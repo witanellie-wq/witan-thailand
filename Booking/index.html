@@ -42,6 +42,12 @@
   .sr-item .si-date{font-size:11px;color:var(--wine-d);font-weight:600}
   .sr-item .si-pr{font-size:12px;color:var(--wine);font-weight:700}
   .sr-empty{text-align:center;color:var(--muted);padding:18px;font-size:13px}
+  /* bulk-paste per-booking status picker */
+  .bpick{display:flex;gap:5px;margin-top:5px}
+  .bpb{border:1.2px solid var(--line);background:#fff;border-radius:3px;padding:5px 10px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted)}
+  .bpb.on{background:var(--wine);border-color:var(--wine);color:#fff}
+  .bpb.v.on{background:#2f8f5b;border-color:#2f8f5b}
+  .bpb.n.on{background:#c0392b;border-color:#c0392b}
   .sr-sum{background:var(--soft);border-radius:3px;padding:8px 11px;margin-bottom:9px;font-size:12px;color:var(--wine-d)}
   .sr-sum b{color:var(--wine)}
   .monthbar .nav{border:none;background:var(--soft);color:var(--gold-d);width:38px;height:38px;border-radius:4px;
@@ -3181,23 +3187,37 @@ function parseMultiBooking(t){
 function renderBulkPreview(P){
   _bulkParsed=P;
   const dups=P.blocks.map(b=>!!data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||'')));
+  P.blocks.forEach(b=>{if(!b.status)b.status='예약';});
   let html='<b style="color:var(--wine)">📅 '+P.date+' · '+P.blocks.length+' bookings found · พบ '+P.blocks.length+' คิว</b><br>';
-  html+=P.blocks.map((b,i)=>'<div style="padding:4px 0;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
+  html+=P.blocks.map((b,i)=>'<div style="padding:4px 0 7px;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
     +'<b>'+(b.time||'--')+'</b> '+esc(b.name||'')+' '+(dups[i]?'<span style="color:#c0392b">(duplicate — skip · ซ้ำ)</span>':'')+'<br>'
     +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
     +(b.src?' · '+b.src+(b.srcid?': '+esc(b.srcid):''):'')
     +(b.treat?' · '+esc(b.treat):'')+(b.price?' · ฿'+b.price.toLocaleString():'')
-    +(b.dur?' · '+b.dur+'min':'')+(b.visit?' · '+b.visit:'')+'</span></div>').join('');
+    +(b.dur?' · '+b.dur+'min':'')+(b.visit?' · '+b.visit:'')+'</span>'
+    +(dups[i]?'':'<div class="bpick">'
+      +'<button class="bpb'+(b.status==='예약'?' on':'')+'" onclick="bulkSetStatus('+i+',\'예약\',this)">📌 예약 จอง</button>'
+      +'<button class="bpb v'+(b.status==='방문'?' on':'')+'" onclick="bulkSetStatus('+i+',\'방문\',this)">✅ 방문 มาแล้ว</button>'
+      +'<button class="bpb n'+(b.status==='노쇼'?' on':'')+'" onclick="bulkSetStatus('+i+',\'노쇼\',this)">❌ 노쇼 ไม่มา</button>'
+      +'</div>')
+    +'</div>').join('');
   html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+dups.filter(x=>!x).length+' bookings · เพิ่มคิวทั้งหมด</button>';
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=html;
+}
+function bulkSetStatus(i,st,btn){
+  if(!_bulkParsed||!_bulkParsed.blocks[i])return;
+  _bulkParsed.blocks[i].status=st;
+  const row=btn.parentElement;
+  row.querySelectorAll('.bpb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
 }
 function bulkAddParsed(){
   const P=_bulkParsed;if(!P)return;
   let added=0,skipped=0;
   P.blocks.forEach((b,i)=>{
     if(data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||''))){skipped++;return;}
-    data.push({id:Date.now()+i,date:P.date,status:'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
+    data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
       seats:'1',companion:'',dur:b.dur||'60',line:'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
