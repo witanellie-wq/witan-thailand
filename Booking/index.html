@@ -234,6 +234,16 @@
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
   .chip{border:1.4px solid var(--line);border-radius:3px;padding:6px 12px;font-size:12px;cursor:pointer;user-select:none}
   .chip.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .chip.offday{border-color:#e3a9a9;color:#b5341f;background:#fdf3f3}
+  .chip.offday.on{background:#c0392b;border-color:#c0392b;color:#fff}
+  .offnote{flex-basis:100%;font-size:10.5px;color:#b5341f;font-weight:600}
+  .offcal{border:1.3px solid var(--line);border-radius:4px;padding:9px;margin:-3px 0 9px;background:var(--soft2)}
+  .offcal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;font-size:13px}
+  .offcal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;align-items:center}
+  .offcal-g .dh{font-size:9px;color:var(--muted);font-weight:700}
+  .offd{border:1.2px solid var(--line);background:#fff;border-radius:3px;padding:7px 0;font-size:11.5px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .offd.on{background:#c0392b;border-color:#c0392b;color:#fff;font-weight:700}
+  .cell .offmark{position:absolute;bottom:2px;left:3px;font-size:8px;line-height:1}
   .seg{display:flex;gap:8px}.seg .chip{flex:1;text-align:center}
   .mrow{display:flex;gap:8px;margin-top:16px}
   .save{flex:1;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border:none;border-radius:4px;padding:14px;font:700 15px/1 'Noto Sans KR';cursor:pointer}
@@ -583,7 +593,7 @@
 
     <div class="g2">
       <div><label class="lab" data-i18n="mSrc">예약 경로</label>
-        <select id="m_src" data-i18n-opt="opt_src"><option value="LINE">LINE</option><option value="Facebook">Facebook</option><option value="Instagram">Instagram</option><option value="TikTok">TikTok</option><option value="전화">전화</option><option value="워크인 Walk-in">워크인 Walk-in</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select></div>
+        <select id="m_src" data-i18n-opt="opt_src"><option value="LINE">LINE</option><option value="Facebook">Facebook</option><option value="Instagram">Instagram</option><option value="TikTok">TikTok</option><option value="GoWabi">GoWabi</option><option value="전화">전화</option><option value="워크인 Walk-in">워크인 Walk-in</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select></div>
       <div><label class="lab" data-i18n="mSrcid">계정/아이디</label><input id="m_srcid" data-i18n-ph="ph_srcid" placeholder="@id 또는 이름"></div>
     </div>
     <label class="lab" data-i18n="mCap">대화 캡처</label>
@@ -825,7 +835,7 @@
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0">👩‍⚕️ Staff Roster · จัดการผู้ทำ</h2>
       <button class="sheet-x" onclick="closeStaffMgr()" aria-label="Close">✕</button></div>
-    <div class="sub">Add, remove and reorder therapists — changes show in the booking form immediately. · เพิ่ม/ลบ/เรียงผู้ทำ มีผลทันที</div>
+    <div class="sub">Add, remove, reorder therapists. Tap 🏖 to mark each one's days off on a monthly calendar — off staff are flagged when booking. · แตะ 🏖 เพื่อกำหนดวันหยุดรายเดือน จะแจ้งเตือนตอนจอง</div>
     <div style="display:flex;gap:8px;margin:8px 0 14px">
       <input id="staffNew" placeholder="Name (e.g. Jam) · ชื่อ" style="flex:1" onkeydown="if(event.key==='Enter')addStaffMgr()">
       <button class="btn gold" style="flex:0 0 auto" onclick="addStaffMgr()">＋ Add · เพิ่ม</button>
@@ -868,6 +878,20 @@ const sb=(CLOUD_READY&&window.supabase)?window.supabase.createClient(SUPABASE_UR
 
 let cloudOn=false;                       // 로그인 + 서버 데이터 로드 완료
 let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
+let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
+function toggleOffDate(name,dateStr){
+  const arr=staffOffDates[name]||(staffOffDates[name]=[]);
+  const i=arr.indexOf(dateStr);
+  if(i>=0)arr.splice(i,1);else{arr.push(dateStr);arr.sort();}
+  if(!arr.length)delete staffOffDates[name];
+  try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}
+  queueSync('settings');
+  if(typeof render==='function')render();
+}
+function offStaffFor(dateStr){
+  if(!dateStr)return[];
+  return staffList.filter(n=>(staffOffDates[n]||[]).includes(dateStr));
+}
 let _snapB=new Map(),_snapC=new Map();   // 서버 스냅샷 (id → JSON 문자열) : 변경분만 업로드
 let _dirty={bookings:false,customers:false,staff:false,settings:false};
 let _pushT=null,_retryT=null,_pushing=false;
@@ -942,7 +966,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -965,6 +989,8 @@ async function fetchAll(){
   if(smap.beds!=null)bedsVal=parseInt(smap.beds)||2;else _dirty.settings=true;
   if(Array.isArray(smap.discounts))discounts=smap.discounts;else _dirty.settings=true;
   if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
+  if(smap.staff_offdates&&typeof smap.staff_offdates==='object')staffOffDates=smap.staff_offdates;
+  try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1014,6 +1040,8 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(smap.beds!=null)bedsVal=parseInt(smap.beds)||2;
         if(Array.isArray(smap.discounts))discounts=smap.discounts;
         if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
+        if(smap.staff_offdates&&typeof smap.staff_offdates==='object'){staffOffDates=smap.staff_offdates;try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}}
+        if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
       cacheAll();refreshUI();
@@ -1262,7 +1290,7 @@ const I18N={
   mName:{ko:'이름 *',th:'ชื่อ *',en:'Name *'},mStart:{ko:'시작 시간',th:'เวลาเริ่ม',en:'Start time'},
   mDur:{ko:'소요시간(분)',th:'ระยะเวลา(นาที)',en:'Duration(min)'},mEnd:{ko:'종료 (자동)',th:'สิ้นสุด(อัตโนมัติ)',en:'End (auto)'},
   mSeats:{ko:'동반 인원 (베드)',th:'จำนวนคน(เตียง)',en:'People (beds)'},mCompanion:{ko:'동반자 이름 (선택)',th:'ชื่อเพื่อน(ถ้ามี)',en:'Companion (optional)'},
-  mPhone:{ko:'전화',th:'เบอร์โทร',en:'Phone'},mSrc:{ko:'예약 경로',th:'ช่องทาง',en:'Source'},mSrcid:{ko:'계정/아이디',th:'ไอดี',en:'Account/ID'},
+  mPhone:{ko:'전화 *',th:'เบอร์โทร *',en:'Phone *'},mSrc:{ko:'예약 경로 *',th:'ช่องทาง *',en:'Source *'},mSrcid:{ko:'계정/예약번호 *',th:'ไอดี/เลขจอง *',en:'Account/Booking no. *'},
   mCap:{ko:'대화 캡처 (선택)',th:'แคปแชท(ถ้ามี)',en:'Chat capture (opt.)'},mCapBtn:{ko:'📷 캡처 첨부',th:'📷 แนบรูป',en:'📷 Attach'},
   mGender:{ko:'성별',th:'เพศ',en:'Gender'},mNat:{ko:'국적',th:'สัญชาติ',en:'Nationality'},mNatC:{ko:'어느 나라',th:'ประเทศ',en:'Country'},
   mBktreat:{ko:'예약 시술 (예정)',th:'บริการที่จอง',en:'Booked service'},mTreat:{ko:'시술 / 프로그램 (여러 개 추가 가능)',th:'บริการ (เพิ่มได้หลายอย่าง)',en:'Services (add multiple)'},
@@ -1279,7 +1307,7 @@ const I18N={
   // placeholders
   ph_name:{ko:'ชื่อ (이름)',th:'ชื่อ',en:'Name'},ph_companion:{ko:'친구 이름',th:'ชื่อเพื่อน',en:'Companion name'},
   ph_time:{ko:'1300 → 13:00',th:'1300 → 13:00',en:'1300 → 13:00'},ph_amt:{ko:'฿금액',th:'฿ราคา',en:'฿amount'},
-  ph_srcid:{ko:'@id 또는 이름',th:'@id หรือชื่อ',en:'@id or name'},ph_memo:{ko:'피부고민·특이사항·다음 예약 등',th:'ปัญหาผิว·หมายเหตุ·นัดถัดไป',en:'Skin concern·notes·next visit'},
+  ph_srcid:{ko:'@id·예약번호·전화',th:'ไอดี/เลขจอง/เบอร์',en:'@id / booking no. / phone'},ph_memo:{ko:'피부고민·특이사항·다음 예약 등',th:'ปัญหาผิว·หมายเหตุ·นัดถัดไป',en:'Skin concern·notes·next visit'},
   ph_care:{ko:'니들 깊이·앰플 종류·시술 부위·피부 반응 등',th:'ความลึกเข็ม·แอมพูล·บริเวณ·ปฏิกิริยาผิว',en:'Needle depth·ampoule·area·skin reaction'},
   ph_service:{ko:'5일분 세럼 증정·LED 추가·애프터케어 등',th:'แถมเซรั่ม5วัน·LED·ดูแลหลังทำ',en:'5-day serum gift·LED·aftercare'},
   ph_final:{ko:'예: 1880',th:'เช่น 1880',en:'e.g. 1880'},
@@ -1290,7 +1318,7 @@ const I18N={
   opt_visit:{ko:['신규','재방문'],th:['ใหม่','เก่า'],en:['New','Return']},
   opt_nat:{ko:['🇹🇭 태국','🌏 외국'],th:['🇹🇭 ไทย','🌏 ต่างชาติ'],en:['🇹🇭 Thai','🌏 Foreign']},
   opt_gender:{ko:['♀ 여성','♂ 남성','⚧ LGBTQ+ (레이디보이 등)','기타'],th:['♀ หญิง','♂ ชาย','⚧ LGBTQ+ (กะเทย ฯลฯ)','อื่นๆ'],en:['♀ Female','♂ Male','⚧ LGBTQ+','Other']},
-  opt_src:{ko:['LINE','Facebook','Instagram','TikTok','전화','워크인 Walk-in','지인소개','기타'],th:['LINE','Facebook','Instagram','TikTok','โทร','Walk-in','แนะนำ','อื่นๆ'],en:['LINE','Facebook','Instagram','TikTok','Phone','Walk-in','Referral','Other']},
+  opt_src:{ko:['LINE','Facebook','Instagram','TikTok','GoWabi','전화','워크인 Walk-in','지인소개','기타'],th:['LINE','Facebook','Instagram','TikTok','GoWabi','โทร','Walk-in','แนะนำ','อื่นๆ'],en:['LINE','Facebook','Instagram','TikTok','GoWabi','Phone','Walk-in','Referral','Other']},
 };
 function T(k){const v=I18N[k];return v?(v[LANG]||v.ko):k;}
 function applyViewMode(){
@@ -1543,7 +1571,7 @@ function updateEndTime(){
 }
 function autoDur(treat){const d=TREAT_DUR[treat];if(d){$('m_dur').value=d;updateEndTime()}}
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function srcIcon(s){return ({'LINE':'🟢','Facebook':'🔵','Instagram':'🟣','TikTok':'⚫','전화':'📞','워크인 Walk-in':'🚶','지인소개':'👥'}[s]||'')}
+function srcIcon(s){return ({'LINE':'🟢','Facebook':'🔵','Instagram':'🟣','TikTok':'⚫','GoWabi':'🟩','전화':'📞','워크인 Walk-in':'🚶','지인소개':'👥'}[s]||'')}
 function genIcon(g){return ({'여성':'♀','남성':'♂','LGBTQ+':'⚧'}[g]||'')}
 
 // auto-format time input: digits only -> HH:MM
@@ -1582,8 +1610,11 @@ function renderStaffChips(selected){
   const extra=sel.filter(s=>s&&s!=='기타'&&!staffList.includes(s)); // 옛 데이터 담당 보존
   const items=[...staffList,...extra,'기타'];
   const box=$('m_staff');if(!box)return;
-  box.innerHTML=items.map(n=>`<div class="chip${sel.includes(n)?' on':''}" data-st="${esc(n)}">${esc(n)}</div>`).join('')
-    +`<div class="chip stadd" onclick="addStaffQuick()" style="border-style:dashed;color:var(--gold-d)" data-i18n="stAdd">＋ 담당 추가</div>`;
+  const mdate=(document.getElementById('m_date')&&document.getElementById('m_date').value)||selDate;
+  const offs=offStaffFor(mdate);
+  box.innerHTML=items.map(n=>`<div class="chip${sel.includes(n)?' on':''}${offs.includes(n)?' offday':''}" data-st="${esc(n)}">${esc(n)}${offs.includes(n)?' 🏖':''}</div>`).join('')
+    +`<div class="chip stadd" onclick="addStaffQuick()" style="border-style:dashed;color:var(--gold-d)" data-i18n="stAdd">＋ 담당 추가</div>`
+    +(offs.length?`<div class="offnote">🏖 Day off: ${offs.map(esc).join(', ')} · วันหยุด</div>`:'');
   box.querySelectorAll('.chip:not(.stadd)').forEach(c=>c.onclick=()=>staffToggle(c));
   if(!box.querySelector('.chip.on:not(.stadd)')){const f=box.querySelector('.chip:not(.stadd)');if(f)f.classList.add('on');}
   const addc=box.querySelector('.stadd');if(addc)addc.textContent=T('stAdd');
@@ -1608,16 +1639,50 @@ function closeStaffMgr(){$('staffOverlay').classList.remove('on');
   // 편집 모달이 열려 있으면 칩 갱신 (선택 유지)
   const sel=[...document.querySelectorAll('#m_staff .chip.on:not(.stadd)')].map(c=>c.dataset.st);
   renderStaffChips(sel);}
+let _offCalOpen=null,_offCalMonth=null;
+function toggleOffCal(n){_offCalOpen=(_offCalOpen===n)?null:n;if(!_offCalMonth)_offCalMonth=todayStr().slice(0,7);renderStaffMgr();}
+function offCalMove(d){
+  const [y,m]=(_offCalMonth||todayStr().slice(0,7)).split('-').map(Number);
+  const dt=new Date(y,m-1+d,1);
+  _offCalMonth=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+  renderStaffMgr();
+}
+function renderOffCal(n){
+  const ym=_offCalMonth||todayStr().slice(0,7);
+  const [y,m]=ym.split('-').map(Number);
+  const first=new Date(y,m-1,1).getDay();
+  const days=new Date(y,m,0).getDate();
+  const offs=staffOffDates[n]||[];
+  const dn=(I18N.dow[LANG]||I18N.dow.en);
+  let cells=dn.map(d=>`<span class="dh">${d}</span>`).join('')+'<span></span>'.repeat(first);
+  for(let d=1;d<=days;d++){
+    const ds=ym+'-'+String(d).padStart(2,'0');
+    cells+=`<button type="button" class="offd${offs.includes(ds)?' on':''}" onclick="toggleOffDate('${esc(n)}','${ds}');renderStaffMgr()">${d}</button>`;
+  }
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `<div class="offcal">
+    <div class="offcal-h"><button type="button" class="qact" onclick="offCalMove(-1)">‹</button>
+      <b>🏖 ${esc(n)} — ${MN[m-1]} ${y}</b>
+      <button type="button" class="qact" onclick="offCalMove(1)">›</button></div>
+    <div class="offcal-g">${cells}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:5px">Tap dates to mark day off · แตะวันที่เพื่อกำหนดวันหยุด · 날짜를 눌러 휴무 지정</div>
+  </div>`;
+}
 function renderStaffMgr(){
   const box=$('staffMgrList');
-  box.innerHTML=staffList.map((n,i)=>`<div class="strow">
+  const ym=_offCalMonth||todayStr().slice(0,7);
+  box.innerHTML=staffList.map((n,i)=>{
+    const cnt=(staffOffDates[n]||[]).filter(d=>d.startsWith(ym)).length;
+    return `<div class="strow">
     <span class="stnm">${esc(n)}</span>
-    <span>
+    <span style="display:flex;align-items:center;gap:4px">
+      <button class="qact${_offCalOpen===n?' use':''}" onclick="toggleOffCal('${esc(n)}')">🏖 ${cnt}</button>
       <button class="qact" onclick="moveStaff(${i},-1)" ${i===0?'disabled style=\"opacity:.3\"':''}>▲</button>
       <button class="qact" onclick="moveStaff(${i},1)" ${i===staffList.length-1?'disabled style=\"opacity:.3\"':''}>▼</button>
       <button class="qact danger" onclick="removeStaff(${i})">🗑</button>
     </span>
-  </div>`).join('')||'<div class="empty">담당자가 없어요. 아래에서 추가하세요.</div>';
+  </div>${_offCalOpen===n?renderOffCal(n):''}`;
+  }).join('')||'<div class="empty">담당자가 없어요. 아래에서 추가하세요.</div>';
 }
 function addStaffMgr(){
   const inp=$('staffNew');const name=(inp.value||'').trim();
@@ -1823,6 +1888,7 @@ function render(){
       ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
       ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
+      ${offStaffFor(ds).length?`<div class="offmark" title="Day off">🏖</div>`:''}
     </div>`;
   }
   $('calGrid').innerHTML=html;
@@ -2010,7 +2076,8 @@ function renderDay(){
   let ps;
   if(isStaff()){ps=vis.length?`${T('visitN')} ${vis.length}`:(dayE.length?`${T('bookN')} ${dayE.length}`:'');}
   else{ps=rev?`${T('visitN')} ${vis.length} · ${fmt(rev)}`:(dayE.length?`${T('bookN')} ${dayE.length}`:'');}
-  $('pSum').textContent=ps;
+  const _poffs=offStaffFor(selDate);
+  $('pSum').textContent=ps+(_poffs.length?` · 🏖 ${_poffs.join(', ')}`:'');
   const list=$('bkList');
   if(!dayE.length){list.innerHTML='<div class="empty">No bookings · ยังไม่มีการจอง</div>';return}
 
@@ -2146,12 +2213,17 @@ function openModal(id){
   ov.classList.add('on');
 }
 function setStatus(s){document.querySelectorAll('#m_status .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s))}
-function onModalDateChange(){/* 날짜는 저장 시 반영됨 */}
+function onModalDateChange(){
+  const sel=[...document.querySelectorAll('#m_staff .chip.on:not(.stadd)')].map(c=>c.dataset.st);
+  renderStaffChips(sel);
+}
 function closeModal(){$('overlay').classList.remove('on')}
 
 function saveBooking(){
   const name=$('m_name').value.trim();
   if(!name){alert('Enter a name · กรอกชื่อ');$('m_name').focus();return false}
+  if(!$('m_phone').value.trim()){alert('Enter phone number · กรอกเบอร์โทร');$('m_phone').focus();return false}
+  if(!$('m_srcid').value.trim() && $('m_src').value!=='워크인 Walk-in'){alert('Enter booking source info — ID / booking no. · กรอกข้อมูลช่องทางจอง (ไอดี/เลขจอง)');$('m_srcid').focus();return false}
   const status=getStatus();
   // 베드 충돌 체크 (노쇼 아니고 시간 있을 때)
   if(status==='예약'||status==='방문'){
@@ -2163,6 +2235,9 @@ function saveBooking(){
       }
     }
   }
+  const _offs=offStaffFor($('m_date').value||selDate);
+  const _offSel=getStaff().split(',').map(x=>x.trim()).filter(n=>_offs.includes(n));
+  if(_offSel.length&&!confirm('🏖 '+_offSel.join(', ')+' — day off on this date · เป็นวันหยุดของพนักงาน\nBook anyway? · จองต่อไหม?'))return false;
   let amount=0, treat='', items=[], bktreat=$('m_bktreat').value, subtotal=0, discount=0, discname='', disctype='', discval=0, adjust=0;
   const expAmt=parseFloat(($('m_bkamt').value||'').replace(/[^0-9.]/g,''))||0;
   if(status==='방문'){
@@ -3006,6 +3081,9 @@ function parseBookingText(t){
     else if(hasColon && /(phone|เบอร์|전화|폰)/i.test(head)){ const v=val(l).match(/[\d\-\s+()]{7,}/); if(v)out.phone=v[0].trim(); }
     else if(hasColon && /(treatment|ทรีตเมนต์|시술|메뉴)/i.test(head)){ out.treat=val(l); }
     else if(hasColon && /(price|ราคา|가격|금액)/i.test(head)){ const v=val(l).replace(/[,฿]/g,'').match(/\d+(?:\.\d+)?/); if(v)out.price=Math.round(+v[0]); }
+    else if(hasColon && /(source|channel|ช่องทาง|예약수단|예약경로|경로)/i.test(head)){ const v=val(l).toLowerCase(); if(/gowabi|โกวาบิ/.test(v))out.src='GoWabi'; else if(/line|ไลน์/.test(v))out.src='LINE'; else if(/fb|face|เฟ/.test(v))out.src='Facebook'; else if(/ig|insta|ไอจี/.test(v))out.src='Instagram'; else if(/tiktok/.test(v))out.src='TikTok'; else if(/walk/.test(v))out.src='워크인 Walk-in'; else if(/phone|โทร|전화/.test(v))out.src='전화'; }
+    else if(hasColon && /(booking\s*(no|number|id)|เลขที่|เลขจอง|예약번호|ref)/i.test(head)){ out.bookno=val(l); }
+    else if(hasColon && /^(id|ไอดี|아이디|account|acct)$/i.test(head.trim())){ out.srcid=val(l); }
     else if(hasColon && /(note|หมายเหตุ|비고|메모)/i.test(head)){ out.note=val(l); }
     else if(hasColon && /(branch|สาขา|지점)/i.test(head)){ out.branch=val(l); }
     else if(!out.time){ const tm=l.match(/^(\d{1,2})[:.](\d{2})\s*(pm|am)?$/i); if(tm){let h=+tm[1];if(/pm/i.test(tm[3]||'')&&h<12)h+=12;out.time=String(h).padStart(2,'0')+':'+tm[2];} }
@@ -3042,11 +3120,99 @@ function parseBookingText(t){
       out.line=ch+(id?': '+id:'');
     }
   }else if(out.line && ch){ out.line=ch+': '+out.line; }
+  // ── 예약수단(src)·수단정보(srcid) 보정 ──
+  if(!out.src){
+    if(/gowabi|โกวาบิ/i.test(t))out.src='GoWabi';
+    else if(ch==='LINE')out.src='LINE';
+    else if(ch==='FB')out.src='Facebook';
+    else if(ch==='IG')out.src='Instagram';
+    else if(/tiktok/i.test(t))out.src='TikTok';
+  }
+  if(!out.srcid){
+    if(out.bookno)out.srcid=out.bookno;
+    else if(out.line)out.srcid=out.line.replace(/^(FB|IG|LINE):?\s*/i,'').trim();
+  }
   return out;
+}
+
+/* ===== 여러 건 한꺼번에 붙여넣기 (일일 큐 리스트) ===== */
+let _bulkParsed=null;
+const TH_MONTHS={'มกราคม':1,'กุมภาพันธ์':2,'มีนาคม':3,'เมษายน':4,'พฤษภาคม':5,'มิถุนายน':6,'กรกฎาคม':7,'สิงหาคม':8,'กันยายน':9,'ตุลาคม':10,'พฤศจิกายน':11,'ธันวาคม':12,'ม.ค':1,'ก.พ':2,'มี.ค':3,'เม.ย':4,'พ.ค':5,'มิ.ย':6,'ก.ค':7,'ส.ค':8,'ก.ย':9,'ต.ค':10,'พ.ย':11,'ธ.ค':12};
+function parseMultiBooking(t){
+  const lines=t.split(/\n/).map(s=>s.trim());
+  let date='';
+  for(const l of lines.slice(0,5)){
+    let m=l.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m){date=m[1]+'-'+String(+m[2]).padStart(2,'0')+'-'+String(+m[3]).padStart(2,'0');break;}
+    m=l.match(/(\d{1,2})\s+([ก-๙]+(?:\.[ก-๙]+)?\.?)/u);
+    if(m){const mo=TH_MONTHS[m[2].replace(/\.$/,'')];if(mo){const y=new Date().getFullYear();date=y+'-'+String(mo).padStart(2,'0')+'-'+String(+m[1]).padStart(2,'0');break;}}
+  }
+  if(!date){
+    if(lines.slice(0,3).some(l=>/พรุ่งนี้|내일|tomorrow/i.test(l))){const d=new Date();d.setDate(d.getDate()+1);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());date=d.toISOString().slice(0,10);}
+    else date=todayStr();
+  }
+  const blocks=[];let cur=null;
+  for(const l of lines){
+    const tm=l.match(/^⏰?\s*(\d{1,2})[:.](\d{2})\s*(?:น\.)?\s*[—–\-]\s*(.+)$/u);
+    if(tm){cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[3].trim(),memo:[]};blocks.push(cur);continue;}
+    if(!cur)continue;
+    if(/^[━─═=]{3,}/.test(l)||/^รวม\s/.test(l)){cur=null;continue;}
+    if(!l)continue;
+    const ph=l.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
+    if(ph&&!cur.phone)cur.phone=ph[1];
+    const fb=l.match(/(FB|Facebook|IG|Insta(?:gram)?|LINE|ไลน์)\s*[:：]\s*([^·\n]+)/i);
+    if(fb&&!cur.srcid){const c=fb[1].toUpperCase();cur.src=/^F/.test(c)?'Facebook':(/^I(G|N)/.test(c)?'Instagram':'LINE');cur.srcid=fb[2].trim();}
+    if(/gowabi/i.test(l)&&!cur.src)cur.src='GoWabi';
+    const pr=l.match(/([\d,]{2,7})\s*\.?-/);
+    if(pr&&!cur.treat&&/นาที|💆|min/iu.test(l)){
+      cur.price=Math.round(+pr[1].replace(/,/g,''));
+      const du=l.match(/(\d{2,3})\s*(?:นาที|min)/i);if(du)cur.dur=du[1];
+      let tt=l.slice(0,pr.index).replace(/^[\p{Extended_Pictographic}️‍\s]+/gu,'').trim();
+      if(tt)cur.treat=tt;
+      continue;
+    }
+    if(/ลูกค้าใหม่|🆕/u.test(l))cur.visit='신규';
+    if(/ลูกค้าเก่า|🔁/u.test(l))cur.visit='재방문';
+    if(!ph&&!fb){const clean=l.replace(/^[\p{Extended_Pictographic}️‍\s·]+/gu,'').trim();if(clean)cur.memo.push(clean);}
+  }
+  return {date,blocks};
+}
+function renderBulkPreview(P){
+  _bulkParsed=P;
+  const dups=P.blocks.map(b=>!!data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||'')));
+  let html='<b style="color:var(--wine)">📅 '+P.date+' · '+P.blocks.length+' bookings found · พบ '+P.blocks.length+' คิว</b><br>';
+  html+=P.blocks.map((b,i)=>'<div style="padding:4px 0;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
+    +'<b>'+(b.time||'--')+'</b> '+esc(b.name||'')+' '+(dups[i]?'<span style="color:#c0392b">(duplicate — skip · ซ้ำ)</span>':'')+'<br>'
+    +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
+    +(b.src?' · '+b.src+(b.srcid?': '+esc(b.srcid):''):'')
+    +(b.treat?' · '+esc(b.treat):'')+(b.price?' · ฿'+b.price.toLocaleString():'')
+    +(b.dur?' · '+b.dur+'min':'')+(b.visit?' · '+b.visit:'')+'</span></div>').join('');
+  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+dups.filter(x=>!x).length+' bookings · เพิ่มคิวทั้งหมด</button>';
+  $('pastePreview').style.display='block';
+  $('pastePreview').innerHTML=html;
+}
+function bulkAddParsed(){
+  const P=_bulkParsed;if(!P)return;
+  let added=0,skipped=0;
+  P.blocks.forEach((b,i)=>{
+    if(data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||''))){skipped++;return;}
+    data.push({id:Date.now()+i,date:P.date,status:'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
+      seats:'1',companion:'',dur:b.dur||'60',line:'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
+      nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
+      expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
+    added++;
+  });
+  save();
+  _bulkParsed=null;
+  selDate=P.date;cur=new Date(P.date+'T00:00');cur.setDate(1);
+  closePasteImport();render();
+  alert('➕ Added '+added+' bookings · เพิ่ม '+added+' คิว'+(skipped?'\n(skipped '+skipped+' duplicates · ข้าม '+skipped+')':''));
 }
 function parsePasteImport(){
   const t=$('pasteBox').value.trim();
   if(!t){alert('Paste the text first · กรุณาวางข้อความ');return;}
+  const multi=parseMultiBooking(t);
+  if(multi.blocks.length>=2){renderBulkPreview(multi);return;}
   const p=parseBookingText(t);
   if(!p.name && !p.phone && !p.date){
     $('pastePreview').style.display='block';
@@ -3054,7 +3220,7 @@ function parsePasteImport(){
     return;
   }
   // 미리보기
-  const rows=[['📅 Date',p.date||'(today)'],['⏰ Time',p.time||'—'],['👤 Name',p.name||'—'],['📞 Phone',p.phone||'—'],['💬 LINE/IG',p.line||'—'],['💆 Treatment',p.treat||'—'],['💰 Est. price',p.price?fmt(p.price):'—'],['📝 Note',[p.note,p.branch].filter(Boolean).join(' · ')||'—']];
+  const rows=[['📅 Date',p.date||'(today)'],['⏰ Time',p.time||'—'],['👤 Name',p.name||'—'],['📞 Phone',p.phone||'—'],['🛎️ Source',(p.src||'—')+(p.srcid?' · '+p.srcid:'')],['💬 LINE/IG',p.line||'—'],['💆 Treatment',p.treat||'—'],['💰 Est. price',p.price?fmt(p.price):'—'],['📝 Note',[p.note,p.branch].filter(Boolean).join(' · ')||'—']];
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=rows.map(r=>`<b style="color:var(--gold-d)">${r[0]}</b> ${esc(String(r[1]))}`).join('<br>')+
     '<div style="margin-top:8px;color:var(--muted);font-size:11px">Booking form filled — review and save. · กรอกให้แล้ว ตรวจสอบแล้วบันทึก</div>';
@@ -3067,6 +3233,8 @@ function parsePasteImport(){
   if(p.name)$('m_name').value=p.name;
   if(p.phone){$('m_phone').value=p.phone; if(typeof phoneLookup==='function')phoneLookup();}
   if(p.line)$('m_line').value=p.line;
+  if(p.src)$('m_src').value=p.src;
+  if(p.srcid)$('m_srcid').value=p.srcid;
   if(p.treat){$('m_bktreat').value='__custom__'; if(typeof onBktreatSel==='function')onBktreatSel('__custom__'); $('m_bktreatcustom').value=p.treat;}
   if(p.price!=null && $('m_bkamt'))$('m_bkamt').value=p.price;
   const memoParts=[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean);
