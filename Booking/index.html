@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>HANAHAYAN 월간 예약·매출 · Monthly</title>
+<title>HANAHAYAN Booking · Monthly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Prompt:wght@300;400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1C2333;--wine:#1B2A4A;--wine-d:#111D36;--gold:#A2977D;--gold-d:#847763;
-    --line:#E2DED3;--soft:#F3F2ED;--soft2:#FAFAF6;--muted:#868275;--bg:#F6F5F1;--ok:#2e7d52;
+    --ink:#14181F;--wine:#1B2A4A;--wine-d:#111D36;--gold:#B79B5E;--gold-d:#8C7647;
+    --line:#E2E5EA;--soft:#F1F3F6;--soft2:#F8F9FB;--muted:#7A8090;--bg:#F4F5F7;--ok:#2e7d52;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Noto Sans KR','Prompt',sans-serif;color:var(--ink);background:var(--bg);
@@ -20,20 +20,20 @@
   .brand small{display:block;font:500 7px/1.4 'Prompt';letter-spacing:3px;color:var(--gold-d);margin-top:2px}
 
   /* month nav + stats */
-  .monthbar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;
+  .monthbar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:2px;
     padding:10px 12px;box-shadow:0 3px 12px rgba(17,29,54,.07);margin-bottom:10px}
   .langsw{display:flex;gap:4px}
-  .langbtn{border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:7px;padding:5px 9px;
+  .langbtn{border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:3px;padding:5px 9px;
     font-size:11px;cursor:pointer;font-family:inherit;font-weight:600}
-  .langbtn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
-  .searchbar{display:flex;gap:8px;align-items:center;background:#fff;border-radius:12px;padding:6px 10px;
+  .langbtn.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .searchbar{display:flex;gap:8px;align-items:center;background:#fff;border-radius:2px;padding:6px 10px;
     margin-bottom:10px;box-shadow:0 3px 12px rgba(17,29,54,.07)}
   .searchbar input{flex:1;border:none;padding:9px 4px;font-size:14px;font-family:inherit;background:none}
   .searchbar input:focus{outline:none}
   .searchbar .sclear{border:none;background:var(--soft);color:var(--gold-d);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px}
-  .searchres{background:#fff;border-radius:12px;padding:10px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.07);max-height:340px;overflow-y:auto}
+  .searchres{background:#fff;border-radius:2px;padding:10px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.07);max-height:340px;overflow-y:auto}
   .searchres .sr-h{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600}
-  .sr-item{border:1.3px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:7px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+  .sr-item{border:1.3px solid var(--line);border-radius:4px;padding:9px 12px;margin-bottom:7px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
   .sr-item:hover{border-color:var(--gold);background:var(--soft2)}
   .sr-item .si-l{min-width:0}
   .sr-item .si-nm{font-weight:700;font-size:13.5px}
@@ -42,28 +42,28 @@
   .sr-item .si-date{font-size:11px;color:var(--wine-d);font-weight:600}
   .sr-item .si-pr{font-size:12px;color:var(--wine);font-weight:700}
   .sr-empty{text-align:center;color:var(--muted);padding:18px;font-size:13px}
-  .sr-sum{background:var(--soft);border-radius:8px;padding:8px 11px;margin-bottom:9px;font-size:12px;color:var(--wine-d)}
+  .sr-sum{background:var(--soft);border-radius:3px;padding:8px 11px;margin-bottom:9px;font-size:12px;color:var(--wine-d)}
   .sr-sum b{color:var(--wine)}
-  .monthbar .nav{border:none;background:var(--soft);color:var(--gold-d);width:38px;height:38px;border-radius:10px;
+  .monthbar .nav{border:none;background:var(--soft);color:var(--gold-d);width:38px;height:38px;border-radius:4px;
     font-size:18px;cursor:pointer}
   .monthbar .mlabel{font:700 17px/1 'Noto Sans KR';text-align:center}
   .monthbar .mlabel small{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-top:3px}
 
   .sum{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:12px}
-  .stat.exp{background:linear-gradient(160deg,#F9F5EC,#EFEADB);border:1px solid #DCD3BC}
-  .stat.exp .v{color:#847763}
-  .stat{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;box-shadow:0 3px 12px rgba(17,29,54,.06)}
+  .stat.exp{background:linear-gradient(160deg,#F6F8FB,#EAEEF5);border:1px solid #C9D2E1}
+  .stat.exp .v{color:var(--gold-d)}
+  .stat{background:#fff;border-radius:2px;padding:12px 8px;text-align:center;box-shadow:0 3px 12px rgba(17,29,54,.06)}
   .stat .v{font:700 18px/1 'Noto Sans KR';color:var(--gold-d)}
   .stat .l{font-size:10px;color:var(--muted);margin-top:4px}
 
   /* calendar */
-  .cal{background:#fff;border-radius:14px;padding:10px;box-shadow:0 4px 16px rgba(17,29,54,.08);margin-bottom:14px}
-  .staffbox{background:#fff;border-radius:12px;padding:11px 13px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.06)}
-  .statbox{background:#fff;border-radius:12px;padding:11px 13px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.06)}
+  .cal{background:#fff;border-radius:2px;padding:10px;box-shadow:0 4px 16px rgba(17,29,54,.08);margin-bottom:14px}
+  .staffbox{background:#fff;border-radius:2px;padding:11px 13px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.06)}
+  .statbox{background:#fff;border-radius:2px;padding:11px 13px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.06)}
   .statbox .stt{font-size:11px;color:var(--wine-d);font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:6px}
   .statbox .stt::before{content:"";width:3px;height:12px;background:var(--gold);border-radius:2px}
   .st-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;text-align:center}
-  .st-cell{background:var(--soft2);border-radius:9px;padding:8px 4px}
+  .st-cell{background:var(--soft2);border-radius:3px;padding:8px 4px}
   .st-cell .n{font-size:16px;font-weight:700}
   .st-cell .t{font-size:9.5px;color:var(--muted);margin-top:2px}
   .st-cell.book .n{color:var(--gold-d)} .st-cell.visit .n{color:var(--ok)}
@@ -73,13 +73,13 @@
   .st-cell.sel{border-color:var(--gold);background:#fff}
   #statList{margin-top:8px}
   .sl-item{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#fff;border:1.3px solid var(--line);
-    border-radius:9px;padding:8px 11px;margin-bottom:6px;cursor:pointer;font-size:12px}
+    border-radius:3px;padding:8px 11px;margin-bottom:6px;cursor:pointer;font-size:12px}
   .sl-item:hover{border-color:var(--gold);background:var(--soft2)}
   .sl-item .sl-l{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sl-item .sl-r{text-align:right;color:var(--muted);font-size:11px;white-space:nowrap}
   .sl-item .sl-ph{font-size:10px;color:var(--gold-d)}
   .sl-empty{text-align:center;color:var(--muted);font-size:11.5px;padding:8px}
-  .conv{margin-top:10px;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+  .conv{margin-top:10px;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-radius:3px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
   .conv b{font-size:17px}
   .staffbox .sb-h{font-size:11px;color:var(--wine-d);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
   .staffbox .sb-h::before{content:"";width:3px;height:12px;background:var(--gold);border-radius:2px}
@@ -93,13 +93,13 @@
     padding:4px 0;font-weight:600}
   .dow span:first-child{color:#c0506a}
   .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .cell{aspect-ratio:1/1.15;border-radius:9px;border:1.3px solid transparent;background:var(--soft2);
+  .cell{aspect-ratio:1/1.15;border-radius:3px;border:1.3px solid transparent;background:var(--soft2);
     padding:4px 3px;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:.1s}
   .cell:hover{border-color:var(--gold)}
   .cell.empty{background:transparent;cursor:default}
-  .cell.has{background:linear-gradient(160deg,#F9F5EC,#EFEADB);border-color:#DCD3BC}
+  .cell.has{background:linear-gradient(160deg,#F6F8FB,#EAEEF5);border-color:#C9D2E1}
   .cell.today{border-color:var(--gold);background:#fff}
-  .cell.sel{border-color:var(--gold-d);background:linear-gradient(150deg,#B0A68C,#847763);box-shadow:0 3px 10px rgba(132,119,99,.45)}
+  .cell.sel{border-color:var(--gold-d);background:linear-gradient(150deg,#26365A,#111D36);box-shadow:0 3px 10px rgba(17,29,54,.45)}
   .cell.sel .dnum,.cell.sel .cnt,.cell.sel .rev{color:#fff !important}
   .cell.sel .dot{background:#fff}
   .cell .dnum{font-size:12px;font-weight:600;line-height:1}
@@ -111,23 +111,23 @@
   .cell.sel .exp{color:#fff !important;opacity:.85}
   .cell .dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
   .cell.full{background:#fbe9e9;border-color:#e3a9a9}
-  .cell.full.sel{background:linear-gradient(150deg,#B0A68C,#847763);border-color:var(--gold-d)}
+  .cell.full.sel{background:linear-gradient(150deg,#26365A,#111D36);border-color:var(--gold-d)}
   .cell .fullbadge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:700;color:#fff;background:#d34d4d;
-    border-radius:6px;padding:1px 4px;line-height:1.3}
+    border-radius:2px;padding:1px 4px;line-height:1.3}
   .cell.sel .fullbadge{background:#fff;color:var(--gold-d)}
-  .bedbar{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:8px 12px;
+  .bedbar{display:flex;align-items:center;gap:8px;background:#fff;border-radius:4px;padding:8px 12px;
     margin-bottom:10px;box-shadow:0 2px 8px rgba(17,29,54,.05);font-size:12px;color:var(--wine-d);font-weight:600}
-  .bedbar select{width:56px;padding:5px;border:1.3px solid var(--line);border-radius:7px;font-family:inherit}
+  .bedbar select{width:56px;padding:5px;border:1.3px solid var(--line);border-radius:3px;font-family:inherit}
   .bedbar .bedhint{font-size:10px;color:var(--muted);font-weight:400;margin-left:auto;text-align:right}
 
   .slot{margin-top:12px}
   .slot-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .slot-time{font-weight:700;font-size:14px;color:var(--wine-d);background:var(--soft);padding:3px 11px;border-radius:8px}
-  .slot-badge{font-size:10px;padding:2px 9px;border-radius:10px;font-weight:600}
+  .slot-time{font-weight:700;font-size:14px;color:var(--wine-d);background:var(--soft);padding:3px 11px;border-radius:3px}
+  .slot-badge{font-size:10px;padding:2px 9px;border-radius:4px;font-weight:600}
   .slot-badge.full{background:#fbe3e3;color:#c0392b;border:1px solid #e8b3b3}
   .slot-badge.ok{background:var(--soft2);color:var(--gold-d);border:1px solid var(--line)}
   .slot-cards{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-  .bcard{flex:1 1 0;min-width:0;border:1.4px solid var(--line);border-radius:10px;padding:9px 11px;
+  .bcard{flex:1 1 0;min-width:0;border:1.4px solid var(--line);border-radius:4px;padding:9px 11px;
     cursor:pointer;background:var(--soft2);min-width:140px}
   .bcard:hover{border-color:var(--gold)}
   .bcard.pending{border-style:dashed}
@@ -137,21 +137,21 @@
   .bcard .bmeta{font-size:10.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bcard .bpr{font-weight:700;color:var(--wine);font-size:13px;margin-top:3px}
   .bcard.pending .bpr{color:var(--gold-d)}
-  .bcard .bpill{display:inline-block;font-size:8.5px;padding:1px 5px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--gold-d)}
-  .bedslot-empty{flex:1 1 0;min-width:120px;border:1.4px dashed var(--line);border-radius:10px;padding:9px;
+  .bcard .bpill{display:inline-block;font-size:8.5px;padding:1px 5px;border-radius:3px;background:#fff;border:1px solid var(--line);color:var(--gold-d)}
+  .bedslot-empty{flex:1 1 0;min-width:120px;border:1.4px dashed var(--line);border-radius:4px;padding:9px;
     text-align:center;color:var(--muted);font-size:11px;background:#fff;display:flex;align-items:center;justify-content:center}
   /* timeline */
-  .tl-warn{background:#fbe3e3;color:#c0392b;border:1px solid #e8b3b3;border-radius:8px;padding:8px 11px;font-size:11.5px;margin-bottom:8px}
+  .tl-warn{background:#fbe3e3;color:#c0392b;border:1px solid #e8b3b3;border-radius:3px;padding:8px 11px;font-size:11.5px;margin-bottom:8px}
   .tl-headrow{position:relative;height:24px;margin-left:0}
   .tl-head{position:absolute;font-size:10.5px;font-weight:700;color:var(--wine-d);text-align:center;
-    background:var(--soft);border-radius:6px;padding:3px 0}
-  .tl{position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;margin-top:2px}
+    background:var(--soft);border-radius:2px;padding:3px 0}
+  .tl{position:relative;border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden;margin-top:2px}
   .tl-line{position:absolute;left:42px;right:0;border-top:1px dashed #ece3cf;height:0}
   .tl-time{position:absolute;left:0;width:40px;font-size:9px;color:var(--muted);transform:translateY(-1px);text-align:right;padding-right:4px}
   .tl-tap{position:absolute;top:0;cursor:pointer}
-  .tl-block{position:absolute;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border-radius:7px;padding:4px 6px;overflow:hidden;
-    cursor:pointer;box-shadow:0 2px 5px rgba(132,119,99,.35);border:1.5px solid #847763}
-  .tl-block.pending{background:#EEEADE;border-color:#BFB49A;color:#6C6551;box-shadow:none;background-image:repeating-linear-gradient(45deg,rgba(132,119,99,.10) 0 6px,transparent 6px 12px)}
+  .tl-block{position:absolute;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-radius:3px;padding:4px 6px;overflow:hidden;
+    cursor:pointer;box-shadow:0 2px 5px rgba(17,29,54,.35);border:1.5px solid #16233F}
+  .tl-block.pending{background:#EAEDF3;border-color:#9FABC4;color:#4A5678;box-shadow:none;background-image:repeating-linear-gradient(45deg,rgba(17,29,54,.10) 0 6px,transparent 6px 12px)}
   .tl-block.conflict{background:#c0392b;border-color:#8e2a20;animation:pulse 1.2s infinite}
   @keyframes pulse{0%,100%{box-shadow:0 2px 5px rgba(192,57,43,.4)}50%{box-shadow:0 0 0 3px rgba(192,57,43,.3)}}
   .tl-block .tb-t{font-size:8.5px;opacity:.9;white-space:nowrap;overflow:hidden}
@@ -160,16 +160,16 @@
   .tl-sub{font-size:11px;font-weight:700;color:var(--wine-d);margin:12px 0 4px}
 
   /* day panel */
-  .panel{background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 16px rgba(17,29,54,.08);margin-bottom:14px}
+  .panel{background:#fff;border-radius:2px;padding:14px;box-shadow:0 4px 16px rgba(17,29,54,.08);margin-bottom:14px}
   .panel h3{font-size:15px;color:var(--wine-d);display:flex;align-items:center;justify-content:space-between}
   .panel h3 .dsum{font-size:12px;color:var(--muted);font-weight:500}
-  .selbanner{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;
-    border-radius:10px;padding:11px 14px;margin-bottom:10px;font-weight:700;font-size:16px}
+  .selbanner{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;
+    border-radius:4px;padding:11px 14px;margin-bottom:10px;font-weight:700;font-size:16px}
   .selbanner .dsum{font-size:12px;font-weight:500;opacity:.92}
-  .addbtn{width:100%;margin:10px 0;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border:none;border-radius:10px;
+  .addbtn{width:100%;margin:10px 0;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border:none;border-radius:4px;
     padding:13px;font:700 15px/1 'Noto Sans KR';cursor:pointer}
-  .addbtn:active{background:#847763}
-  .bk{border:1.3px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;
+  .addbtn:active{background:#33415F}
+  .bk{border:1.3px solid var(--line);border-radius:4px;padding:10px 12px;margin-top:8px;cursor:pointer;
     display:flex;align-items:flex-start;gap:10px;background:var(--soft2)}
   .bk:hover{border-color:var(--gold)}
   .bk .m{flex:1;min-width:0}
@@ -181,7 +181,7 @@
   .bk.noshow .nm{text-decoration:line-through;text-decoration-color:#bbb}
   .bk.noshow .pr{color:var(--muted)}
   .statusseg .chip small{font-weight:400;opacity:.8;font-size:9px}
-  .pill{display:inline-block;font-size:9px;padding:1px 6px;border-radius:9px;background:var(--soft);
+  .pill{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;background:var(--soft);
     color:var(--gold-d);margin-left:4px;border:1px solid var(--line)}
   .empty{text-align:center;color:var(--muted);padding:18px;font-size:13px}
 
@@ -189,13 +189,13 @@
   .overlay{position:fixed;inset:0;background:rgba(28,35,51,.4);display:none;align-items:flex-end;
     justify-content:center;z-index:50}
   .overlay.on{display:flex}
-  .sheet{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;
+  .sheet{background:#fff;border-radius:4px 10px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;
     padding:18px 16px 28px;animation:up .2s ease}
   @keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
   .sheet h2{font-size:16px;color:var(--wine-d);margin-bottom:4px}
   .sheet .sub{font-size:11px;color:var(--muted);margin-bottom:10px}
   label.lab{display:block;font-size:11px;color:var(--muted);margin:9px 0 4px}
-  input,select,textarea{width:100%;border:1.4px solid var(--line);border-radius:9px;padding:11px 12px;
+  input,select,textarea{width:100%;border:1.4px solid var(--line);border-radius:3px;padding:11px 12px;
     font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
   textarea{resize:vertical;min-height:40px}
@@ -205,67 +205,67 @@
   .itemrow{display:flex;gap:6px;margin-top:3px}
   .itemrow select{flex:1}
   .itemrow .iamt{flex:0 0 90px;text-align:right;font-weight:600}
-  .itemrow .itemadd{flex:0 0 44px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:22px;font-weight:700;cursor:pointer}
+  .itemrow .itemadd{flex:0 0 44px;background:var(--wine);color:#fff;border:none;border-radius:3px;font-size:22px;font-weight:700;cursor:pointer}
   .iline{display:flex;align-items:center;gap:8px;background:var(--soft2);border:1px solid var(--line);
-    border-radius:9px;padding:8px 11px;margin-top:6px;font-size:13px}
+    border-radius:3px;padding:8px 11px;margin-top:6px;font-size:13px}
   .iline .it{flex:1;font-weight:600}
   .iline .ip{font-weight:700;color:var(--wine)}
   .iline .ix{color:#b33;cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
   .totbar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:11px 13px;
-    background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border-radius:10px;font-size:13px}
+    background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-radius:4px;font-size:13px}
   .totbar b{font-size:18px}
   .capbtn{width:100%;border:1.4px dashed var(--gold);background:var(--soft2);color:var(--gold-d);
-    border-radius:9px;padding:11px;font-size:13px;cursor:pointer;font-family:inherit}
+    border-radius:3px;padding:11px;font-size:13px;cursor:pointer;font-family:inherit}
   #capPreview{margin-top:8px}
-  #capPreview img{max-width:100%;border-radius:9px;border:1px solid var(--line)}
+  #capPreview img{max-width:100%;border-radius:3px;border:1px solid var(--line)}
   #capPreview .rm{display:inline-block;margin-top:5px;font-size:11px;color:#b33;cursor:pointer}
-  .calcbar{margin-top:10px;border:1.4px solid var(--line);border-radius:11px;overflow:hidden}
+  .calcbar{margin-top:10px;border:1.4px solid var(--line);border-radius:4px;overflow:hidden}
   .cline{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;font-size:13px;border-bottom:1px solid var(--soft)}
   .cline b{font-weight:700}
   .cline.disc{background:var(--soft2)}
   .discinput{display:flex;gap:5px;align-items:center}
-  .discinput select{width:54px;padding:6px;border-radius:7px}
-  .discinput input{width:90px;padding:7px 9px;text-align:right;border-radius:7px}
-  .cline.total{background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border-bottom:none}
+  .discinput select{width:54px;padding:6px;border-radius:3px}
+  .discinput input{width:90px;padding:7px 9px;text-align:right;border-radius:3px}
+  .cline.total{background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-bottom:none}
   .cline.total b{font-size:18px}
   .editbtn{font-size:11px;background:rgba(255,255,255,.25);color:#fff;border:1px solid rgba(255,255,255,.5);
-    border-radius:7px;padding:5px 9px;cursor:pointer;font-family:inherit;white-space:nowrap}
+    border-radius:3px;padding:5px 9px;cursor:pointer;font-family:inherit;white-space:nowrap}
   #finalEditRow .editbtn{background:var(--soft);color:var(--gold-d);border-color:var(--line)}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
-  .chip{border:1.4px solid var(--line);border-radius:18px;padding:6px 12px;font-size:12px;cursor:pointer;user-select:none}
-  .chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .chip{border:1.4px solid var(--line);border-radius:3px;padding:6px 12px;font-size:12px;cursor:pointer;user-select:none}
+  .chip.on{background:var(--wine);color:#fff;border-color:var(--wine)}
   .seg{display:flex;gap:8px}.seg .chip{flex:1;text-align:center}
   .mrow{display:flex;gap:8px;margin-top:16px}
-  .save{flex:1;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border:none;border-radius:11px;padding:14px;font:700 15px/1 'Noto Sans KR';cursor:pointer}
-  .del{flex:0 0 auto;background:#fff;color:#b33;border:1.4px solid #e8c3c3;border-radius:11px;padding:14px 16px;font-weight:600;cursor:pointer}
+  .save{flex:1;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border:none;border-radius:4px;padding:14px;font:700 15px/1 'Noto Sans KR';cursor:pointer}
+  .del{flex:0 0 auto;background:#fff;color:#b33;border:1.4px solid #e8c3c3;border-radius:4px;padding:14px 16px;font-weight:600;cursor:pointer}
   .cancel{width:100%;margin-top:8px;background:none;border:none;color:var(--muted);padding:10px;font-size:13px;cursor:pointer}
   .companbtn{width:100%;margin-top:14px;background:var(--soft2);color:var(--gold-d);border:1.4px dashed var(--gold);
-    border-radius:10px;padding:11px;font-size:13px;cursor:pointer;font-family:inherit}
+    border-radius:4px;padding:11px;font-size:13px;cursor:pointer;font-family:inherit}
   .statusseg{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap}
   .statusseg .chip{flex:1 1 30%;text-align:center;padding:7px 6px;font-size:11.5px;min-width:78px}
 
   .toolbar{display:flex;gap:8px;margin-bottom:10px}
-  .btn{border:1.4px solid var(--line);background:#fff;border-radius:9px;padding:10px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;color:var(--ink);flex:1}
-  .btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .btn{border:1.4px solid var(--line);background:#fff;border-radius:3px;padding:10px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;color:var(--ink);flex:1}
+  .btn.gold{background:var(--wine);color:#fff;border-color:var(--wine)}
   .hint{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.6}
-  .phm{margin-top:7px;background:linear-gradient(160deg,#F9F5EC,#EFEADB);border:1.4px solid #DCD3BC;border-radius:10px;padding:10px 12px}
-  .phm .phm-h{font-size:12px;font-weight:700;color:#847763;display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .phm .phm-load{border:none;background:var(--gold);color:#fff;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-  .phm .phm-sum{font-size:11px;color:#6C6551;margin-top:4px}
-  .phm .phm-hist{margin-top:6px;border-top:1px dashed #DCD3BC;padding-top:6px}
-  .phm .phm-row{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:#6C6551;padding:2px 0}
-  .phm .phm-row b{color:#847763}
+  .phm{margin-top:7px;background:linear-gradient(160deg,#F6F8FB,#EAEEF5);border:1.4px solid #C9D2E1;border-radius:4px;padding:10px 12px}
+  .phm .phm-h{font-size:12px;font-weight:700;color:#33415F;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .phm .phm-load{border:none;background:var(--wine);color:#fff;border-radius:3px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .phm .phm-sum{font-size:11px;color:#4A5678;margin-top:4px}
+  .phm .phm-hist{margin-top:6px;border-top:1px dashed #C9D2E1;padding-top:6px}
+  .phm .phm-row{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:#4A5678;padding:2px 0}
+  .phm .phm-row b{color:#33415F}
 
   /* ===== 고객 원장 Customer Ledger ===== */
   .filtsw{display:flex;gap:6px;margin:10px 0}
-  .filtbtn{flex:1;border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;padding:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .filtbtn{flex:1;border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:3px;padding:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit}
   .filtbtn.on{background:var(--wine);color:#fff;border-color:var(--wine)}
   .ledsum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-  .ledsum .ls{background:var(--soft2);border:1.3px solid var(--line);border-radius:10px;padding:8px 8px}
+  .ledsum .ls{background:var(--soft2);border:1.3px solid var(--line);border-radius:4px;padding:8px 8px}
   .ledsum .ls .lv{font:700 13px/1.2 'Noto Sans KR';color:var(--wine-d)}
   .ledsum .ls .ll{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.3}
   .ledsum .ls.mem .lv{color:var(--gold-d)}
-  .ccard{border:1.4px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:9px;background:#fff}
+  .ccard{border:1.4px solid var(--line);border-radius:2px;padding:11px 12px;margin-top:9px;background:#fff}
   .ccard.course{border-left:4px solid #3b6fb0}
   .ccard.mem{border-left:4px solid var(--gold)}
   .ccard.plain{border-left:4px solid var(--line)}
@@ -282,10 +282,10 @@
   .ckdate{flex:1;text-align:center;font-weight:700;font-size:15px;color:var(--wine-d)}
   .cksum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
   .cksum.s3{grid-template-columns:repeat(3,1fr)}
-  .cksum .cs{background:var(--soft2);border:1.3px solid var(--line);border-radius:9px;padding:8px 4px;text-align:center}
+  .cksum .cs{background:var(--soft2);border:1.3px solid var(--line);border-radius:3px;padding:8px 4px;text-align:center}
   .cksum .cs .v{font:700 15px/1 'Noto Sans KR';color:var(--wine-d)}
   .cksum .cs .l{font-size:9px;color:var(--muted);margin-top:4px}
-  .ckrow{border:1.4px solid var(--line);border-left-width:4px;border-radius:11px;padding:10px 11px;margin-bottom:9px;background:#fff}
+  .ckrow{border:1.4px solid var(--line);border-left-width:4px;border-radius:4px;padding:10px 11px;margin-bottom:9px;background:#fff}
   .ckrow.s예약{border-left-color:#c9a84a}
   .ckrow.s방문{border-left-color:#2f8f5b;background:#F4FAF6}
   .ckrow.s노쇼{border-left-color:#c0392b;opacity:.72}
@@ -293,66 +293,66 @@
   .ckrow.s연기대기{border-left-color:#7a6df0;background:#F6F5FF}
   .ckbtn.wait{color:#5b4fd0;border-color:#cdc7f4}
   .ckbtn.wait.on{background:#6a5df0;color:#fff;border-color:#6a5df0}
-  .ckpendbtn{width:100%;border:1.4px dashed #b7afe8;background:#F6F5FF;color:#5b4fd0;border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px}
+  .ckpendbtn{width:100%;border:1.4px dashed #b7afe8;background:#F6F5FF;color:#5b4fd0;border-radius:3px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px}
   .ckpendbtn.back{border-style:solid;background:#6a5df0;color:#fff;border-color:#6a5df0}
-  .strow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.3px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px;background:#fff}
+  .strow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.3px solid var(--line);border-radius:4px;padding:9px 12px;margin-bottom:8px;background:#fff}
   .strow .stnm{font-weight:700;font-size:14px}
   .strow .qact{padding:6px 9px;margin-left:4px}
   .ck-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
   .ck-nm{font-weight:700;font-size:14px}
   .ck-tm{font-size:12px;color:var(--wine-d);font-weight:700;white-space:nowrap}
   .ck-meta{font-size:10.5px;color:var(--muted);margin-top:4px;word-break:break-word}
-  .ck-stbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-left:6px}
+  .ck-stbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-left:6px}
   .ckacts{display:flex;gap:6px;margin-top:10px}
-  .ckbtn{flex:1;min-width:0;border:1.3px solid var(--line);background:#fff;border-radius:8px;padding:10px 4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .ckbtn{flex:1;min-width:0;border:1.3px solid var(--line);background:#fff;border-radius:3px;padding:10px 4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink)}
   .ckbtn.visit.on{background:#2f8f5b;color:#fff;border-color:#2f8f5b}
   .ckbtn.no.on{background:#c0392b;color:#fff;border-color:#c0392b}
   .ckbtn.post{color:#5b4fd0;border-color:#cdc7f4}
   .ckbtn.reset{flex:0 0 auto;padding:10px 12px;color:var(--muted)}
   .cklrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-  .cklchip{border:1.3px solid #BCD3EE;background:#EAF2FB;color:#2a5b93;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+  .cklchip{border:1.3px solid #BCD3EE;background:#EAF2FB;color:#2a5b93;border-radius:3px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
   .cklchip b{color:#1b4c86}
   .cklchip.done{background:#f0efe9;border-color:var(--line);color:var(--muted);cursor:default}
-  .cklchip.mem{background:#F9F5EC;border-color:#DCD3BC;color:var(--gold-d);cursor:default}
+  .cklchip.mem{background:#F9F5EC;border-color:#C9D2E1;color:var(--gold-d);cursor:default}
   .cklchip.pay{background:var(--gold-d);border-color:var(--gold-d);color:#fff;font-weight:700}
   .ccard.done{opacity:.6}
   .ccard .cc-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
   .ccard .cc-nm{font-weight:700;font-size:14px}
   .ccard .cc-meta{font-size:10.5px;color:var(--muted);margin-top:3px;word-break:break-word;line-height:1.5}
-  .ctag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:5px}
+  .ctag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:5px}
   .ctag.course{background:#e7f0fb;color:#2a5b93}
   .ctag.mem{background:#F2ECDD;color:var(--gold-d)}
   .cc-big{text-align:right;white-space:nowrap}
   .cc-big .cb-v{font:700 18px/1 'Noto Sans KR';color:var(--wine)}
   .cc-big .cb-l{font-size:9.5px;color:var(--muted);margin-top:3px}
-  .cprog{height:7px;background:var(--soft);border-radius:5px;margin:9px 0 2px;overflow:hidden}
+  .cprog{height:7px;background:var(--soft);border-radius:2px;margin:9px 0 2px;overflow:hidden}
   .cprog i{display:block;height:100%;background:linear-gradient(90deg,#3b6fb0,#5b8fd0)}
   .cprog.mem i{background:linear-gradient(90deg,var(--gold),var(--gold-d))}
   .clow{color:#c0392b !important}
   .calert{font-size:10px;color:#c0392b;font-weight:600;margin-top:4px}
   .qacts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-  .qact{border:1.3px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .qact{border:1.3px solid var(--line);background:#fff;border-radius:3px;padding:7px 10px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .qact.use{background:var(--wine);color:#fff;border-color:var(--wine);font-weight:700}
   .qact.use.mem{background:var(--gold-d);border-color:var(--gold-d)}
   .qact.danger{color:#b33;border-color:#e8c3c3}
   .chist{margin-top:9px;border-top:1px dashed var(--line);padding-top:7px;display:none}
   .chist.on{display:block}
-  .chist .hrow{font-size:10.5px;color:#6C6551;padding:2px 0;word-break:break-word}
-  .ledger-badge{margin-top:7px;border-radius:10px;padding:10px 12px;background:linear-gradient(160deg,#EAF2FB,#DBE8F6);border:1.4px solid #BCD3EE}
-  .ledger-badge.mem{background:linear-gradient(160deg,#F9F5EC,#EFEADB);border-color:#DCD3BC}
+  .chist .hrow{font-size:10.5px;color:#4A5678;padding:2px 0;word-break:break-word}
+  .ledger-badge{margin-top:7px;border-radius:4px;padding:10px 12px;background:linear-gradient(160deg,#EAF2FB,#DBE8F6);border:1.4px solid #BCD3EE}
+  .ledger-badge.mem{background:linear-gradient(160deg,#F6F8FB,#EAEEF5);border-color:#C9D2E1}
   .ledger-badge .lb-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#2a5b93}
   .ledger-badge.mem .lb-h{color:var(--gold-d)}
-  .ledger-badge .lb-use{border:none;background:#2a5b93;color:#fff;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .ledger-badge .lb-use{border:none;background:#2a5b93;color:#fff;border-radius:3px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
   .ledger-badge.mem .lb-use{background:var(--gold-d)}
   .ledger-badge .lb-sum{font-size:11px;color:#40506a;margin-top:5px}
-  .ledger-badge.mem .lb-sum{color:#6C6551}
+  .ledger-badge.mem .lb-sum{color:#4A5678}
   /* ===== 직원 모드 (매출 숨김) ===== */
   .modesw{display:flex;justify-content:flex-end;margin-bottom:10px}
-  .modebtn{border:1.4px solid var(--line);background:#fff;color:var(--muted);border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .modebtn{border:1.4px solid var(--line);background:#fff;color:var(--muted);border-radius:3px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
   .modebtn.staff{background:#fff;color:var(--muted);border-color:var(--line);padding:7px 11px;font-size:14px}
   .staffbanner{display:none!important}
   /* ===== 일별 객단가 추이 ===== */
-  .avgtrend{margin:10px 0 4px;background:var(--soft2);border:1.3px solid var(--line);border-radius:12px;padding:12px 12px 10px}
+  .avgtrend{margin:10px 0 4px;background:var(--soft2);border:1.3px solid var(--line);border-radius:2px;padding:12px 12px 10px}
   .avgtrend .at-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
   .avgtrend .at-t{font-size:12.5px;font-weight:800;color:var(--wine-d);line-height:1.3}
   .avgtrend .at-t small{display:block;font-size:9px;color:var(--muted);font-weight:600;margin-top:2px;letter-spacing:.01em}
@@ -360,8 +360,8 @@
   .at-up{color:#1c7a41}.at-down{color:#c0392b}.at-flat{color:var(--muted)}
   .at-chart{position:relative;display:flex;align-items:flex-end;gap:3px;height:84px;margin:12px 0 18px}
   .at-bar{flex:1;min-width:4px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative}
-  .at-bar i{display:block;width:100%;max-width:16px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--gold),var(--gold-d));min-height:2px}
-  .at-bar.below i{background:linear-gradient(180deg,#d5ccb8,#b3a98f)}
+  .at-bar i{display:block;width:100%;max-width:16px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#3D5178,#1B2A4A);min-height:2px}
+  .at-bar.below i{background:linear-gradient(180deg,#C2CBDB,#9AA6BD)}
   .at-bar .bd{font-size:7.5px;color:var(--muted);position:absolute;bottom:-13px}
   .at-avgline{position:absolute;left:0;right:0;border-top:1.4px dashed var(--wine);opacity:.55;pointer-events:none}
   .at-avglbl{position:absolute;right:0;font-size:9px;color:var(--wine);font-weight:800;background:var(--soft2);padding:0 3px;transform:translateY(-50%)}
@@ -369,12 +369,12 @@
   .at-empty{font-size:11px;color:var(--muted);text-align:center;padding:14px 0}
   .at-chart .trendline{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:3}
   .at-chart .trendline line{stroke:#8f6d38;stroke-width:2.4;stroke-linecap:round}
-  .at-bar.cur i{background:repeating-linear-gradient(135deg,#cbbfa3 0 3px,#e6ded0 3px 6px);border:1px solid #b3a98f}
+  .at-bar.cur i{background:repeating-linear-gradient(135deg,#C5CDDC 0 3px,#E8ECF3 3px 6px);border:1px solid #9AA6BD}
   /* ===== A4 시트 화면 보기 ===== */
   #sheetView{display:none;position:fixed;inset:0;background:#403d33;z-index:120;overflow:auto;padding:12px 8px 40px;-webkit-overflow-scrolling:touch}
   #sheetView.on{display:block}
   .sv-bar{max-width:794px;margin:0 auto 10px;display:flex;gap:8px;justify-content:flex-end;position:sticky;top:0;z-index:5;padding:4px 0}
-  .sv-btn{border:none;border-radius:9px;padding:10px 16px;font:700 13px 'Noto Sans KR';cursor:pointer;background:var(--gold-d);color:#fff}
+  .sv-btn{border:none;border-radius:3px;padding:10px 16px;font:700 13px 'Noto Sans KR';cursor:pointer;background:var(--wine);color:#fff}
   .sv-btn.close{background:#fff;color:#333}
   #printSheet{position:static;width:794px;max-width:100%;margin:0 auto;background:#fff;padding:34px 30px;box-sizing:border-box;font-family:'Noto Sans KR','Noto Sans Thai',sans-serif;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
   @media print{
@@ -411,14 +411,14 @@
   body.staff .rev,body.staff .exp{display:none!important}
   /* ===== 로그인 게이트 · 동기화 상태 ===== */
   #gateOverlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-  .gatecard{background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(17,29,54,.15);padding:28px 22px;width:100%;max-width:360px;text-align:center}
+  .gatecard{background:#fff;border-radius:3px;box-shadow:0 8px 30px rgba(17,29,54,.15);padding:28px 22px;width:100%;max-width:360px;text-align:center}
   .gatecard h2{font-size:16px;color:var(--wine-d);margin:14px 0 4px}
   .gatecard .gsub{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6}
   .gatecard input{text-align:center;font-size:16px;letter-spacing:2px}
-  .gatecard button{width:100%;margin-top:10px;background:linear-gradient(150deg,#B0A68C,#847763);color:#fff;border:none;border-radius:10px;padding:13px;font:700 14px 'Noto Sans KR';cursor:pointer}
+  .gatecard button{width:100%;margin-top:10px;background:var(--wine);color:#fff;border:none;border-radius:4px;padding:13px;font:700 14px 'Noto Sans KR';cursor:pointer}
   .gatecard button:disabled{opacity:.6}
   #gateErr{color:#c0392b;font-size:12px;font-weight:700;margin-top:8px}
-  #gateCfg{font-size:12px;color:var(--muted);line-height:1.7;background:var(--soft2);border:1.3px dashed var(--line);border-radius:10px;padding:12px;margin-top:6px;text-align:left}
+  #gateCfg{font-size:12px;color:var(--muted);line-height:1.7;background:var(--soft2);border:1.3px dashed var(--line);border-radius:4px;padding:12px;margin-top:6px;text-align:left}
   .syncbar{position:fixed;top:0;left:0;right:0;z-index:300;text-align:center;font-size:12px;font-weight:700;padding:8px 12px}
   .syncbar.err{background:#c0392b;color:#fff}
   .syncbar.warn{background:#f3e3b3;color:#6a5620}
@@ -433,12 +433,12 @@
 <div id="gateOverlay">
   <div class="gatecard">
     <div class="brand" style="text-align:center">HANAHAYAN<small>CLINIC · SUKHUMVIT 23</small></div>
-    <h2>🔒 직원 로그인 · พนักงานเข้าสู่ระบบ</h2>
-    <div class="gsub">공유 비밀번호를 입력하세요<br>กรอกรหัสผ่านร้าน · Enter shop password</div>
+    <h2>🔒 Staff Login · เข้าสู่ระบบ</h2>
+    <div class="gsub">Enter the shop password<br>กรอกรหัสผ่านร้าน</div>
     <div id="gatePwWrap">
-      <input type="password" id="gatePw" placeholder="비밀번호 · รหัสผ่าน" autocomplete="current-password" onkeydown="if(event.key==='Enter')gateLogin()">
+      <input type="password" id="gatePw" placeholder="Password · รหัสผ่าน" autocomplete="current-password" onkeydown="if(event.key==='Enter')gateLogin()">
       <div id="gateErr" style="display:none"></div>
-      <button id="gateBtn" onclick="gateLogin()">입장 · เข้าใช้งาน</button>
+      <button id="gateBtn" onclick="gateLogin()">Enter · เข้าใช้งาน</button>
     </div>
     <div id="gateCfg" style="display:none">⚙️ 아직 Supabase 연결 설정이 안 됐어요.<br>
       <b>index.html</b> 상단 스크립트의 <b>SUPABASE_URL</b> / <b>SUPABASE_ANON_KEY</b> 값을 채운 뒤 다시 배포해 주세요.<br>
@@ -455,7 +455,7 @@
     </div></header>
 
   <div class="modesw">
-    <button class="modebtn" id="modeBtn" onclick="toggleViewMode()">🔒 직원 모드</button>
+    <button class="modebtn" id="modeBtn" onclick="toggleViewMode()">🔒 Staff mode</button>
   </div>
   <div class="staffbanner" id="staffBanner" data-i18n="staffBan">👀 직원 모드 · โหมดพนักงาน — 매출은 숨겨져 있어요 (손님수·객단가만 표시)</div>
 
@@ -493,9 +493,9 @@
   <div class="panel" id="dayPanel">
     <div class="selbanner"><span id="pDate" data-i18n="selectDate">날짜를 선택하세요</span><span class="dsum" id="pSum"></span></div>
     <button class="addbtn" data-i18n="addBtn" onclick="openModal(null)">+ 예약·방문 추가</button>
-    <button class="addbtn" style="background:var(--gold-d);border-color:var(--gold-d)" onclick="openPasteImport()">📋 텍스트 붙여넣어 예약 추가 · วางข้อความ</button>
+    <button class="addbtn" style="background:var(--gold-d);border-color:var(--gold-d)" onclick="openPasteImport()">📋 Paste booking text · วางข้อความจอง</button>
     <button class="addbtn" style="background:#2f8f5b;border-color:#2f8f5b" data-i18n="ckBtn" onclick="openCheckin()">✅ 체크인 리스트 (방문·노쇼·연기)</button>
-    <button class="addbtn owner-only" style="background:#fff;color:#b5341f;border-color:#e6c6c6;font-size:12px" onclick="deleteDayBookings()">🗑 이 날짜 예약 전체 삭제 · ลบทั้งวัน</button>
+    <button class="addbtn owner-only" style="background:#fff;color:#b5341f;border-color:#e6c6c6;font-size:12px" onclick="deleteDayBookings()">🗑 Delete all bookings this day · ลบทั้งวัน</button>
     <div id="bkList"></div>
   </div>
 
@@ -503,10 +503,10 @@
     <button class="btn owner-only" data-i18n="discMgr" onclick="openDiscMgr()">⚙ 할인 관리</button>
     <button class="btn" data-i18n="stMgr" onclick="openStaffMgr()">👩‍⚕️ 담당자 관리</button>
     <button class="btn gold owner-only" data-i18n="csv" onclick="exportCSV()">⬇ CSV</button>
-    <button class="btn gold owner-only" onclick="exportCustomersXLSX()">👥 고객 엑셀 · ลูกค้า Excel</button>
+    <button class="btn gold owner-only" onclick="exportCustomersXLSX()">👥 Customer Excel · ลูกค้า Excel</button>
   </div>
   <div class="toolbar owner-only">
-    <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 고객 원장 · ทะเบียนลูกค้า (3회권·멤버십)</button>
+    <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 Customer Ledger · ทะเบียนลูกค้า (Course·Membership)</button>
   </div>
   <div class="toolbar owner-only">
     <button class="btn" data-i18n="backup" onclick="backupData()">💾 백업</button>
@@ -514,8 +514,8 @@
     <input type="file" id="restoreFile" accept=".json" hidden onchange="restoreData(this)">
   </div>
   <div class="toolbar owner-only">
-    <button class="btn gold" onclick="openTextBackup()">📋 텍스트 백업/복원 (미리보기용)</button>
-    <button class="btn" style="flex:0 0 auto" onclick="if(confirm('로그아웃할까요? · ออกจากระบบ?'))cloudLogout()">🚪 로그아웃</button>
+    <button class="btn gold" onclick="openTextBackup()">📋 Text backup/restore · สำรองแบบข้อความ</button>
+    <button class="btn" style="flex:0 0 auto" onclick="if(confirm('Log out? · ออกจากระบบ?'))cloudLogout()">🚪 Logout</button>
   </div>
   <div class="hint" data-i18n="hint">💾</div>
 </div>
@@ -523,23 +523,23 @@
 <!-- TEXT BACKUP/RESTORE MODAL (works even in preview) -->
 <div class="overlay" id="txtOverlay">
   <div class="sheet">
-    <h2>📋 텍스트 백업 / 복원</h2>
-    <div class="sub">파일 다운로드가 막힌 환경(미리보기 등)에서 데이터를 옮길 때 사용해요.</div>
+    <h2>📋 Text Backup / Restore · สำรองข้อมูล</h2>
+    <div class="sub">Use this when file download is blocked. · ใช้เมื่อดาวน์โหลดไฟล์ไม่ได้</div>
 
-    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:11px;padding:12px;margin-bottom:12px">
-      <div class="sec-t" style="margin-top:0;font-size:12px;font-weight:700;color:var(--wine-d)">① 백업 (현재 기기에서)</div>
-      <div style="font-size:11px;color:var(--muted);margin:6px 0">아래 버튼 → 텍스트 전체 복사 → 메모장/카톡 등에 붙여넣어 보관</div>
-      <button class="btn gold" style="width:100%;margin-bottom:8px" onclick="genTextBackup()">📤 데이터 텍스트 생성</button>
-      <textarea id="txtData" style="width:100%;min-height:120px;font-size:10px;font-family:monospace" placeholder="여기에 백업 데이터가 나타나요"></textarea>
-      <button class="btn" style="width:100%;margin-top:6px" onclick="copyTextBackup()">📋 전체 복사</button>
+    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px">
+      <div class="sec-t" style="margin-top:0;font-size:12px;font-weight:700;color:var(--wine-d)">① Backup (this device) · สำรอง</div>
+      <div style="font-size:11px;color:var(--muted);margin:6px 0">Button below → copy all → keep it in Notes/LINE · คัดลอกเก็บไว้</div>
+      <button class="btn gold" style="width:100%;margin-bottom:8px" onclick="genTextBackup()">📤 Generate backup text · สร้างข้อความ</button>
+      <textarea id="txtData" style="width:100%;min-height:120px;font-size:10px;font-family:monospace" placeholder="Backup text appears here · ข้อความสำรองจะแสดงที่นี่"></textarea>
+      <button class="btn" style="width:100%;margin-top:6px" onclick="copyTextBackup()">📋 Copy all · คัดลอกทั้งหมด</button>
     </div>
 
-    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:11px;padding:12px">
-      <div class="sec-t" style="margin-top:0;font-size:12px;font-weight:700;color:var(--wine-d)">② 복원 (새 기기에서)</div>
-      <div style="font-size:11px;color:var(--muted);margin:6px 0">위에서 복사한 텍스트를 ①칸에 붙여넣고 → 아래 버튼</div>
-      <button class="save" style="width:100%" onclick="restoreFromText()">📥 붙여넣은 데이터로 복원</button>
+    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:4px;padding:12px">
+      <div class="sec-t" style="margin-top:0;font-size:12px;font-weight:700;color:var(--wine-d)">② Restore (new device) · กู้คืน</div>
+      <div style="font-size:11px;color:var(--muted);margin:6px 0">Paste the copied text into box ① then press below · วางข้อความแล้วกดปุ่ม</div>
+      <button class="save" style="width:100%" onclick="restoreFromText()">📥 Restore from pasted text · กู้คืนข้อมูล</button>
     </div>
-    <button class="cancel" onclick="$('txtOverlay').classList.remove('on')">닫기</button>
+    <button class="cancel" onclick="$('txtOverlay').classList.remove('on')">Close · ปิด</button>
   </div>
 </div>
 
@@ -547,7 +547,7 @@
 <!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="sheet">
-    <h2 id="mTitle">예약·방문 입력</h2>
+    <h2 id="mTitle">Booking</h2>
     <label class="lab" data-i18n="mDate" style="margin-top:2px">📅 예약 날짜</label>
     <input type="date" id="m_date" onchange="onModalDateChange()">
     <div class="sub" id="mDateSub" style="display:none"></div>
@@ -597,10 +597,10 @@
     <label class="lab" data-i18n="mTreat">시술/프로그램</label>
     <div class="itemrow">
       <select id="m_treat" onchange="onTreatSel()">
-        <optgroup label="단품"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
-        <optgroup label="프로그램"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT & FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
-        <optgroup label="기타"><option>HIFU</option><option>RF/LDM</option><option>홈케어 세럼</option><option>충전 멤버십</option><option>기타</option></optgroup>
-        <optgroup label="✏️"><option value="__custom__">✏️ 직접 입력…</option></optgroup>
+        <optgroup label="A la carte · เดี่ยว"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
+        <optgroup label="Program · โปรแกรม"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT & FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
+        <optgroup label="Other · อื่นๆ"><option>HIFU</option><option>RF/LDM</option><option value="홈케어 세럼">Home Serum · เซรั่มโฮมแคร์</option><option value="충전 멤버십">Membership Top-up · เติมเมมเบอร์ชิพ</option><option value="기타">Other · อื่นๆ</option></optgroup>
+        <optgroup label="✏️"><option value="__custom__">✏️ Custom… · กรอกเอง</option></optgroup>
       </select>
       <input id="m_itemamt" inputmode="numeric" data-i18n-ph="ph_amt" placeholder="฿금액" class="iamt owner-only">
       <button type="button" class="itemadd" onclick="addItem()">+</button>
@@ -614,7 +614,7 @@
         <select id="m_discsel" onchange="onDiscSel()" style="flex:1;margin-left:10px"></select>
       </div>
       <div class="cline disc" id="manualDisc" style="display:none">
-        <span>직접 입력</span>
+        <span>Manual · กรอกเอง</span>
         <span class="discinput">
           <select id="m_disctype" onchange="renderItems()"><option value="amt">฿</option><option value="pct">%</option></select>
           <input id="m_discval" inputmode="numeric" placeholder="0" oninput="renderItems()">
@@ -622,13 +622,13 @@
       <div class="cline total"><span data-i18n="mFinal">최종 결제</span>
         <span style="display:flex;align-items:center;gap:8px">
           <b id="m_total">฿0</b>
-          <button type="button" class="editbtn" onclick="toggleFinalEdit()">✎ 수정</button>
+          <button type="button" class="editbtn" onclick="toggleFinalEdit()">✎ Edit</button>
         </span></div>
       <div class="cline" id="finalEditRow" style="display:none;background:var(--soft2)">
-        <span>직접 금액 ฿</span>
+        <span>Custom amount ฿</span>
         <span class="discinput"><input id="m_finalover" inputmode="numeric" data-i18n-ph="ph_final" placeholder="예: 1880" oninput="renderItems()">
-        <button type="button" class="editbtn" onclick="roundFinal()">원단위 절삭</button>
-        <button type="button" class="editbtn" onclick="clearFinalOver()">↺ 자동</button></span>
+        <button type="button" class="editbtn" onclick="roundFinal()">Round down · ปัดเศษ</button>
+        <button type="button" class="editbtn" onclick="clearFinalOver()">↺ Auto</button></span>
       </div>
     </div>
     </div>
@@ -641,18 +641,18 @@
     </div>
     <div class="g2">
       <div id="m_natcwrap" style="display:none"><label class="lab" data-i18n="mNatC">어느 나라</label>
-        <select id="m_natc"><option>한국 🇰🇷</option><option>중국 🇨🇳</option><option>일본 🇯🇵</option><option>대만 🇹🇼</option><option>홍콩 🇭🇰</option><option>싱가포르 🇸🇬</option><option>말레이시아 🇲🇾</option><option>인도 🇮🇳</option><option>미국 🇺🇸</option><option>영국 🇬🇧</option><option>호주 🇦🇺</option><option>러시아 🇷🇺</option><option>중동 🌍</option><option>유럽 기타 🇪🇺</option><option>기타 🌏</option></select></div>
+        <select id="m_natc"><option value="한국">Korea 🇰🇷</option><option value="중국">China 🇨🇳</option><option value="일본">Japan 🇯🇵</option><option value="대만">Taiwan 🇹🇼</option><option value="홍콩">Hong Kong 🇭🇰</option><option value="싱가포르">Singapore 🇸🇬</option><option value="말레이시아">Malaysia 🇲🇾</option><option value="인도">India 🇮🇳</option><option value="미국">USA 🇺🇸</option><option value="영국">UK 🇬🇧</option><option value="호주">Australia 🇦🇺</option><option value="러시아">Russia 🇷🇺</option><option value="중동">Middle East 🌍</option><option value="유럽 기타">Europe 🇪🇺</option><option value="기타">Other 🌏</option></select></div>
     </div>
 
     <div id="bookBlock" style="display:none">
       <label class="lab" data-i18n="mBktreat">예약 시술(예정)</label>
       <select id="m_bktreat" onchange="onBktreatSel(this.value)">
-        <optgroup label="단품"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
-        <optgroup label="프로그램"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT & FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
-        <optgroup label="기타"><option>HIFU</option><option>RF/LDM</option><option>홈케어 세럼</option><option>충전 멤버십</option><option>상담</option><option>기타</option></optgroup>
-        <optgroup label="✏️"><option value="__custom__">✏️ 직접 입력…</option></optgroup>
+        <optgroup label="A la carte · เดี่ยว"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
+        <optgroup label="Program · โปรแกรม"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT & FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
+        <optgroup label="Other · อื่นๆ"><option>HIFU</option><option>RF/LDM</option><option value="홈케어 세럼">Home Serum · เซรั่มโฮมแคร์</option><option value="충전 멤버십">Membership Top-up · เติมเมมเบอร์ชิพ</option><option value="상담">Consult · ปรึกษา</option><option value="기타">Other · อื่นๆ</option></optgroup>
+        <optgroup label="✏️"><option value="__custom__">✏️ Custom… · กรอกเอง</option></optgroup>
       </select>
-      <input id="m_bktreatcustom" data-i18n-ph="ph_custom" placeholder="예약 시술 직접 입력" style="display:none;margin:6px 0 0">
+      <input id="m_bktreatcustom" data-i18n-ph="ph_custom" placeholder="Custom treatment name · กรอกเอง" style="display:none;margin:6px 0 0">
       <label class="lab owner-only" data-i18n="mBkAmt">예상 금액 (฿) — 예상매출에 집계</label>
       <input id="m_bkamt" inputmode="numeric" placeholder="0" class="owner-only">
     </div>
@@ -686,29 +686,29 @@
 <!-- DISCOUNT MANAGER MODAL -->
 <div class="overlay" id="discOverlay">
   <div class="sheet">
-    <h2>할인 행사 관리 · ส่วนลด</h2>
-    <div class="sub">상시 할인 + 기간 할인을 등록하면, 예약 날짜에 맞는 할인이 자동으로 선택지에 떠요.</div>
+    <h2>Discounts · จัดการส่วนลด</h2>
+    <div class="sub">Always-on and limited-period discounts appear automatically for matching dates. · ส่วนลดจะแสดงอัตโนมัติตามวันที่จอง</div>
 
-    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:11px;padding:12px;margin-bottom:12px">
-      <div class="sec-t" style="margin-top:0">+ 새 할인 추가</div>
-      <label class="lab">할인 이름 · ชื่อ</label><input id="d_name" placeholder="예: 송끄란 특별할인">
+    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px">
+      <div class="sec-t" style="margin-top:0">+ New discount · เพิ่มส่วนลด</div>
+      <label class="lab">Name · ชื่อ</label><input id="d_name" placeholder="e.g. Songkran special">
       <div class="g2">
-        <div><label class="lab">할인 값</label>
+        <div><label class="lab">Value · มูลค่า</label>
           <span class="discinput"><select id="d_type"><option value="pct">%</option><option value="amt">฿</option></select>
           <input id="d_value" inputmode="numeric" placeholder="10" style="flex:1"></span></div>
-        <div><label class="lab">유형</label>
-          <select id="d_period" onchange="togglePeriod()"><option value="always">상시 (항상)</option><option value="period">기간 한정</option></select></div>
+        <div><label class="lab">Type · ประเภท</label>
+          <select id="d_period" onchange="togglePeriod()"><option value="always">Always · ตลอด</option><option value="period">Period · ช่วงเวลา</option></select></div>
       </div>
       <div class="g2" id="d_dates" style="display:none">
-        <div><label class="lab">시작일 · เริ่ม</label><input type="date" id="d_start"></div>
-        <div><label class="lab">종료일 · สิ้นสุด</label><input type="date" id="d_end"></div>
+        <div><label class="lab">Start · เริ่ม</label><input type="date" id="d_start"></div>
+        <div><label class="lab">End · สิ้นสุด</label><input type="date" id="d_end"></div>
       </div>
-      <button class="save" style="width:100%;margin-top:12px" onclick="addDisc()">+ 할인 추가</button>
+      <button class="save" style="width:100%;margin-top:12px" onclick="addDisc()">+ Add discount · เพิ่ม</button>
     </div>
 
-    <div class="sec-t">등록된 할인</div>
+    <div class="sec-t">Active discounts · รายการส่วนลด</div>
     <div id="discList"></div>
-    <button class="cancel" onclick="closeDiscMgr()">닫기</button>
+    <button class="cancel" onclick="closeDiscMgr()">Close · ปิด</button>
   </div>
 </div>
 
@@ -716,7 +716,7 @@
 <div class="overlay" id="custOverlay">
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0" data-i18n="ledTitle">👤 고객 원장</h2>
-      <button class="sheet-x" onclick="closeCustMgr()" aria-label="닫기">✕</button></div>
+      <button class="sheet-x" onclick="closeCustMgr()" aria-label="Close">✕</button></div>
     <div class="sub" data-i18n-html="ledSub">3회권·코스 잔여 회차와 멤버십 충전 잔액을 관리해요.</div>
 
     <div class="filtsw" style="margin-top:2px">
@@ -727,32 +727,32 @@
     <div class="ledsum" id="ledSum"></div>
 
     <div id="custFormWrap" style="display:none">
-    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:11px;padding:12px;margin-bottom:12px">
-      <div class="sec-t" style="margin-top:0" id="custFormTitle">+ 새 고객 등록</div>
+    <div style="background:var(--soft2);border:1.4px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px">
+      <div class="sec-t" style="margin-top:0" id="custFormTitle">+ New customer · เพิ่มลูกค้า</div>
       <div class="filtsw">
-        <button class="filtbtn on" id="cf_course" onclick="custTypeToggle('course')">🎟️ 코스(횟수권)</button>
-        <button class="filtbtn" id="cf_mem" onclick="custTypeToggle('membership')">💳 멤버십(충전)</button>
+        <button class="filtbtn on" id="cf_course" onclick="custTypeToggle('course')">🎟️ Course (sessions) · คอร์ส</button>
+        <button class="filtbtn" id="cf_mem" onclick="custTypeToggle('membership')">💳 Membership (top-up) · เมมเบอร์ชิพ</button>
       </div>
       <div class="g2">
-        <div><label class="lab">이름 · ชื่อ</label><input id="c_name" placeholder="고객 이름"></div>
-        <div><label class="lab">전화 · เบอร์</label><input id="c_phone" inputmode="tel" placeholder="08x-xxx-xxxx" oninput="showCustMatch()"></div>
+        <div><label class="lab">Name · ชื่อ</label><input id="c_name" placeholder="Customer name"></div>
+        <div><label class="lab">Phone · เบอร์</label><input id="c_phone" inputmode="tel" placeholder="08x-xxx-xxxx" oninput="showCustMatch()"></div>
       </div>
-      <div id="custMatchInfo" style="display:none;margin-top:6px;background:#EAF2FB;border:1.3px solid #BCD3EE;border-radius:8px;padding:7px 10px;font-size:11px;color:#2a5b93;line-height:1.5"></div>
+      <div id="custMatchInfo" style="display:none;margin-top:6px;background:#EAF2FB;border:1.3px solid #BCD3EE;border-radius:3px;padding:7px 10px;font-size:11px;color:#2a5b93;line-height:1.5"></div>
       <label class="lab">LINE</label><input id="c_line" placeholder="@...">
 
       <div id="cFieldsCourse">
-        <label class="lab">시술/코스 · คอร์ส</label>
+        <label class="lab">Treatment/Course · คอร์ส</label>
         <select id="c_treat" onchange="$('c_treatcustom').style.display=this.value==='__custom__'?'block':'none';if(this.value==='__custom__')$('c_treatcustom').focus()">
-          <optgroup label="단품"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
-          <optgroup label="프로그램"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT &amp; FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
-          <optgroup label="기타"><option>HIFU</option><option>Body HIFU</option><option>RF/LDM</option><option>두피 페인팅</option><option>반영구</option><option>홈케어 세럼</option><option>기타</option></optgroup>
-          <optgroup label="✏️"><option value="__custom__">✏️ 직접 입력…</option></optgroup>
+          <optgroup label="A la carte · เดี่ยว"><option>BB Glow</option><option>MesoGlaze</option><option>LALA Peel</option><option>Milk Peel</option><option>Lip Tattoo</option></optgroup>
+          <optgroup label="Program · โปรแกรม"><option>TONE UP</option><option>GLASS GLOW</option><option>ACNE CLEAR</option><option>PORE FINE</option><option>LIFT &amp; FIRM</option><option>REPAIR</option><option>REVERSE AGING</option></optgroup>
+          <optgroup label="Other · อื่นๆ"><option>HIFU</option><option>Body HIFU</option><option>RF/LDM</option><option value="두피 페인팅">Scalp Painting · เพ้นท์หนังศีรษะ</option><option value="반영구">Semi-permanent · สักคิ้ว/ปาก</option><option value="홈케어 세럼">Home Serum · เซรั่มโฮมแคร์</option><option value="기타">Other · อื่นๆ</option></optgroup>
+          <optgroup label="✏️"><option value="__custom__">✏️ Custom… · กรอกเอง</option></optgroup>
         </select>
-        <input id="c_treatcustom" placeholder="코스명 직접 입력 (예: HIFU Intensive 3회)" style="display:none;margin-top:6px">
+        <input id="c_treatcustom" placeholder="Custom course name (e.g. HIFU Intensive x3)" style="display:none;margin-top:6px">
         <div class="g3">
-          <div><label class="lab">총 횟수</label><input id="c_total" inputmode="numeric" placeholder="3" oninput="renderUsesRows()"></div>
-          <div><label class="lab">사용 횟수</label><input id="c_used" inputmode="numeric" placeholder="자동" readonly style="background:var(--soft);color:var(--muted)"></div>
-          <div><label class="lab">결제 ฿(옵션)</label><input id="c_price" inputmode="numeric" placeholder="0"></div>
+          <div><label class="lab">Total sessions · ครั้งรวม</label><input id="c_total" inputmode="numeric" placeholder="3" oninput="renderUsesRows()"></div>
+          <div><label class="lab">Used · ใช้แล้ว</label><input id="c_used" inputmode="numeric" placeholder="auto" readonly style="background:var(--soft);color:var(--muted)"></div>
+          <div><label class="lab">Paid ฿ (opt.) · จ่ายแล้ว</label><input id="c_price" inputmode="numeric" placeholder="0"></div>
         </div>
         <label class="lab" data-i18n="usesLbl">회차별 사용 기록</label>
         <div id="cUsesList" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -760,22 +760,22 @@
 
       <div id="cFieldsMem" style="display:none">
         <div class="g3">
-          <div><label class="lab">충전액 ฿</label><input id="c_charged" inputmode="numeric" placeholder="10000" oninput="calcMemBal()"></div>
-          <div><label class="lab">보너스 ฿</label><input id="c_bonus" inputmode="numeric" placeholder="1000" oninput="calcMemBal()"></div>
-          <div><label class="lab">등급</label><input id="c_tier" placeholder="Silver"></div>
+          <div><label class="lab">Top-up ฿ · ยอดเติม</label><input id="c_charged" inputmode="numeric" placeholder="10000" oninput="calcMemBal()"></div>
+          <div><label class="lab">Bonus ฿ · โบนัส</label><input id="c_bonus" inputmode="numeric" placeholder="1000" oninput="calcMemBal()"></div>
+          <div><label class="lab">Tier · ระดับ</label><input id="c_tier" placeholder="Silver"></div>
         </div>
-        <label class="lab">현재 잔액 ฿ · ยอดคงเหลือ <span style="color:var(--muted)">(비우면 충전+보너스 자동)</span></label>
+        <label class="lab">Balance ฿ · ยอดคงเหลือ <span style="color:var(--muted)">(blank = top-up + bonus)</span></label>
         <input id="c_balance" inputmode="numeric" placeholder="11000">
       </div>
 
       <div class="g2">
-        <div><label class="lab">구매일 · วันซื้อ</label><input type="date" id="c_buy"></div>
-        <div><label class="lab">만료일 (옵션)</label><input type="date" id="c_exp"></div>
+        <div><label class="lab">Buy date · วันซื้อ</label><input type="date" id="c_buy"></div>
+        <div><label class="lab">Expiry (opt.) · หมดอายุ</label><input type="date" id="c_exp"></div>
       </div>
-      <label class="lab">메모</label><input id="c_memo" placeholder="비고 (예: 사진동의, 동반 등록 등)">
+      <label class="lab">Memo · บันทึก</label><input id="c_memo" placeholder="e.g. photo consent, joint register">
       <input type="hidden" id="c_edit" value="">
-      <button class="save" style="width:100%;margin-top:12px" onclick="addCust()" id="custSaveBtn">+ 등록</button>
-      <button class="cancel" id="custCancelEdit" style="display:none" onclick="resetCustForm();custView('list')">✕ 편집 취소</button>
+      <button class="save" style="width:100%;margin-top:12px" onclick="addCust()" id="custSaveBtn">+ Register · ลงทะเบียน</button>
+      <button class="cancel" id="custCancelEdit" style="display:none" onclick="resetCustForm();custView('list')">✕ Cancel edit · ยกเลิก</button>
     </div>
     </div>
 
@@ -796,7 +796,7 @@
     </div>
 
     <button class="save" id="custAddBtnBottom" style="width:100%;margin-bottom:8px" onclick="resetCustForm();custView('form')" data-i18n="ledTabForm">➕ 새 고객 등록</button>
-    <button class="cancel" onclick="closeCustMgr()">닫기</button>
+    <button class="cancel" onclick="closeCustMgr()">Close · ปิด</button>
   </div>
 </div>
 
@@ -804,7 +804,7 @@
 <div class="overlay" id="checkinOverlay">
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0" data-i18n="ckTitle">✅ 체크인 리스트</h2>
-      <button class="sheet-x" onclick="closeCheckin()" aria-label="닫기">✕</button></div>
+      <button class="sheet-x" onclick="closeCheckin()" aria-label="Close">✕</button></div>
     <div class="sub" data-i18n="ckSub">방문하면 ✅ 방문, 안 오면 🚫 노쇼, 날짜를 미루면 📅 연기를 누르세요.</div>
     <div class="cknav">
       <button class="btn" data-i18n="ckPrev" onclick="ckMove(-1)">◀ 어제</button>
@@ -814,7 +814,7 @@
     <div class="cksum" id="ckSum"></div>
     <button class="ckpendbtn" id="ckPendBtn" onclick="ckTogglePending()"></button>
     <div id="ckList"></div>
-    <button class="addbtn" style="margin-top:6px;background:var(--wine);border-color:var(--wine)" onclick="printCheckinSheet()">📄 이 날짜 A4 보기 · ดูใบเช็คอิน A4</button>
+    <button class="addbtn" style="margin-top:6px;background:var(--wine);border-color:var(--wine)" onclick="printCheckinSheet()">📄 View A4 sheet · ดูใบเช็คอิน A4</button>
     <button class="addbtn" style="margin-top:6px" data-i18n="mAdd" onclick="closeCheckin();openModal(null)">+ 예약·방문 추가</button>
     <button class="cancel" data-i18n="mClose" onclick="closeCheckin()">닫기</button>
   </div>
@@ -823,12 +823,12 @@
 <!-- STAFF MANAGER MODAL -->
 <div class="overlay" id="staffOverlay">
   <div class="sheet">
-    <div class="sheet-hd"><h2 style="margin-bottom:0">👩‍⚕️ 담당자 관리 · จัดการผู้ทำ</h2>
-      <button class="sheet-x" onclick="closeStaffMgr()" aria-label="닫기">✕</button></div>
-    <div class="sub">테라피스트(담당자)를 추가·삭제·순서 변경할 수 있어요. 여기서 추가하면 예약 작성 화면의 담당 칩에 바로 나와요.</div>
+    <div class="sheet-hd"><h2 style="margin-bottom:0">👩‍⚕️ Staff Roster · จัดการผู้ทำ</h2>
+      <button class="sheet-x" onclick="closeStaffMgr()" aria-label="Close">✕</button></div>
+    <div class="sub">Add, remove and reorder therapists — changes show in the booking form immediately. · เพิ่ม/ลบ/เรียงผู้ทำ มีผลทันที</div>
     <div style="display:flex;gap:8px;margin:8px 0 14px">
-      <input id="staffNew" placeholder="이름 입력 (예: Jam)" style="flex:1" onkeydown="if(event.key==='Enter')addStaffMgr()">
-      <button class="btn gold" style="flex:0 0 auto" onclick="addStaffMgr()">＋ 추가</button>
+      <input id="staffNew" placeholder="Name (e.g. Jam) · ชื่อ" style="flex:1" onkeydown="if(event.key==='Enter')addStaffMgr()">
+      <button class="btn gold" style="flex:0 0 auto" onclick="addStaffMgr()">＋ Add · เพิ่ม</button>
     </div>
     <div id="staffMgrList"></div>
     <button class="cancel" data-i18n="mClose" onclick="closeStaffMgr()">닫기</button>
@@ -839,7 +839,7 @@
 <div class="overlay" id="pinOverlay">
   <div class="sheet" style="max-width:360px">
     <div class="sheet-hd"><h2 id="pinTitle" style="margin-bottom:0">🔑 PIN</h2>
-      <button class="sheet-x" onclick="closePin()" aria-label="닫기">✕</button></div>
+      <button class="sheet-x" onclick="closePin()" aria-label="Close">✕</button></div>
     <div class="sub" id="pinMsg"></div>
     <input id="pinInput" inputmode="numeric" type="password" maxlength="8" autocomplete="off"
       style="width:100%;text-align:center;font-size:22px;letter-spacing:6px;padding:12px"
@@ -887,7 +887,7 @@ function cacheAll(){ // localStorage는 오프라인 캐시로만 사용
 function queueSync(part){
   if(part)_dirty[part]=true;
   if(!sb)return;
-  if(!cloudOn){if(part)syncBar('err','⚠️ 서버 미연결 — 저장이 서버에 반영되지 않았어요 · ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์');return;}
+  if(!cloudOn){if(part)syncBar('err','⚠️ Not connected — changes not saved to server · ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์');return;}
   clearTimeout(_pushT);_pushT=setTimeout(pushAll,400);
 }
 async function pushAll(){
@@ -902,7 +902,7 @@ async function pushAll(){
   }catch(err){
     console.error('[sync] push 실패',err);
     _dirty.bookings=_dirty.customers=_dirty.staff=_dirty.settings=true; // 다음 재시도에서 전체 diff 다시 확인
-    syncBar('err','⚠️ 저장 실패 — 인터넷 연결을 확인하세요 (자동 재시도 중) · บันทึกไม่สำเร็จ กำลังลองใหม่');
+    syncBar('err','⚠️ Save failed — check internet (auto-retrying) · บันทึกไม่สำเร็จ กำลังลองใหม่');
     clearTimeout(_retryT);_retryT=setTimeout(pushAll,15000);
   }
   _pushing=false;
@@ -942,7 +942,10 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const {error}=await sb.from('settings').upsert([{key:'beds',value:bedsVal},{key:'discounts',value:discounts}]);
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts}];
+  const pin=localStorage.getItem('hanahayan_ownerpin');
+  if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
+  const {error}=await sb.from('settings').upsert(rows);
   if(error)throw error;
 }
 async function fetchAll(){
@@ -961,6 +964,7 @@ async function fetchAll(){
   const smap={};(g.data||[]).forEach(r=>{smap[r.key]=r.value});
   if(smap.beds!=null)bedsVal=parseInt(smap.beds)||2;else _dirty.settings=true;
   if(Array.isArray(smap.discounts))discounts=smap.discounts;else _dirty.settings=true;
+  if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1009,6 +1013,7 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         const smap={};(g.data||[]).forEach(r=>{smap[r.key]=r.value});
         if(smap.beds!=null)bedsVal=parseInt(smap.beds)||2;
         if(Array.isArray(smap.discounts))discounts=smap.discounts;
+        if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
       cacheAll();refreshUI();
@@ -1032,14 +1037,14 @@ function hideGate(){const g=document.getElementById('gateOverlay');if(g)g.style.
 function gateErrMsg(m){const e=document.getElementById('gateErr');e.textContent=m;e.style.display='block';}
 async function gateLogin(){
   const pw=document.getElementById('gatePw').value;
-  if(!pw){gateErrMsg('비밀번호를 입력하세요 · กรอกรหัสผ่าน');return}
+  if(!pw){gateErrMsg('Enter password · กรอกรหัสผ่าน');return}
   const btn=document.getElementById('gateBtn');btn.disabled=true;
   try{
     const {error}=await sb.auth.signInWithPassword({email:LOGIN_EMAIL,password:pw});
-    if(error){gateErrMsg('비밀번호가 맞지 않아요 · รหัสผ่านไม่ถูกต้อง');return}
+    if(error){gateErrMsg('Wrong password · รหัสผ่านไม่ถูกต้อง');return}
     document.getElementById('gateErr').style.display='none';
     hideGate();startCloud();
-  }catch(e){gateErrMsg('연결 실패 — 인터넷을 확인하세요 · เชื่อมต่อไม่ได้');}
+  }catch(e){gateErrMsg('Connection failed — check internet · เชื่อมต่อไม่ได้');}
   finally{btn.disabled=false;}
 }
 async function cloudLogout(){
@@ -1048,7 +1053,7 @@ async function cloudLogout(){
 }
 async function startCloud(){
   hideGate();
-  syncBar('warn','☁️ 서버에서 데이터 불러오는 중… · กำลังโหลดข้อมูล…');
+  syncBar('warn','☁️ Loading data… · กำลังโหลดข้อมูล…');
   try{
     await fetchAll();
     subscribeRealtime();
@@ -1056,7 +1061,7 @@ async function startCloud(){
     refreshUI();
   }catch(e){
     console.error('[sync] 초기 로드 실패',e);
-    syncBar('err','⚠️ 오프라인 — 서버 연결 실패. 지금 저장하는 내용은 서버에 반영되지 않아요. (자동 재시도 중)');
+    syncBar('err','⚠️ Offline — cannot reach server, changes are NOT being saved (auto-retrying) · ออฟไลน์ กำลังลองใหม่');
     setTimeout(startCloud,15000);
   }
 }
@@ -1121,14 +1126,14 @@ function loadCustomer(){
   setIf('m_gender',e.gender);setIf('m_nat',e.nat);onNat();
   if(e.nat==='외국')setIf('m_natc',e.natc);
   document.getElementById('m_visit').value='재방문';
-  box.querySelector('.phm-sum').innerHTML='<b style="color:#847763">'+T('phLoaded')+'</b>';
+  box.querySelector('.phm-sum').innerHTML='<b style="color:var(--gold-d)">'+T('phLoaded')+'</b>';
 }
 const $=id=>document.getElementById(id);
 
 /* ===== i18n ===== */
-let LANG=localStorage.getItem('hanahayan_lang')||'ko';
+let LANG=localStorage.getItem('hanahayan_lang')||'en';
 const VM_KEY='hanahayan_viewmode', PIN_KEY='hanahayan_ownerpin';
-let viewMode=(location.hash.toLowerCase().includes('staff')||location.search.toLowerCase().includes('staff'))?'staff':(localStorage.getItem(VM_KEY)||'owner');
+let viewMode=(location.hash.toLowerCase().includes('staff')||location.search.toLowerCase().includes('staff'))?'staff':(localStorage.getItem(VM_KEY)||'staff'); // 새 기기는 직원 모드로 시작 (사장 모드는 PIN)
 function isStaff(){return viewMode==='staff';}
 const I18N={
   appTitle:{ko:'월간 예약·매출',th:'จองและยอดขายรายเดือน',en:'Monthly Booking & Sales'},
@@ -1321,7 +1326,7 @@ function pinConfirm(){
   const v=($('pinInput').value||'').trim();
   if(_pinMode==='set'){
     if(!v){pinErr(T('pinEmpty'));return;}
-    localStorage.setItem(PIN_KEY,v);closePin();
+    localStorage.setItem(PIN_KEY,v);queueSync('settings');closePin();
     viewMode='staff';applyViewMode();render();
     if($('checkinOverlay').classList.contains('on'))renderCheckin();
   }else{
@@ -1383,7 +1388,7 @@ function populateDiscSelect(preVal){
   const act=activeDiscs(selDate);
   let html='<option value="none">없음</option>';
   act.forEach(d=>{html+=`<option value="d:${d.id}">${esc(discLabel(d))}${(d.start||d.end)?' ⏰':''}</option>`});
-  html+='<option value="manual">직접 입력…</option>';
+  html+='<option value="manual">Manual… · กรอกเอง</option>';
   sel.innerHTML=html;
   sel.value = preVal && [...sel.options].some(o=>o.value===preVal) ? preVal : 'none';
   $('manualDisc').style.display = sel.value==='manual' ? 'flex':'none';
@@ -1413,7 +1418,7 @@ function togglePeriod(){$('d_dates').style.display=$('d_period').value==='period
 function addDisc(){
   const name=$('d_name').value.trim();
   const value=parseFloat(($('d_value').value||'').replace(/[^0-9.]/g,''))||0;
-  if(!name||!value){alert('이름과 할인 값을 입력하세요');return}
+  if(!name||!value){alert('Enter name and value · กรอกชื่อและมูลค่า');return}
   const period=$('d_period').value==='period';
   discounts.push({id:Date.now(),name,type:$('d_type').value,value,
     start:period?$('d_start').value:'',end:period?$('d_end').value:''});
@@ -1421,14 +1426,14 @@ function addDisc(){
   ['d_name','d_value','d_start','d_end'].forEach(i=>$(i).value='');
   $('d_period').value='always';togglePeriod();renderDiscList();
 }
-function delDisc(id){if(confirm('이 할인을 삭제할까요?')){discounts=discounts.filter(d=>d.id!==id);saveDiscs();renderDiscList()}}
+function delDisc(id){if(confirm('Delete this discount? · ลบส่วนลดนี้?')){discounts=discounts.filter(d=>d.id!==id);saveDiscs();renderDiscList()}}
 function renderDiscList(){
-  if(!discounts.length){$('discList').innerHTML='<div class="empty">등록된 할인 없음</div>';return}
+  if(!discounts.length){$('discList').innerHTML='<div class="empty">No discounts · ไม่มีส่วนลด</div>';return}
   $('discList').innerHTML=discounts.map(d=>{
-    const period=(d.start||d.end)?`<span class="meta">⏰ ${d.start||'~'} ~ ${d.end||'~'}</span>`:'<span class="meta">상시</span>';
+    const period=(d.start||d.end)?`<span class="meta">⏰ ${d.start||'~'} ~ ${d.end||'~'}</span>`:'<span class="meta">Always · ตลอด</span>';
     return `<div class="bk"><div class="m"><div class="nm">${esc(d.name)}
       <span class="pill">${d.type==='pct'?d.value+'%':'฿'+d.value}</span></div>${period}</div>
-      <span class="del" onclick="delDisc(${d.id})" style="border:none;padding:6px 8px">삭제</span></div>`;
+      <span class="del" onclick="delDisc(${d.id})" style="border:none;padding:6px 8px">Delete</span></div>`;
   }).join('');
 }
 
@@ -1486,7 +1491,7 @@ function addItem(){
   let t=$('m_treat').value;
   if(t==='__custom__'){
     t=$('m_treatcustom').value.trim();
-    if(!t){alert('항목 이름을 입력하세요');$('m_treatcustom').focus();return}
+    if(!t){alert('Enter item name · กรอกชื่อรายการ');$('m_treatcustom').focus();return}
   }
   const a=parseFloat(($('m_itemamt').value||'').replace(/[^0-9.]/g,''))||0;
   curItems.push({treat:t,amount:a});
@@ -1513,7 +1518,7 @@ function loadCap(input){
   r.readAsDataURL(f);
 }
 function showCap(){
-  $('capPreview').innerHTML = capImg ? `<img src="${capImg}"><br><span class="rm" onclick="removeCap()">✕ 캡처 삭제</span>` : '';
+  $('capPreview').innerHTML = capImg ? `<img src="${capImg}"><br><span class="rm" onclick="removeCap()">✕ Remove capture · ลบรูป</span>` : '';
 }
 function removeCap(){capImg='';$('m_capfile').value='';showCap()}
 
@@ -1617,13 +1622,13 @@ function renderStaffMgr(){
 function addStaffMgr(){
   const inp=$('staffNew');const name=(inp.value||'').trim();
   if(!name){inp.focus();return;}
-  if(name==='기타'){alert('"기타"는 기본 항목이라 자동으로 있어요.');inp.value='';return;}
-  if(staffList.includes(name)){alert('이미 있는 담당자예요.');inp.value='';return;}
+  if(name==='기타'){alert('"Other" is built-in · มีอยู่แล้ว');inp.value='';return;}
+  if(staffList.includes(name)){alert('Already in the list · มีชื่อนี้แล้ว');inp.value='';return;}
   staffList.push(name);saveStaff();inp.value='';renderStaffMgr();
 }
 function removeStaff(i){
   const n=staffList[i];
-  if(confirm(`담당자 "${n}" 을(를) 목록에서 뺄까요?\n(기존 예약 기록의 담당명은 그대로 남아요)`)){
+  if(confirm(`Remove "${n}" from the roster? · ลบออกจากรายชื่อ?\n(Past bookings keep the name · บันทึกเก่ายังอยู่)`)){
     staffList.splice(i,1);saveStaff();renderStaffMgr();
   }
 }
@@ -1635,11 +1640,11 @@ function moveStaff(i,d){
 function moveMonth(n){cur.setMonth(cur.getMonth()+n);render()}
 function renderMonthTrend(){
   const box=$('monTrend'); if(!box) return;
-  const title=`<div class="at-t">📊 월별 매출 추이<small>ยอดขายรายเดือน · 여러 달 확정매출 패턴</small></div>`;
+  const title=`<div class="at-t">📊 Monthly Revenue<small>ยอดขายรายเดือน</small></div>`;
   const map={};
   data.forEach(e=>{ if(e.status==='방문'){const k=e.date.slice(0,7); map[k]=(map[k]||0)+Number(e.amount||0);} });
   const keys=Object.keys(map).filter(k=>map[k]>0).sort();
-  if(!keys.length){box.innerHTML=`<div class="at-h">${title}</div><div class="at-empty">확정 매출 데이터가 없어요 · ยังไม่มียอดขาย</div>`;return;}
+  if(!keys.length){box.innerHTML=`<div class="at-h">${title}</div><div class="at-empty">No confirmed revenue yet · ยังไม่มียอดขาย</div>`;return;}
   const curY=cur.getFullYear(), curM=cur.getMonth()+1;
   let [yy,mm]=keys[0].split('-').map(Number);
   const months=[]; let guard=0;
@@ -1666,15 +1671,15 @@ function renderMonthTrend(){
   const avg=comp.length?Math.round(compTotal/comp.length):Math.round(rev.reduce((a,b)=>a+b,0)/win.length);
   let tCls='at-flat',tHtml='― 유지 · ทรงตัว';
   if(hasTrend && comp.length>=3 && Math.abs(pct)>=5){
-    if(slope>0){tCls='at-up';tHtml=`▲ 상승세 · เพิ่มขึ้น (+${pct}%)`;}
-    else{tCls='at-down';tHtml=`▼ 하락세 · ลดลง (${pct}%)`;}
+    if(slope>0){tCls='at-up';tHtml=`▲ Rising · เพิ่มขึ้น (+${pct}%)`;}
+    else{tCls='at-down';tHtml=`▼ Falling · ลดลง (${pct}%)`;}
   }
   const H=76;
   const bars=win.map((w,i)=>{
     const h=rev[i]>0?Math.max(2,Math.round(rev[i]/maxRev*H)):0;
     const isCur=w.key===curKey;
     const below=!isCur&&rev[i]>0&&rev[i]<avg;
-    return `<div class="at-bar${below?' below':''}${isCur?' cur':''}" title="${w.y}년 ${w.m}월 · 매출 ${fmt(rev[i])}${isCur?' (진행중)':''}"><i style="height:${h}px"></i><span class="bd">${w.m}${isCur?'*':''}</span></div>`;
+    return `<div class="at-bar${below?' below':''}${isCur?' cur':''}" title="${w.y}-${w.m} · ${fmt(rev[i])}${isCur?' (ongoing)':''}"><i style="height:${h}px"></i><span class="bd">${w.m}${isCur?'*':''}</span></div>`;
   }).join('');
   const avgY=Math.round(avg/maxRev*H);
   const x1=((firstI+0.5)/win.length)*100, x2=((lastI+0.5)/win.length)*100;
@@ -1685,21 +1690,21 @@ function renderMonthTrend(){
     <div class="at-h">${title}<div class="at-trend ${tCls}">${tHtml}</div></div>
     <div class="at-chart" style="height:${H}px">
       <div class="at-avgline" style="bottom:${avgY}px"></div>
-      <div class="at-avglbl" style="bottom:${avgY}px">마감월 평균 ${fmt(avg)}</div>
+      <div class="at-avglbl" style="bottom:${avgY}px">Avg/closed-month ${fmt(avg)}</div>
       ${bars}${svg}
     </div>
     <div class="at-foot"><span>${win[0].y}.${win[0].m} ~ ${win[n-1].y}.${win[n-1].m}</span><span>* 진행중 · 추세는 마감월 기준 · <span style="color:#8f6d38">— 추세선</span></span></div>`;
 }
 function renderRevTrend(y,m,days){
   const box=$('avgTrend'); if(!box) return;
-  const title=`<div class="at-t">📈 일별 매출 추이<small>ยอดขายรายวัน · 이번 달 매출 패턴</small></div>`;
+  const title=`<div class="at-t">📈 Daily Revenue<small>ยอดขายรายวัน</small></div>`;
   const rev=[]; let monthTotal=0, activeDays=0, lastDay=0, maxRev=1;
   for(let d=1;d<=days;d++){
     const r=data.filter(e=>e.date===ymd(y,m,d)&&e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
     rev[d]=r; monthTotal+=r;
     if(r>0){activeDays++;lastDay=d;if(r>maxRev)maxRev=r;}
   }
-  if(!activeDays){box.innerHTML=`<div class="at-h">${title}</div><div class="at-empty">이번 달 매출 데이터가 없어요 · ยังไม่มียอดขายเดือนนี้</div>`;return;}
+  if(!activeDays){box.innerHTML=`<div class="at-h">${title}</div><div class="at-empty">No revenue this month · ยังไม่มียอดขายเดือนนี้</div>`;return;}
   // 선형 추세선 (1일 ~ 마지막 매출일, 중간 무매출일은 0 포함)
   let n=lastDay, sx=0,sy=0,sxx=0,sxy=0;
   for(let d=1;d<=lastDay;d++){sx+=d;sy+=rev[d];sxx+=d*d;sxy+=d*rev[d];}
@@ -1710,8 +1715,8 @@ function renderRevTrend(y,m,days){
   const dayAvg=Math.round(monthTotal/lastDay);
   let tCls='at-flat',tHtml='― 유지 · ทรงตัว';
   if(lastDay>=3 && Math.abs(pct)>=5){
-    if(slope>0){tCls='at-up';tHtml=`▲ 상승세 · เพิ่มขึ้น (+${pct}%)`;}
-    else{tCls='at-down';tHtml=`▼ 하락세 · ลดลง (${pct}%)`;}
+    if(slope>0){tCls='at-up';tHtml=`▲ Rising · เพิ่มขึ้น (+${pct}%)`;}
+    else{tCls='at-down';tHtml=`▼ Falling · ลดลง (${pct}%)`;}
   }
   const H=76;
   let bars='';
@@ -1719,7 +1724,7 @@ function renderRevTrend(y,m,days){
     const h=rev[d]>0?Math.max(2,Math.round(rev[d]/maxRev*H)):0;
     const below=rev[d]>0&&rev[d]<dayAvg;
     const lbl=(d===1||d%5===0||d===days)?d:'';
-    bars+=`<div class="at-bar${below?' below':''}" title="${d}일 · 매출 ${fmt(rev[d])}"><i style="height:${h}px"></i><span class="bd">${lbl}</span></div>`;
+    bars+=`<div class="at-bar${below?' below':''}" title="Day ${d} · ${fmt(rev[d])}"><i style="height:${h}px"></i><span class="bd">${lbl}</span></div>`;
   }
   const avgY=Math.round(dayAvg/maxRev*H);
   const x1=((0.5)/days)*100, x2=((lastDay-0.5)/days)*100;
@@ -1729,10 +1734,10 @@ function renderRevTrend(y,m,days){
     <div class="at-h">${title}<div class="at-trend ${tCls}">${tHtml}</div></div>
     <div class="at-chart" style="height:${H}px">
       <div class="at-avgline" style="bottom:${avgY}px"></div>
-      <div class="at-avglbl" style="bottom:${avgY}px">일평균 ${fmt(dayAvg)}</div>
+      <div class="at-avglbl" style="bottom:${avgY}px">Daily avg ${fmt(dayAvg)}</div>
       ${bars}${svg}
     </div>
-    <div class="at-foot"><span>월 매출 ${fmt(monthTotal)}</span><span>영업일 ${activeDays}일 · 일평균 ${fmt(dayAvg)} · <span style="color:#8f6d38">— 추세선</span></span></div>`;
+    <div class="at-foot"><span>Month ${fmt(monthTotal)}</span><span>Days ${activeDays} · Daily avg ${fmt(dayAvg)} · <span style="color:#8f6d38">— 추세선</span></span></div>`;
 }
 function renderStatBox(s){
   $('statBox').innerHTML=`
@@ -1773,7 +1778,7 @@ function highlightStatCell(st){
 
 function render(){
   const y=cur.getFullYear(), m=cur.getMonth();
-  $('mLabel').firstChild.textContent=y+'년 '+(m+1)+'월';
+  $('mLabel').firstChild.textContent=['January','February','March','April','May','June','July','August','September','October','November','December'][m]+' '+y;
   // month stats
   const monthEntries=data.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em===m+1});
   const sumSeats=arr=>arr.reduce((s,e)=>s+(parseInt(e.seats)||1),0);
@@ -1813,9 +1818,9 @@ function render(){
     const dow=new Date(y,m,d).getDay();
     const cls=['cell',dow===0?'sun':'',dayE.length?'has':'',ds===todayStr()?'today':'',isFull?'full':'',ds===selDate?'sel':''].join(' ');
     html+=`<div class="${cls}" onclick="selectDay('${ds}')">
-      ${isFull?`<div class="fullbadge">${over?'초과':'FULL'}</div>`:''}
+      ${isFull?`<div class="fullbadge">${over?'OVER':'FULL'}</div>`:''}
       <div class="dnum">${d}</div>
-      ${dayE.length?`<div class="cnt">${dayE.length}건</div>`:''}
+      ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
       ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
     </div>`;
@@ -1904,12 +1909,12 @@ function assignLanes(dayE,beds){
 
 function deleteDayBookings(){
   const dayList=data.filter(e=>e.date===selDate);
-  if(!dayList.length){alert(selDate+' · 삭제할 예약이 없어요.');return;}
-  if(!confirm(`⚠️ ${selDate} 날짜의 예약 ${dayList.length}건을 모두 삭제할까요?\n(되돌릴 수 없어요. 테스트/옛 데이터 정리용)`))return;
+  if(!dayList.length){alert(selDate+' · No bookings to delete · ไม่มีการจอง');return;}
+  if(!confirm(`⚠️ Delete ALL ${dayList.length} bookings on ${selDate}? · ลบทั้งหมด?\n(Cannot be undone · กู้คืนไม่ได้)`))return;
   data=data.filter(e=>e.date!==selDate);
   save();render();
   if(document.getElementById('dayPanel'))renderDay();
-  alert(`🗑 ${selDate} 예약 ${dayList.length}건을 삭제했어요.`);
+  alert(`🗑 Deleted ${dayList.length} bookings on ${selDate} · ลบแล้ว`);
 }
 function printCheckinSheet(){
   const day=(typeof ckDate!=='undefined'&&ckDate)?ckDate:(selDate||todayStr());
@@ -1989,7 +1994,7 @@ async function savePrintSheetPDF(day){
     pdf.save('HANAHAYAN_เช็คอิน_'+day+'.pdf');
   }catch(e){
     // 라이브러리 로드 실패 시 브라우저 인쇄로 폴백
-    try{window.print();}catch(_){alert('PDF 저장에 실패했어요. 인터넷 연결 후 다시 시도해주세요 · โหลดไลบรารีไม่สำเร็จ');}
+    try{window.print();}catch(_){alert('PDF failed — check internet and retry · โหลดไลบรารีไม่สำเร็จ');}
   }
 }
 function renderDay(){
@@ -2007,7 +2012,7 @@ function renderDay(){
   else{ps=rev?`${T('visitN')} ${vis.length} · ${fmt(rev)}`:(dayE.length?`${T('bookN')} ${dayE.length}`:'');}
   $('pSum').textContent=ps;
   const list=$('bkList');
-  if(!dayE.length){list.innerHTML='<div class="empty">예약/방문 없음 · ยังไม่มี</div>';return}
+  if(!dayE.length){list.innerHTML='<div class="empty">No bookings · ยังไม่มีการจอง</div>';return}
 
   const {placed,notimed,anyConflict}=assignLanes(dayE,beds);
   // timeline range (clinic 10:30~20:00, 확장 가능)
@@ -2137,7 +2142,7 @@ function openModal(id){
   renderItems();
   applyStatusUI();
   const[y,m,d]=selDate.split('-');
-  $('mDateSub').textContent=`${y}년 ${Number(m)}월 ${Number(d)}일`;
+  $('mDateSub').textContent=`${y}-${m}-${d}`;
   ov.classList.add('on');
 }
 function setStatus(s){document.querySelectorAll('#m_status .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s))}
@@ -2146,7 +2151,7 @@ function closeModal(){$('overlay').classList.remove('on')}
 
 function saveBooking(){
   const name=$('m_name').value.trim();
-  if(!name){alert('이름을 입력하세요');$('m_name').focus();return false}
+  if(!name){alert('Enter a name · กรอกชื่อ');$('m_name').focus();return false}
   const status=getStatus();
   // 베드 충돌 체크 (노쇼 아니고 시간 있을 때)
   if(status==='예약'||status==='방문'){
@@ -2154,7 +2159,7 @@ function saveBooking(){
     if(st!=null){
       const en=st+(parseInt($('m_dur').value)||60), seats=Math.min(parseInt($('m_seats').value)||1,getBeds());
       if(wouldExceed($('m_date').value||selDate,st,en,seats,getBeds(),editId)){
-        if(!confirm(`⚠️ 이 시간대(${$('m_time').value}~${$('m_end').value})에 베드 ${getBeds()}개가 이미 찼어요.\n그래도 저장할까요? (초과 예약으로 표시됩니다)`))return false;
+        if(!confirm(`⚠️ Beds are full at ${$('m_time').value}~${$('m_end').value} (${getBeds()} beds) · เตียงเต็มช่วงนี้\nSave anyway? (shown as over-capacity) · บันทึกต่อไหม?`))return false;
       }
     }
   }
@@ -2163,7 +2168,7 @@ function saveBooking(){
   if(status==='방문'){
     const pend=parseFloat(($('m_itemamt').value||'').replace(/[^0-9.]/g,''))||0;
     if(pend>0){let pt=$('m_treat').value;if(pt==='__custom__')pt=$('m_treatcustom').value.trim()||'기타';curItems.push({treat:pt,amount:pend});}
-    if(!curItems.length){alert('시술을 1개 이상 추가하세요 (+ 버튼)');return false}
+    if(!curItems.length){alert('Add at least 1 treatment (+ button) · เพิ่มอย่างน้อย 1 รายการ');return false}
     items=JSON.parse(JSON.stringify(curItems));
     const t=calcTotals(); subtotal=t.sub; discount=t.discount; amount=t.final;
     discname=t.discname; disctype=t.disctype; discval=t.discval; adjust=t.adjust||0;
@@ -2210,10 +2215,10 @@ function rebookFromCurrent(){
   // 이름·전화·LINE·성별·국적·경로·예약시술·예상금액·인원은 그대로 유지됨
   $('m_name').focus();
 }
-function deleteBooking(){if(editId&&confirm('삭제할까요?')){data=data.filter(x=>x.id!=editId);save();closeModal();render()}}
+function deleteBooking(){if(editId&&confirm('Delete? · ลบไหม?')){data=data.filter(x=>x.id!=editId);save();closeModal();render()}}
 
 function exportCSV(){
-  if(!data.length){alert('데이터 없음');return}
+  if(!data.length){alert('No data · ไม่มีข้อมูล');return}
   const cols=['날짜','시간','상태','전환','이름','전화','LINE','예약경로','계정ID','동반인원','성별','국적','국가','방문','시술','소계','할인명','할인액','조정','최종금액','결제','담당','시술관리','서비스내역','메모'];
   const keys=['date','time','status','converted','name','phone','line','src','srcid','seats','gender','nat','natc','visit','treat','subtotal','discname','discount','adjust','amount','pay','staff','care','service','memo'];
   const rows=[...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));
@@ -2224,8 +2229,8 @@ function exportCSV(){
 }
 
 function exportCustomersXLSX(){
-  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 다시 눌러주세요.');return}
-  if(!data.length){alert('데이터 없음 · ไม่มีข้อมูล');return}
+  if(typeof XLSX==='undefined'){alert('Excel library still loading — try again shortly · กำลังโหลด ลองอีกครั้ง');return}
+  if(!data.length){alert('No data · ไม่มีข้อมูล');return}
   const norm=s=>String(s||'').replace(/[\s\-()]/g,'');
   const cust={};
   [...data].forEach(e=>{
@@ -2304,12 +2309,12 @@ function doSearch(){
     return textMatch||phoneMatch;
   }).sort((a,b)=>b.date.localeCompare(a.date)||(b.time||'').localeCompare(a.time||''));
   box.style.display='block';
-  if(!hits.length){box.innerHTML=`<div class="sr-empty">"${esc(raw)}" 검색 결과 없음</div>`;return;}
+  if(!hits.length){box.innerHTML=`<div class="sr-empty">"${esc(raw)}" — no results · ไม่พบผลลัพธ์</div>`;return;}
   const totalSpent=hits.filter(e=>e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
   const visits=hits.filter(e=>e.status==='방문').length;
   const names=[...new Set(hits.map(e=>e.name))];
-  let html=`<div class="sr-h">🔍 "${esc(raw)}" — ${hits.length}건${names.length>1?' ('+names.length+'명)':''}</div>`;
-  html+=`<div class="sr-sum">${T('visitN')} <b>${visits}회</b>${isStaff()?'':' · 총 결제 <b>'+fmt(totalSpent)+'</b>'+(visits?' · 객단가 '+fmt(Math.round(totalSpent/visits)):'')}</div>`;
+  let html=`<div class="sr-h">🔍 "${esc(raw)}" — ${hits.length}${names.length>1?' ('+names.length+' ppl)':''}</div>`;
+  html+=`<div class="sr-sum">${T('visitN')} <b>${visits}</b>${isStaff()?'':' · Total <b>'+fmt(totalSpent)+'</b>'+(visits?' · Avg '+fmt(Math.round(totalSpent/visits)):'')}</div>`;
   html+=hits.map(e=>{
     const [y,mo,d]=e.date.split('-');
     const st=({'예약':'📅'+T('s_예약'),'방문':'✅'+T('s_방문'),'노쇼':'🚫'+T('s_노쇼'),'캔슬':'❌'+T('s_캔슬')}[e.status]||e.status);
@@ -2343,14 +2348,14 @@ function restoreData(input){
     try{
       const p=JSON.parse(e.target.result);
       if(!p.bookings)throw new Error('형식 오류');
-      const merge=confirm('복원 방식:\n\n[확인] = 기존 데이터에 합치기 (병합)\n[취소] = 기존 데이터 덮어쓰기 (교체)');
+      const merge=confirm('Restore mode:\n\n[OK] = Merge into existing data · รวมกับข้อมูลเดิม\n[Cancel] = Replace all data · แทนที่ทั้งหมด');
       if(merge){const ids=new Set(data.map(x=>x.id));p.bookings.forEach(b=>{if(!ids.has(b.id))data.push(b)});}
       else{data=p.bookings;}
       if(p.discounts){discounts=p.discounts;saveDiscs();}
       if(p.customers){customers=p.customers;saveCusts();}
       save();render();
-      alert('복원 완료! 예약 '+data.length+'건 · 원장 '+customers.length+'명\n☁️ 서버에 업로드 중이에요 — 상단에 경고가 없으면 완료된 거예요.');
-    }catch(err){alert('복원 실패: 올바른 백업 파일이 아니에요')}
+      alert('Restored! Bookings '+data.length+' · Ledger '+customers.length+'\n☁️ Uploading to server — done when no warning shows on top · กำลังอัปโหลด');
+    }catch(err){alert('Restore failed: not a valid backup file · ไฟล์ไม่ถูกต้อง')}
     input.value='';
   };
   r.readAsText(f);
@@ -2370,23 +2375,23 @@ function copyTextBackup(){
   let ok=false;
   try{ok=document.execCommand('copy');}catch(e){}
   if(navigator.clipboard){navigator.clipboard.writeText(ta.value).then(()=>{},()=>{});}
-  alert(ok?'복사됐어요! 메모장·카톡 등에 붙여넣어 보관하세요.':'복사가 안 되면 텍스트를 길게 눌러 직접 복사하세요.');
+  alert(ok?'Copied! Keep it in Notes/LINE · คัดลอกแล้ว':'If copy failed, long-press the text to copy · กดค้างเพื่อคัดลอกเอง');
 }
 function restoreFromText(){
   const txt=$('txtData').value.trim();
-  if(!txt){alert('① 칸에 백업 텍스트를 붙여넣으세요');return;}
+  if(!txt){alert('Paste backup text into box ① · วางข้อความในช่อง ①');return;}
   try{
     const p=JSON.parse(txt);
     if(!p.bookings)throw new Error('형식 오류');
-    const merge=confirm('복원 방식:\n\n[확인] = 기존 데이터에 합치기 (병합)\n[취소] = 기존 데이터 덮어쓰기 (교체)');
+    const merge=confirm('Restore mode:\n\n[OK] = Merge into existing data · รวมกับข้อมูลเดิม\n[Cancel] = Replace all data · แทนที่ทั้งหมด');
     if(merge){const ids=new Set(data.map(x=>x.id));p.bookings.forEach(b=>{if(!ids.has(b.id))data.push(b)});}
     else{data=p.bookings;}
     if(p.discounts){discounts=p.discounts;saveDiscs();}
     if(p.customers){customers=p.customers;saveCusts();}
     save();render();
     $('txtOverlay').classList.remove('on');
-    alert('복원 완료! 예약 '+data.length+'건 · 원장 '+customers.length+'명\n☁️ 서버에 업로드 중이에요 — 상단에 경고가 없으면 완료된 거예요.');
-  }catch(err){alert('복원 실패: 텍스트가 올바른 백업 형식이 아니에요');}
+    alert('Restored! Bookings '+data.length+' · Ledger '+customers.length+'\n☁️ Uploading to server — done when no warning shows on top · กำลังอัปโหลด');
+  }catch(err){alert('Restore failed: invalid backup text · ข้อความไม่ถูกต้อง');}
 }
 
 /* ============================================================
@@ -2492,18 +2497,18 @@ function resetCustForm(){
   renderUsesRows([]);
   custTypeToggle('course');
   $('custFormTitle').textContent=T('ledTabForm');
-  $('custSaveBtn').textContent='+ 등록';
+  $('custSaveBtn').textContent='+ Register · ลงทะเบียน';
   $('custCancelEdit').style.display='none';
 }
 function addCust(){
   const name=$('c_name').value.trim();
-  if(!name){alert('이름을 입력하세요');$('c_name').focus();return}
+  if(!name){alert('Enter a name · กรอกชื่อ');$('c_name').focus();return}
   const editId=$('c_edit').value;
   const base={name,phone:$('c_phone').value.trim(),line:$('c_line').value.trim(),type:custType,
     buyDate:$('c_buy').value||todayStr(),expiry:$('c_exp').value||'',memo:$('c_memo').value.trim()};
   if(custType==='course'){
     const total=parseInt($('c_total').value)||0;
-    if(total<1){alert('총 횟수를 입력하세요 (예: 3)');$('c_total').focus();return}
+    if(total<1){alert('Enter total sessions (e.g. 3) · กรอกจำนวนครั้ง');$('c_total').focus();return}
     base.treat=cTreatVal();
     base.total=total;
     base.uses=collectUses().slice(0,total);
@@ -2521,7 +2526,7 @@ function addCust(){
     if(i>=0)customers[i]={...customers[i],...base};
   }else{
     base.id=Date.now();base.createdAt=todayStr();
-    base.history=[{t:nowStamp(),note:custType==='course'?`등록 (${base.used}/${base.total})`:`등록 · 잔액 ${fmt(base.balance)}`,delta:0}];
+    base.history=[{t:nowStamp(),note:custType==='course'?`Registered (${base.used}/${base.total})`:`Registered · balance ${fmt(base.balance)}`,delta:0}];
     customers.push(base);
   }
   saveCusts();resetCustForm();renderLedSum();renderCustList();custView('list');
@@ -2548,18 +2553,18 @@ function editCust(id){
 }
 function delCust(id){
   const c=customers.find(x=>x.id==id);
-  if(confirm(`"${c?c.name:''}" 고객을 원장에서 삭제할까요?\n(이력도 함께 삭제됩니다)`)){
+  if(confirm(`Delete "${c?c.name:''}" from the ledger? · ลบลูกค้า?\n(History is deleted too · ประวัติจะถูกลบ)`)){
     customers=customers.filter(c=>c.id!=id);saveCusts();renderLedSum();renderCustList();
   }
 }
 function useCourse(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
   const rem=(c.total||0)-(c.used||0);
-  if(rem<=0){alert('남은 회차가 없어요. "횟수추가/재구매"로 늘려주세요.');return}
-  if(!confirm(`${c.name} · ${c.treat}\n${c.used}/${c.total} → ${(c.used||0)+1}/${c.total} · 1회 차감할까요?`))return;
+  if(rem<=0){alert('No sessions left — use "Add / rebuy" · ไม่มีครั้งเหลือ');return}
+  if(!confirm(`${c.name} · ${c.treat}\n${c.used}/${c.total} → ${(c.used||0)+1}/${c.total} · Use 1 session? · หัก 1 ครั้ง?`))return;
   ensureUses(c);
   c.uses.push({t:nowStamp()});c.used=c.uses.length;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`사용 1회 (${c.used}/${c.total})`,delta:-1});
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Used 1 (${c.used}/${c.total})`,delta:-1});
   saveCusts();renderLedSum();renderCustList();
 }
 function convertCourse(id){
@@ -2567,42 +2572,42 @@ function convertCourse(id){
   const rem=Math.max(0,(c.total||0)-(c.used||0));
   const unit=(c.price&&c.total)?Math.round(c.price/c.total):0;
   const val=unit*rem;
-  if(rem<=0||val<=0){alert('전환할 잔여 가치가 없어요. (결제금액이 입력된 코스만 전환 가능)');return;}
-  if(!confirm(`"${c.name}" 코스를 금액권으로 전환할까요?\n\n🎟️ 잔여 ${rem}회 (회당 ${fmt(unit)}) → 💳 잔액 ${fmt(val)}\n\n전환 후에는 어떤 메뉴든 금액 차감으로 자유롭게 사용할 수 있어요.\n(되돌리려면 수정에서 다시 코스로 바꾸면 됩니다)`))return;
+  if(rem<=0||val<=0){alert('Nothing to convert — course needs a paid amount · ไม่มียอดให้แปลง');return;}
+  if(!confirm(`"${c.name}" Convert course to balance? · แปลงเป็นยอดเงิน?\n\n🎟️ ${rem} left (per ${fmt(unit)}) → 💳 Balance ${fmt(val)}\n\nAfter converting, the balance works for any menu · ใช้ได้กับทุกเมนู`))return;
   const oldTreat=c.treat||'코스';
   c.type='membership';
   c.balance=val; c.charged=c.price||val; c.bonus=0;
-  c.tier=(c.tier||'')||('코스전환·'+oldTreat.slice(0,10));
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`⇄ 코스→금액권 전환: ${oldTreat} 잔여 ${rem}회 → 잔액 ${fmt(val)}`,delta:0});
+  c.tier=(c.tier||'')||('Converted·'+oldTreat.slice(0,10));
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`⇄ Course→Balance: ${oldTreat} ${rem} left → ${fmt(val)}`,delta:0});
   saveCusts();renderLedSum();renderCustList();
 }
 function addCourseSession(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
-  const v=prompt(`${c.name} · 추가할 횟수를 입력하세요 (재구매)`,'3');if(v===null)return;
-  const n=parseInt(v)||0;if(n<=0){alert('횟수를 확인하세요');return}
+  const v=prompt(`${c.name} · Sessions to add (rebuy) · เพิ่มกี่ครั้ง?`,'3');if(v===null)return;
+  const n=parseInt(v)||0;if(n<=0){alert('Check the number · ตรวจจำนวน');return}
   c.total=(c.total||0)+n;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`횟수 +${n} 추가 (${c.used||0}/${c.total})`,delta:n});
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Sessions +${n} (${c.used||0}/${c.total})`,delta:n});
   saveCusts();renderLedSum();renderCustList();
 }
 function chargeUse(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
-  const v=prompt(`${c.name} · 차감할 금액(฿)\n현재 잔액 ${fmt(c.balance||0)}`,'');
+  const v=prompt(`${c.name} · Amount to deduct (฿) · หักเท่าไร?\nBalance ${fmt(c.balance||0)}`,'');
   if(v===null)return;
   const amt=parseFloat(String(v).replace(/[^0-9.]/g,''))||0;
-  if(amt<=0){alert('금액을 확인하세요');return}
-  if(amt>(c.balance||0) && !confirm(`잔액(${fmt(c.balance||0)})보다 큰 금액이에요.\n그래도 차감할까요? (잔액이 마이너스가 됩니다)`))return;
+  if(amt<=0){alert('Check the amount · ตรวจยอดเงิน');return}
+  if(amt>(c.balance||0) && !confirm(`More than the balance (${fmt(c.balance||0)}) · เกินยอดคงเหลือ\nDeduct anyway? (goes negative) · หักต่อไหม?`))return;
   c.balance=(c.balance||0)-amt;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`사용 −${fmt(amt)} · 잔액 ${fmt(c.balance)}`,delta:-amt});
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Used −${fmt(amt)} · balance ${fmt(c.balance)}`,delta:-amt});
   saveCusts();renderLedSum();renderCustList();
 }
 function topupMember(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
-  const v=prompt(`${c.name} · 충전 금액(฿)을 입력하세요\n(보너스를 함께 얹으려면 그만큼 더한 금액을 넣으세요)`,'');
+  const v=prompt(`${c.name} · Top-up amount (฿) · เติมเท่าไร?\n(Include any bonus in the total)`,'');
   if(v===null)return;
   const amt=parseFloat(String(v).replace(/[^0-9.]/g,''))||0;
-  if(amt<=0){alert('금액을 확인하세요');return}
+  if(amt<=0){alert('Check the amount · ตรวจยอดเงิน');return}
   c.balance=(c.balance||0)+amt;c.charged=(c.charged||0)+amt;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`충전 +${fmt(amt)} · 잔액 ${fmt(c.balance)}`,delta:amt});
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Top-up +${fmt(amt)} · balance ${fmt(c.balance)}`,delta:amt});
   saveCusts();renderLedSum();renderCustList();
 }
 function toggleHist(id){const el=document.getElementById('hist_'+id);if(el)el.classList.toggle('on');}
@@ -2766,8 +2771,8 @@ function renderCustList(){
   $('custList').innerHTML=out;
 }
 function exportCustLedgerXLSX(){
-  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 다시 눌러주세요.');return}
-  if(!customers.length){alert('원장 데이터 없음 · ไม่มีข้อมูล');return}
+  if(typeof XLSX==='undefined'){alert('Excel library still loading — try again shortly · กำลังโหลด ลองอีกครั้ง');return}
+  if(!customers.length){alert('No ledger data · ไม่มีข้อมูล');return}
   const head=['유형 ประเภท','이름 ชื่อ','전화 เบอร์','LINE','시술/등급','총횟수','사용','남은','충전 ฿','보너스 ฿','잔액 ฿','구매일','만료일','메모','최근기록'];
   const aoa=[head];
   [...customers].sort((a,b)=>a.type.localeCompare(b.type)).forEach(c=>{
@@ -2853,7 +2858,7 @@ function ckMemPay(cid,bid){
   if(!c||!e||e.memPaid)return;
   const amt=Number(e.amount)||0; if(amt<=0)return;
   const bal=Number(c.balance||0);
-  if(amt>bal && !confirm(`잔액(${fmt(bal)})보다 결제금액(${fmt(amt)})이 커요.\n차감하면 잔액이 마이너스가 됩니다. 진행할까요?`))return;
+  if(amt>bal && !confirm(`Payment (${fmt(amt)}) exceeds balance (${fmt(bal)}) · เกินยอดคงเหลือ\nBalance will go negative — proceed? · ทำต่อไหม?`))return;
   c.balance=bal-amt;
   (c.history=c.history||[]).unshift({t:nowStamp(),note:`결제 차감 −${fmt(amt)} · 잔액 ${fmt(c.balance)} (${e.date} ${e.name||''})`,delta:-amt});
   e.memPaid=true;
@@ -3041,18 +3046,18 @@ function parseBookingText(t){
 }
 function parsePasteImport(){
   const t=$('pasteBox').value.trim();
-  if(!t){alert('텍스트를 붙여넣어 주세요 · กรุณาวางข้อความ');return;}
+  if(!t){alert('Paste the text first · กรุณาวางข้อความ');return;}
   const p=parseBookingText(t);
   if(!p.name && !p.phone && !p.date){
     $('pastePreview').style.display='block';
-    $('pastePreview').innerHTML='⚠️ 인식된 항목이 없어요. "Date:", "Customer:", "Phone:" 같은 라벨이 있는 양식인지 확인해주세요.';
+    $('pastePreview').innerHTML='⚠️ Nothing recognized — check the text has labels like "Date:", "Customer:", "Phone:" · ไม่พบข้อมูล ตรวจรูปแบบข้อความ';
     return;
   }
   // 미리보기
-  const rows=[['📅 날짜',p.date||'(오늘)'],['⏰ 시간',p.time||'—'],['👤 이름',p.name||'—'],['📞 전화',p.phone||'—'],['💬 LINE/IG',p.line||'—'],['💆 시술',p.treat||'—'],['💰 예상가',p.price?fmt(p.price):'—'],['📝 메모',[p.note,p.branch].filter(Boolean).join(' · ')||'—']];
+  const rows=[['📅 Date',p.date||'(today)'],['⏰ Time',p.time||'—'],['👤 Name',p.name||'—'],['📞 Phone',p.phone||'—'],['💬 LINE/IG',p.line||'—'],['💆 Treatment',p.treat||'—'],['💰 Est. price',p.price?fmt(p.price):'—'],['📝 Note',[p.note,p.branch].filter(Boolean).join(' · ')||'—']];
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=rows.map(r=>`<b style="color:var(--gold-d)">${r[0]}</b> ${esc(String(r[1]))}`).join('<br>')+
-    '<div style="margin-top:8px;color:var(--muted);font-size:11px">예약창을 열어 채웠어요 — 확인·수정 후 저장하세요. (금액은 저장 후에도 방문 처리 시 수정 가능)</div>';
+    '<div style="margin-top:8px;color:var(--muted);font-size:11px">Booking form filled — review and save. · กรอกให้แล้ว ตรวจสอบแล้วบันทึก</div>';
   // 예약창 채우기
   closePasteImport();
   openModal(null);
@@ -3064,7 +3069,7 @@ function parsePasteImport(){
   if(p.line)$('m_line').value=p.line;
   if(p.treat){$('m_bktreat').value='__custom__'; if(typeof onBktreatSel==='function')onBktreatSel('__custom__'); $('m_bktreatcustom').value=p.treat;}
   if(p.price!=null && $('m_bkamt'))$('m_bkamt').value=p.price;
-  const memoParts=[p.note,p.branch?('지점 '+p.branch):''].filter(Boolean);
+  const memoParts=[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean);
   if(memoParts.length)$('m_memo').value=memoParts.join(' · ');
   // 다시 붙여넣기 모달 미리보기 유지 위해 재오픈하지 않음
 }
@@ -3085,9 +3090,9 @@ bootCloud();    // 로그인 확인 후 서버 데이터로 교체 + 실시간 �
 <!-- PASTE IMPORT MODAL -->
 <div class="overlay" id="pasteOverlay">
   <div class="sheet">
-    <div class="sheet-hd"><h2 style="margin-bottom:0">📋 텍스트로 예약 추가 · วางข้อความ</h2>
-      <button class="sheet-x" onclick="closePasteImport()" aria-label="닫기">✕</button></div>
-    <div class="sub">부킹 확인 텍스트(예: 📋ยืนยันคิว/Booking Confirmed …)를 통째로 붙여넣으세요. 자동으로 읽어서 예약 작성창에 채워줘요 — 저장 전에 메뉴·금액 수정 가능. 최종 결제액은 방문 처리 때 다시 수정할 수 있어요.</div>
+    <div class="sheet-hd"><h2 style="margin-bottom:0">📋 Paste Booking Text · วางข้อความ</h2>
+      <button class="sheet-x" onclick="closePasteImport()" aria-label="Close">✕</button></div>
+    <div class="sub">Paste the whole booking-confirmation text — it is parsed into the booking form automatically. You can edit before saving. · วางข้อความยืนยันคิวทั้งหมด ระบบจะกรอกให้อัตโนมัติ แก้ไขก่อนบันทึกได้</div>
     <textarea id="pasteBox" style="width:100%;min-height:180px;font-size:12px" placeholder="📋ยืนยันคิว/Booking Confirmed
 🗓️วันที่/Date: 20/07 (จันทร์) 17:00
 👤ลูกค้า/Customer: คุณ... (Nickname)
@@ -3097,8 +3102,8 @@ bootCloud();    // 로그인 확인 후 서버 데이터로 교체 + 실시간 �
 💰ราคา/Price: 399 THB
 🎁หมายเหตุ/Note: ...
 📍สาขา/Branch: สุขุมวิท 23"></textarea>
-    <div id="pastePreview" style="display:none;background:var(--soft2);border:1.3px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;line-height:1.7"></div>
-    <button class="save" style="width:100%;margin-top:12px" onclick="parsePasteImport()">🔍 분석해서 예약창에 채우기</button>
+    <div id="pastePreview" style="display:none;background:var(--soft2);border:1.3px solid var(--line);border-radius:4px;padding:10px 12px;margin-top:10px;font-size:12px;line-height:1.7"></div>
+    <button class="save" style="width:100%;margin-top:12px" onclick="parsePasteImport()">🔍 Parse &amp; fill booking form · วิเคราะห์และกรอก</button>
     <button class="cancel" data-i18n="mClose" onclick="closePasteImport()">닫기</button>
   </div>
 </div>
