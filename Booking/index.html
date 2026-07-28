@@ -423,6 +423,18 @@
   #printSheet .p-price{text-align:right}
   #printSheet .ps-foot{display:flex;justify-content:space-between;margin-top:7px;font-size:9.5px;color:#7a7466}
   #printSheet .ps-note{margin-top:5px;font-size:8.5px;color:#7a7466;line-height:1.5}
+  /* daily review sheet */
+  #printSheet .rv-wrap{overflow-x:auto}
+  #printSheet .rv-wrap table{min-width:690px}
+  #printSheet td.rv-c{text-align:center}
+  #printSheet .rv-sub{display:block;font-size:8.5px;color:#7a7466;font-weight:400}
+  #printSheet .rv-diff{color:#b5341f;font-weight:800}
+  #printSheet .rv-eq{color:#1c7a41;font-weight:700}
+  #printSheet .rv-mem{font-size:9.5px;color:#2a5b93;line-height:1.4}
+  #printSheet .rv-sum{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+  #printSheet .rv-sum .rs{border:1px solid #8a8272;border-radius:3px;padding:5px 10px;font-size:10.5px;color:#444}
+  #printSheet .rv-sum .rs b{color:#2b3550}
+  #printSheet .rv-sum .rs.warn{border-color:#b5341f;color:#b5341f;font-weight:700}
   body.staff .owner-only{display:none!important}
   body.staff .rev,body.staff .exp{display:none!important}
   /* ===== 로그인 게이트 · 동기화 상태 ===== */
@@ -831,6 +843,7 @@
     <button class="ckpendbtn" id="ckPendBtn" onclick="ckTogglePending()"></button>
     <div id="ckList"></div>
     <button class="addbtn" style="margin-top:6px;background:var(--wine);border-color:var(--wine)" onclick="printCheckinSheet()">📄 View A4 sheet · ดูใบเช็คอิน A4</button>
+    <button class="addbtn owner-only" style="margin-top:6px;background:linear-gradient(150deg,#8C7647,#6e5c36)" onclick="openDayReview()">🧾 Daily review · 오늘 더블체크 · สรุปปิดวัน</button>
     <button class="addbtn" style="margin-top:6px" data-i18n="mAdd" onclick="closeCheckin();openModal(null)">+ 예약·방문 추가</button>
     <button class="cancel" data-i18n="mClose" onclick="closeCheckin()">닫기</button>
   </div>
@@ -2034,6 +2047,99 @@ function printCheckinSheet(){
     </table>
     <div class="ps-foot"><span>จอง ${list.length} · 예약 ${list.length}건</span><span>มา ✓ / ไม่มา ✗ · 방문/노쇼</span><span>ยอดขาย ฿______ · 매출</span></div>
     <div class="ps-note">※ เช็ค ✓/✗ ที่เคาน์เตอร์ · เลขสุดท้าย = จำนวนลูกค้าทั้งวัน · 카운터에서 방문 ✓/✗ 체크 · No. 순서 = 하루 방문 인원</div>`;
+  window.__sheetDay=day;
+  $('sheetView').classList.add('on');
+}
+/* 🧾 일일 더블체크 리뷰: 방문·가격·결제·멤버십 한눈에 */
+function openDayReview(){
+  const day=(typeof ckDate!=='undefined'&&ckDate)?ckDate:(selDate||todayStr());
+  const [y,mo,dd]=day.split('-').map(Number);
+  const thDow=(I18N.dow.th||I18N.dow.ko)[new Date(y,mo-1,dd).getDay()];
+  const koDow=(I18N.dow.ko)[new Date(y,mo-1,dd).getDay()];
+  const list=data.filter(e=>e.date===day)
+    .sort((a,b)=>{const ta=t2m(a.time),tb=t2m(b.time);return (ta==null?1e9:ta)-(tb==null?1e9:tb);});
+  const stCell=s=>s==='방문'?'<span class="rv-eq">✓ มา</span>'
+    :s==='노쇼'?'<span class="rv-diff">✗ ไม่มา</span>'
+    :s==='캔슬'?'<span style="color:#999">캔슬</span>'
+    :s==='연기대기'?'<span style="color:#6a5df0">📅연기</span>'
+    :'<span style="color:#8f6d38">⏳จอง</span>';
+  let mismatch=0;
+  const rows=list.map((e,i)=>{
+    const exp=Number(e.expAmt)||0;
+    const paid=e.status==='방문'?(Number(e.amount)||0):0;
+    let payCell='';
+    if(e.status==='방문'){
+      payCell=fmt(paid);
+      if(exp&&paid===exp)payCell+='<span class="rv-sub rv-eq">= จอง 일치</span>';
+      else if(exp&&paid!==exp){mismatch++;payCell='<span class="rv-diff">'+fmt(paid)+'</span><span class="rv-sub rv-diff">'+(paid>exp?'+':'−')+fmt(Math.abs(paid-exp))+' ≠จอง</span>';}
+    }
+    const q=normPh(e.phone);
+    const mem=[];
+    if(q&&q.length>=7){
+      customers.filter(c=>normPh(c.phone)===q).forEach(c=>{
+        if(c.type==='course'){
+          const rem=Math.max(0,(c.total||0)-(c.used||0));
+          const usedToday=(c.uses||[]).filter(u=>String(u.t||'').slice(0,10)===day).length;
+          mem.push('🎟️'+(usedToday?'วันนี้−'+usedToday+' · ':'')+rem+'/'+(c.total||0));
+        }else{
+          mem.push(e.memPaid?'💳ชำระแล้ว 결제됨':'💳'+fmt(Number(c.balance)||0));
+        }
+      });
+    }
+    const note=[e.staff||'',(e.memo||'').slice(0,26)].filter(Boolean).join(' · ');
+    return '<tr>'
+      +'<td class="p-no">'+(i+1)+'</td>'
+      +'<td class="rv-c">'+(e.time||'—')+'</td>'
+      +'<td>'+esc(e.name||'')+(e.phone?'<span class="rv-sub">'+esc(e.phone)+'</span>':'')+'</td>'
+      +'<td class="rv-c">'+stCell(e.status)+'</td>'
+      +'<td>'+esc(e.treat||e.bktreat||'')+'</td>'
+      +'<td class="p-price">'+(exp?fmt(exp):'')+'</td>'
+      +'<td class="p-price">'+payCell+'</td>'
+      +'<td class="rv-c">'+(e.status==='방문'?(e.memPaid?'💳':esc(e.pay||'')):'')+'</td>'
+      +'<td class="rv-mem">'+(mem.join('<br>')||'—')+'</td>'
+      +'<td class="rv-sub" style="font-size:9.5px">'+esc(note)+'</td>'
+      +'</tr>';
+  }).join('');
+  const vis=list.filter(e=>e.status==='방문');
+  const noN=list.filter(e=>e.status==='노쇼').length;
+  const waitN=list.filter(e=>e.status==='예약').length;
+  const sumExp=list.filter(e=>e.status!=='캔슬').reduce((s,e)=>s+(Number(e.expAmt)||0),0);
+  const sumPaid=vis.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const payMap={};
+  vis.forEach(e=>{const k=e.memPaid?'💳 สมาชิก멤버십':(e.pay||'기타');(payMap[k]=payMap[k]||{n:0,amt:0});payMap[k].n++;payMap[k].amt+=Number(e.amount)||0;});
+  const payChips=Object.entries(payMap).map(([k,v])=>'<div class="rs">'+esc(k)+' <b>'+v.n+'</b> · <b>'+fmt(v.amt)+'</b></div>').join('');
+  $('printSheet').innerHTML=`
+    <div class="ps-head">
+      <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>
+      <div class="ps-doc">สรุปปิดวัน · Daily Review<small>일일 더블체크 · 방문·가격·결제·멤버십</small></div>
+    </div>
+    <div class="ps-meta">
+      <div class="m"><span class="k">วันที่<small>날짜</small></span>${y}. ${mo}. ${dd}</div>
+      <div class="m"><span class="k">วัน<small>요일</small></span>${thDow} · ${koDow}</div>
+      <div class="m"><span class="k">คิว<small>예약</small></span>${list.length} · ✓${vis.length} ✗${noN}${waitN?' ⏳'+waitN:''}</div>
+    </div>
+    <div class="rv-wrap"><table>
+      <thead><tr>
+        <th class="p-no">No.</th>
+        <th style="width:44px">เวลา<small>시간</small></th>
+        <th>ชื่อ<small>이름</small></th>
+        <th style="width:52px">มา<small>방문</small></th>
+        <th>บริการ<small>시술</small></th>
+        <th style="width:56px">จอง ฿<small>예약가</small></th>
+        <th style="width:64px">จ่ายจริง ฿<small>결제액</small></th>
+        <th style="width:46px">วิธี<small>수단</small></th>
+        <th style="width:84px">สมาชิก<small>멤버십</small></th>
+        <th style="width:76px">หมายเหตุ<small>비고</small></th>
+      </tr></thead>
+      <tbody>${rows||'<tr><td colspan="10" style="text-align:center;color:#999">No bookings · ไม่มีคิว</td></tr>'}</tbody>
+    </table></div>
+    <div class="rv-sum">
+      <div class="rs">ยอดจอง 예약가 합계 <b>${fmt(sumExp)}</b></div>
+      <div class="rs">ยอดชำระ 결제 합계 <b>${fmt(sumPaid)}</b></div>
+      ${payChips}
+      ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
+    </div>
+    <div class="ps-note">※ จ่ายจริง = เฉพาะคิวที่มา ✓ · 결제액은 방문 완료 건만 집계 · 💳 = ชำระด้วยยอดสมาชิก 멤버십 잔액 결제 · 🎟️ = คอร์ส 회차권 (오늘 차감 −n · 잔여/전체)</div>`;
   window.__sheetDay=day;
   $('sheetView').classList.add('on');
 }
