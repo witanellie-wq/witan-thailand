@@ -3153,7 +3153,8 @@ function parseMultiBooking(t){
   }
   const blocks=[];let cur=null;
   for(const l of lines){
-    const tm=l.match(/^⏰?\s*(\d{1,2})[:.](\d{2})\s*(?:น\.)?\s*[—–\-]\s*(.+)$/u);
+    const lt=l.replace(/^[\p{Extended_Pictographic}️‍\s]+/gu,'');
+    const tm=lt.match(/^(\d{1,2})[:.](\d{2})\s*(?:น\.)?\s*[—–\-]\s*(.+)$/u);
     if(tm){cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[3].trim(),memo:[]};blocks.push(cur);continue;}
     if(!cur)continue;
     if(/^[━─═=]{3,}/.test(l)||/^รวม\s/.test(l)){cur=null;continue;}
@@ -3213,7 +3214,13 @@ function parsePasteImport(){
   if(!t){alert('Paste the text first · กรุณาวางข้อความ');return;}
   const multi=parseMultiBooking(t);
   if(multi.blocks.length>=2){renderBulkPreview(multi);return;}
-  const p=parseBookingText(t);
+  let p;
+  if(multi.blocks.length===1){
+    const b=multi.blocks[0];
+    p={date:multi.date,time:b.time,name:b.name,phone:b.phone,src:b.src,srcid:b.srcid,treat:b.treat,price:b.price,dur:b.dur,visit:b.visit,note:(b.memo||[]).join(' · ')};
+  }else{
+    p=parseBookingText(t);
+  }
   if(!p.name && !p.phone && !p.date){
     $('pastePreview').style.display='block';
     $('pastePreview').innerHTML='⚠️ Nothing recognized — check the text has labels like "Date:", "Customer:", "Phone:" · ไม่พบข้อมูล ตรวจรูปแบบข้อความ';
@@ -3229,12 +3236,14 @@ function parsePasteImport(){
   openModal(null);
   if(p.date){$('m_date').value=p.date; if(typeof onModalDateChange==='function')onModalDateChange();}
   if(p.time)$('m_time').value=p.time;
+  if(p.dur&&$('m_dur')){$('m_dur').value=p.dur;if(!$('m_dur').value)$('m_dur').value='60';}
   if(typeof updateEndTime==='function')updateEndTime();
   if(p.name)$('m_name').value=p.name;
   if(p.phone){$('m_phone').value=p.phone; if(typeof phoneLookup==='function')phoneLookup();}
   if(p.line)$('m_line').value=p.line;
   if(p.src)$('m_src').value=p.src;
   if(p.srcid)$('m_srcid').value=p.srcid;
+  if(p.visit&&$('m_visit'))$('m_visit').value=p.visit;
   if(p.treat){$('m_bktreat').value='__custom__'; if(typeof onBktreatSel==='function')onBktreatSel('__custom__'); $('m_bktreatcustom').value=p.treat;}
   if(p.price!=null && $('m_bkamt'))$('m_bkamt').value=p.price;
   const memoParts=[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean);
