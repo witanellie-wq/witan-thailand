@@ -87,6 +87,15 @@
   .sl-empty{text-align:center;color:var(--muted);font-size:11.5px;padding:8px}
   .conv{margin-top:10px;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-radius:3px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
   .conv b{font-size:17px}
+  /* 월별 고객 구성 (재방문·신규·선구매) */
+  .mixbox{margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
+  .mx{margin-bottom:8px;cursor:pointer}
+  .mx:last-child{margin-bottom:0}
+  .mx .mx-h{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--wine-d)}
+  .mx .mx-h b{font-weight:700}
+  .mx .mx-h span{font-weight:700;color:var(--ink);white-space:nowrap}
+  .mx .bar{height:6px;background:var(--soft);border-radius:2px;margin-top:3px;overflow:hidden}
+  .mx .bar i{display:block;height:100%;border-radius:2px}
   .staffbox .sb-h{font-size:11px;color:var(--wine-d);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
   .staffbox .sb-h::before{content:"";width:3px;height:12px;background:var(--gold);border-radius:2px}
   .sb-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--soft)}
@@ -1824,6 +1833,13 @@ function renderRevTrend(y,m,days){
     <div class="at-foot"><span>Month ${fmt(monthTotal)}</span><span>Days ${activeDays} · Daily avg ${fmt(dayAvg)} · <span style="color:#8f6d38">— 추세선</span></span></div>`;
 }
 function renderStatBox(s){
+  const hb=s.visitCount||0;
+  const pc=v=>hb?Math.round((v||0)/hb*100):0;
+  const mixRow=(key,label,v,grad)=>`
+      <div class="mx" onclick="showMixList('${key}')">
+        <div class="mx-h"><b>${label}</b><span>${v||0}/${hb} · ${pc(v)}%</span></div>
+        <div class="bar"><i style="width:${pc(v)}%;background:${grad}"></i></div>
+      </div>`;
   $('statBox').innerHTML=`
     <div class="stt">${T('statTitle')}</div>
     <div class="st-grid">
@@ -1832,9 +1848,37 @@ function renderStatBox(s){
       <div class="st-cell no" onclick="showStatList('노쇼')"><div class="n">${s.noshow}</div><div class="t">${T('stNo')}</div></div>
       <div class="st-cell cancel" onclick="showStatList('캔슬')"><div class="n">${s.cancel}</div><div class="t">${T('stCancel')}</div></div>
     </div>
+    <div class="mixbox">
+      ${mixRow('re','🔁 재방문 · ลูกค้าเก่า',s.reP,'linear-gradient(90deg,#2f8f5b,#57b184)')}
+      ${mixRow('new','🆕 신규 · ลูกค้าใหม่',s.newP,'linear-gradient(90deg,#3b6fb0,#6f9bd4)')}
+      ${mixRow('pre','💳 멤버십·회차권 보유 · สมาชิก/คอร์ส',s.preP,'linear-gradient(90deg,#B79B5E,#8C7647)')}
+    </div>
     <div id="statList"></div>
     <div class="conv"><span>${T('convRate')}</span><b>${s.convRate}%</b></div>`;
   _statListStatus=null;
+}
+// 선구매 고객 여부: 전화번호가 멤버십/회차권 원장에 등록되어 있는가
+function isPrepaidCust(e){
+  const q=normPh(e.phone);
+  return !!(q&&q.length>=7&&customers.some(c=>normPh(c.phone)===q&&(c.type==='course'||c.type==='membership')));
+}
+function showMixList(kind){
+  const box=$('statList'); if(!box)return;
+  const key='mix:'+kind;
+  if(_statListStatus===key){box.innerHTML='';_statListStatus=null;highlightStatCell(null);return}
+  _statListStatus=key; highlightStatCell(null);
+  const y=cur.getFullYear(), m=cur.getMonth();
+  const vis=data.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em===m+1&&e.status==='방문'});
+  const hits=(kind==='pre'?vis.filter(isPrepaidCust):vis.filter(e=>e.visit===(kind==='re'?'재방문':'신규')))
+    .sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));
+  if(!hits.length){box.innerHTML=`<div class="sl-empty">0</div>`;return}
+  box.innerHTML=hits.map(e=>{
+    const [yy,mo,d]=e.date.split('-');
+    const amt=isStaff()?'':(fmt(e.amount||0));
+    return `<div class="sl-item" onclick="gotoBooking('${e.date}','${e.id}')">
+      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}</div>
+      <div class="sl-r">${esc(e.treat||e.bktreat||'')}${amt?' · '+amt:''}${e.phone?'<br><span class="sl-ph">'+esc(e.phone)+'</span>':''}</div>
+    </div>`}).join('');
 }
 
 let _statListStatus=null;
@@ -1881,7 +1925,11 @@ function render(){
   const settled=headcount+noshowP+cancelP;
   const convRate=settled?Math.round(headcount/settled*100):0;
   $('mRange').textContent=isStaff()?'':`${T('visitN')} ${headcount} · ${T('bookN')} ${bookedP} · ${T('noN')} ${noshowP} · ${T('cancelN')} ${cancelP}`;
-  renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate});
+  // 고객 구성: 재방문·신규·선구매(멤버십/회차권 보유)
+  const reP=sumSeats(visited.filter(e=>e.visit==='재방문'));
+  const newP=sumSeats(visited.filter(e=>e.visit==='신규'));
+  const preP=sumSeats(visited.filter(isPrepaidCust));
+  renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP});
 
   // grid
   const first=new Date(y,m,1).getDay();
