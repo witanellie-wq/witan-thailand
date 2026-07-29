@@ -459,6 +459,35 @@
   .syncbar{position:fixed;top:0;left:0;right:0;z-index:300;text-align:center;font-size:12px;font-weight:700;padding:8px 12px}
   .syncbar.err{background:#c0392b;color:#fff}
   .syncbar.warn{background:#f3e3b3;color:#6a5620}
+  /* ===== 모바일 가독성 · 페이지 가로 스크롤 방지 ===== */
+  html,body{max-width:100%;overflow-x:hidden}
+  .searchres,#pastePreview,#statList{word-break:break-word;overflow-wrap:anywhere}
+  .bedbar{flex-wrap:wrap}
+  .sheet{overflow-x:hidden}
+  @media (max-width:480px){
+    body{padding:8px}
+    .monthbar{padding:8px 10px}
+    .monthbar .mlabel{font-size:15px}
+    .sum{gap:5px}
+    .stat{padding:10px 3px}
+    .stat .v{font-size:14px;letter-spacing:-.02em;word-break:keep-all}
+    .stat .l{font-size:9px}
+    .st-cell .n{font-size:14.5px}
+    .cksum .cs .v{font-size:13.5px}
+    .g3{grid-template-columns:1fr 1fr}
+    .sheet{padding:14px 12px 24px}
+    .selbanner{font-size:14px;padding:10px 12px}
+    .statusseg .chip{min-width:60px;font-size:11px;padding:7px 4px}
+    .itemrow .iamt{flex:0 0 76px}
+    .discinput input{width:72px}
+    .cell .rev{font-size:8.5px}
+    .cell .exp{font-size:8px}
+    .bpb{padding:5px 8px;font-size:10px}
+    .ckacts .ckbtn{font-size:11px;padding:9px 2px}
+    .amt input{font-size:17px}
+    .totbar b,.cline.total b{font-size:16px}
+    #printSheet{padding:18px 12px}
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
