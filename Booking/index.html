@@ -945,7 +945,11 @@
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0">📈 Trends · แนวโน้ม · 추이 분석</h2>
       <button class="sheet-x" onclick="closeTrend()" aria-label="Close">✕</button></div>
-    <div class="sub">월별 예약수·손님수·객단가·매출 흐름을 한눈에 봅니다 · ดูแนวโน้มรายเดือน</div>
+    <div class="sub">주별·월별 예약수·손님수·객단가·매출 흐름을 한눈에 봅니다 · ดูแนวโน้มรายสัปดาห์/เดือน</div>
+    <div class="trseg" id="trMode" style="margin-bottom:6px">
+      <div class="chip on" data-p="week" onclick="trPickMode(this)">📆 주간<small>รายสัปดาห์</small></div>
+      <div class="chip" data-p="month" onclick="trPickMode(this)">🗓 월간<small>รายเดือน</small></div>
+    </div>
     <div class="trseg" id="trSeg">
       <div class="chip on" data-k="cust" onclick="trPick(this)">👥 손님수<small>ลูกค้า</small></div>
       <div class="chip" data-k="book" onclick="trPick(this)">📋 예약수<small>คิว</small></div>
@@ -2091,36 +2095,57 @@ function renderStatBox(s){
 /* ============================================================
    📈 추이 분석 — 월별 손님수·예약수·객단가·매출
    ============================================================ */
-let _trKey='cust';
+let _trKey='cust',_trMode='week';
 function openTrend(){$('trendOverlay').classList.add('on');renderTrend();}
 function closeTrend(){$('trendOverlay').classList.remove('on');}
 function trPick(el){_trKey=el.dataset.k;document.querySelectorAll('#trSeg .chip').forEach(c=>c.classList.toggle('on',c.dataset.k===_trKey));renderTrend();}
-// 월별 집계 (예약수·손님수·매출·객단가) — 직접입력 매출·선입금 포함
-function trendMonths(){
+function trPickMode(el){_trMode=el.dataset.p;document.querySelectorAll('#trMode .chip').forEach(c=>c.classList.toggle('on',c.dataset.p===_trMode));renderTrend();}
+// 주 시작일(월요일) 문자열
+function weekStartStr(dateStr){
+  const [y,m,d]=String(dateStr).split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  dt.setDate(dt.getDate()-((dt.getDay()+6)%7));   // 월요일 기준
+  const pad=n=>String(n).padStart(2,'0');
+  return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+}
+function shiftWeek(ws,n){return shiftDate(ws,7*n);}
+function nextMonthKey(k){let[y,m]=k.split('-').map(Number);m++;if(m>12){m=1;y++;}return y+'-'+String(m).padStart(2,'0');}
+// 주/월 집계 (예약수·손님수·매출·객단가) — 직접입력 매출·선입금 포함
+function trendBuckets(mode){
   const map={};
+  const keyOf=d=>mode==='week'?weekStartStr(d):String(d).slice(0,7);
   const get=k=>map[k]||(map[k]={book:0,cust:0,rev:0});
   data.forEach(e=>{
-    if(!e.date)return;
-    const k=String(e.date).slice(0,7);
-    if(e.status==='캔슬')return;
-    const seats=parseInt(e.seats)||1;
+    if(!e.date||e.status==='캔슬'||e.status==='연기대기')return;
+    const k=keyOf(e.date), seats=parseInt(e.seats)||1;
     get(k).book+=1;
     if(e.status==='방문'){get(k).cust+=seats;get(k).rev+=Number(e.amount||0);}
     get(k).rev+=depositOf(e);
   });
-  (manualRev||[]).forEach(r=>{const k=String(r.date).slice(0,7);get(k).rev+=r.amt;get(k).cust+=parseInt(r.cnt)||0;});
-  const keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
-  return keys.map(k=>{
-    const v=map[k];
-    return {key:k,label:k.slice(2).replace('-','/'),book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0};
+  (manualRev||[]).forEach(r=>{const k=keyOf(r.date);get(k).rev+=r.amt;get(k).cust+=parseInt(r.cnt)||0;});
+  let keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
+  if(!keys.length)return [];
+  // 빈 구간도 0으로 채워 연속 표시 (최대 26칸)
+  const full=[];let k=keys[0],last=keys[keys.length-1],guard=0;
+  const curK=mode==='week'?weekStartStr(todayStr()):todayStr().slice(0,7);
+  if(curK>last)last=curK;
+  while(k<=last&&guard<200){full.push(k);k=mode==='week'?shiftWeek(k,1):nextMonthKey(k);guard++;}
+  return full.map(key=>{
+    const v=map[key]||{book:0,cust:0,rev:0};
+    let label;
+    if(mode==='week'){const p=key.split('-');const e2=shiftDate(key,6).split('-');label=+p[1]+'/'+ +p[2]+'~'+ +e2[2];}
+    else label=key.slice(2).replace('-','/');
+    return {key,label,book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0};
   });
 }
 function renderTrend(){
   const chart=$('trChart'),tbl=$('trTable'); if(!chart)return;
-  const all=trendMonths();
+  const wk=_trMode==='week';
+  const all=trendBuckets(_trMode);
   if(!all.length){chart.innerHTML='<div class="at-empty">데이터가 없어요 · ยังไม่มีข้อมูล</div>';tbl.innerHTML='';return}
-  const win=all.length>12?all.slice(-12):all;
-  const curKey=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
+  const N=wk?12:12;
+  const win=all.length>N?all.slice(-N):all;
+  const curKey=wk?weekStartStr(todayStr()):todayStr().slice(0,7);
   const META={cust:{t:'👥 손님수 · ลูกค้า',f:v=>v+'명',u:''},book:{t:'📋 예약수 · จำนวนคิว',f:v=>v+'건',u:''},
               avg:{t:'💵 객단가 · ต่อคน',f:v=>fmt(v),u:''},rev:{t:'💰 매출 · ยอดขาย',f:v=>fmt(v),u:''}};
   const meta=META[_trKey];
@@ -2128,6 +2153,7 @@ function renderTrend(){
   const max=Math.max(...vals,1);
   // 마감월(진행 중인 이번 달 제외) 기준 증감
   const closed=win.filter(x=>x.key!==curKey);
+  const unit=wk?'주':'월';
   let diffHtml='<span class="at-flat">― 데이터 부족</span>';
   if(closed.length>=2){
     const a=closed[0][_trKey],b=closed[closed.length-1][_trKey];
@@ -2137,7 +2163,7 @@ function renderTrend(){
   }
   const avgAll=closed.length?Math.round(closed.reduce((s,x)=>s+x[_trKey],0)/closed.length):0;
   chart.innerHTML=`<div class="trhead"><span class="th-t">${meta.t}</span><span class="th-d">${diffHtml}</span></div>
-    <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">마감월 평균 ${meta.f(avgAll)} · 최근 ${win.length}개월</div>
+    <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">마감${unit} 평균 ${meta.f(avgAll)} · 최근 ${win.length}${wk?'주':'개월'}${wk?' (월요일 시작)':''}</div>
     <div class="trbars">${win.map(x=>{
       const h=Math.max(2,Math.round(x[_trKey]/max*118));
       return `<div class="trbar${x.key===curKey?' cur':''}" title="${x.label} · ${meta.f(x[_trKey])}">
@@ -2146,7 +2172,7 @@ function renderTrend(){
   // 표: 월별 전체 지표 + 전월 대비
   const rows=win.slice().reverse();
   tbl.innerHTML=`<table class="trtbl"><thead><tr>
-      <th style="text-align:left">월</th><th>예약</th><th>손님</th><th>객단가</th><th>매출</th><th>전월비</th></tr></thead><tbody>
+      <th style="text-align:left">${wk?'주':'월'}</th><th>예약</th><th>손님</th><th>객단가</th><th>매출</th><th>${wk?'전주비':'전월비'}</th></tr></thead><tbody>
     ${rows.map((x,i)=>{
       const prev=rows[i+1];
       const pv=prev?prev[_trKey]:null;
@@ -2156,7 +2182,7 @@ function renderTrend(){
         <td class="${d>0?'up':(d<0?'dn':'')}">${d==null?'—':(d>0?'+':'')+d+'%'}</td></tr>`;
     }).join('')}
   </tbody></table>
-  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">* 진행 중인 달 · 전월비는 선택한 지표 기준 · 매출은 직접 입력분·선입금 포함 · 캔슬 제외</div>`;
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">* 진행 중인 ${unit} (추세 계산 제외) · ${wk?'전주비':'전월비'}는 선택한 지표 기준 · 매출은 직접 입력분·선입금 포함 · 캔슬·연기대기 제외</div>`;
 }
 /* ============================================================
    💵 매출 직접 입력 (예약 기록이 없는 날의 입금 매출)
@@ -3977,7 +4003,41 @@ function parseMultiBooking(t){
     if(/ลูกค้าเก่า|🔁/u.test(l))cur.visit='재방문';
     if(!ph&&!fb){const clean=l.replace(/^[\p{Extended_Pictographic}️‍\s·]+/gu,'').trim();if(clean)cur.memo.push(clean);}
   }
-  return {date,blocks,guessed};
+  // ── 미확정 / 대기 줄 → 연기대기(Pending)로 수집 ──
+  const holds=[];
+  const HOLD_RE=/^(미확정|대기|보류|확정\s*대기|pending|hold|รอ(?:ยืนยัน)?)\s*[:：]?\s*(.+)$/i;
+  lines.forEach(l=>{
+    const m=String(l||'').trim().match(HOLD_RE);
+    if(!m||!m[2])return;
+    let body=m[2].trim();
+    const h={memo:[]};
+    const ph=body.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
+    if(ph){h.phone=ph[1];body=body.replace(ph[1],' ').replace(/\s{2,}/g,' ').trim();}
+    const tm=body.match(/\b([01]?\d|2[0-3])[:.](\d{2})\b/);
+    if(tm)h.time=String(+tm[1]).padStart(2,'0')+':'+tm[2];
+    // 이름: 설명 구분자(— – - · ,) 앞부분에서 가격/시술 앞까지
+    let head=body.split(/\s+[—–]\s+|\s·\s/)[0].trim();
+    const rest=body.slice(head.length).replace(/^[\s—–·,]+/,'').trim();
+    const pm=head.match(/([\d,]{3,7})(?:\s*\.?-)?\s*$/);
+    if(pm){h.price=Math.round(+pm[1].replace(/,/g,''));head=head.slice(0,pm.index).trim();}
+    const tw=head.match(/^(.*?)\s+((?:BB|HIFU|LDM|RF|MesoGlaze|LALA|Milk|Lip|콤보|두피|반영구|Body)[^,]*)$/i);
+    if(tw){
+      h.name=tw[1].trim();
+      const tt=tw[2].trim();
+      const p2=tt.match(/^(.*?)\s*([\d,]{3,7})(?:\s*\.?-)?\s*(.*)$/);   // "HIFU 399 오후대 이동" → 시술/가격/나머지
+      if(p2&&p2[1].trim()){
+        h.treat=p2[1].trim();
+        if(!h.price)h.price=Math.round(+p2[2].replace(/,/g,''));
+        if(p2[3]&&p2[3].trim())h.memo.push(p2[3].trim());
+      }else h.treat=tt;
+    }
+    else h.name=head;
+    if(!h.name)return;
+    if(rest)h.memo.push(rest);
+    if(/^(\d{4}-\d{2}-\d{2})/.test(body)){const d=body.match(/(\d{4}-\d{2}-\d{2})/);if(d)h.wantDate=d[1];}
+    holds.push(h);
+  });
+  return {date,blocks,guessed,holds};
 }
 function bulkSetDate(v){
   if(!_bulkParsed||!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
@@ -4038,8 +4098,17 @@ function renderBulkPreview(P){
       +'<button class="bpb n'+(b.status==='노쇼'?' on':'')+'" onclick="bulkSetStatus('+i+',\'노쇼\',this)">❌ 노쇼 ไม่มา</button>'
       +'</div>')
     +'</div>').join('');
+  const holds=P.holds||[];
+  if(holds.length){
+    html+='<div style="margin-top:9px;border-top:1px dashed var(--line);padding-top:8px">'
+      +'<b style="color:#5b4fd0;font-size:11.5px">⏸ 미확정 · 연기대기로 등록 ('+holds.length+') · รอยืนยัน</b>'
+      +holds.map(h=>'<div style="font-size:11px;color:#4A5678;padding:3px 0">· <b>'+esc(h.name||'')+'</b>'
+        +(h.phone?' '+esc(h.phone):'')+(h.treat?' · '+esc(h.treat):'')+(h.price?' · ฿'+h.price.toLocaleString():'')
+        +(h.time?' · '+h.time:'')+((h.memo&&h.memo.length)?' <span style="color:var(--muted)">'+esc(h.memo.join(' ')).slice(0,44)+'</span>':'')+'</div>').join('')
+      +'<div style="font-size:10px;color:var(--muted);margin-top:3px">※ 시간·날짜 없이 대기 목록에 저장 → 확정되면 체크인 리스트 ▸ 연기대기에서 날짜 지정 · ไม่นับยอดขาย</div></div>';
+  }
   const newN=dups.filter(x=>!x).length, dupN=dups.filter(Boolean).length;
-  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+newN+' bookings · เพิ่มคิวทั้งหมด</button>';
+  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+newN+' bookings'+(holds.length?' + ⏸'+holds.length:'')+' · เพิ่มคิวทั้งหมด</button>';
   if(dupN)html+='<button class="save" style="width:100%;margin-top:7px;background:linear-gradient(150deg,#8C7647,#6e5c36)" onclick="bulkFillMissing()">🔄 Fill missing info in '+dupN+' existing · เติมข้อมูลที่ขาด · 기존 '+dupN+'건 빈칸 채우기</button>'
     +'<div style="font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5">※ 빈 항목만 채우고 이미 입력된 값은 그대로 둡니다 · เติมเฉพาะช่องว่าง</div>';
   $('pastePreview').style.display='block';
@@ -4063,11 +4132,25 @@ function bulkAddParsed(){
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
     added++;
   });
+  // ⏸ 미확정 → 연기대기 등록 (같은 이름·전화가 이미 대기 중이면 건너뜀)
+  let held=0;
+  (P.holds||[]).forEach((h,i)=>{
+    const ph=normPh(h.phone||'');
+    const dup=data.find(e=>e.status==='연기대기'&&((ph.length>=7&&normPh(e.phone)===ph)||String(e.name||'').trim()===String(h.name||'').trim()));
+    if(dup)return;
+    data.push({id:Date.now()+1000+i,date:h.wantDate||P.date,status:'연기대기',name:h.name||'',time:h.time||'',phone:h.phone||'',
+      seats:'1',companion:'',dur:'60',line:'',src:'기타',srcid:h.phone||'',cap:'',
+      nat:'태국',natc:'',gender:'',items:[],treat:h.treat||'',bktreat:h.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
+      expAmt:h.price||0,pay:'현금',staff:'',visit:'신규',memo:['⏸미확정'].concat(h.memo||[]).join(' · '),care:'',service:''});
+    held++;
+  });
   save();
   _bulkParsed=null;
   selDate=P.date;cur=new Date(P.date+'T00:00');cur.setDate(1);
   closePasteImport();render();
-  alert('➕ Added '+added+' bookings · เพิ่ม '+added+' คิว'+(skipped?'\n(skipped '+skipped+' duplicates · ข้าม '+skipped+')':''));
+  alert('➕ Added '+added+' bookings · เพิ่ม '+added+' คิว'
+    +(held?'\n⏸ 연기대기 '+held+'건 · รอยืนยัน '+held:'')
+    +(skipped?'\n(skipped '+skipped+' duplicates · ข้าม '+skipped+')':''));
 }
 function parsePasteImport(){
   const t=$('pasteBox').value.trim();
