@@ -87,6 +87,25 @@
   .sl-empty{text-align:center;color:var(--muted);font-size:11.5px;padding:8px}
   .conv{margin-top:10px;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border-radius:3px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
   .conv b{font-size:17px}
+  /* 예상 매출 vs 실제 매출 (사장 모드) */
+  .fcbox{background:#fff;border-radius:2px;padding:12px 13px;margin-bottom:12px;box-shadow:0 3px 12px rgba(17,29,54,.06)}
+  .fcbox .fc-t{font-size:11px;color:var(--wine-d);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .fcbox .fc-t::before{content:"";width:3px;height:12px;background:var(--gold);border-radius:2px}
+  .fc-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;text-align:center}
+  .fc-c{background:var(--soft2);border-radius:3px;padding:9px 4px}
+  .fc-c .fv{font:700 15px/1.15 'Noto Sans KR';word-break:keep-all}
+  .fc-c .fl{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.3}
+  .fc-c.done .fv{color:var(--ok)}
+  .fc-c.pend .fv{color:var(--gold-d)}
+  .fc-c.fore .fv{color:var(--wine)}
+  .fc-bar{height:9px;background:var(--soft);border-radius:3px;margin-top:10px;overflow:hidden;display:flex}
+  .fc-bar i{display:block;height:100%}
+  .fc-bar i.d{background:linear-gradient(90deg,#2f8f5b,#57b184)}
+  .fc-bar i.p{background:repeating-linear-gradient(135deg,#C7B182 0 5px,#E2D3AF 5px 10px)}
+  .fc-lg{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:5px;gap:8px;flex-wrap:wrap}
+  .fc-diff{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px;font-size:11px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .fc-diff b{font-weight:700}
+  .fc-up{color:#1c7a41}.fc-down{color:#c0392b}
   /* 월별 고객 구성 (재방문·신규·선구매) */
   .mixbox{margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
   .mx{margin-bottom:8px;cursor:pointer}
@@ -547,6 +566,7 @@
     <div class="stat"><div class="v" id="mTotal">฿0</div><div class="l" data-i18n="monthRev">월 매출(확정)</div></div>
     <div class="stat"><div class="v" id="mAvg">฿0</div><div class="l" data-i18n="avgSpend">객단가</div></div>
   </div>
+  <div class="fcbox owner-only" id="fcBox"></div>
   <div class="statbox owner-only" id="statBox"></div>
   <div class="avgtrend owner-only" id="monTrend"></div>
   <div class="avgtrend owner-only" id="avgTrend"></div>
@@ -1861,6 +1881,33 @@ function renderRevTrend(y,m,days){
     </div>
     <div class="at-foot"><span>Month ${fmt(monthTotal)}</span><span>Days ${activeDays} · Daily avg ${fmt(dayAvg)} · <span style="color:#8f6d38">— 추세선</span></span></div>`;
 }
+/* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
+function renderForecast(monthEntries,actual,pendingExp){
+  const box=$('fcBox'); if(!box)return;
+  if(isStaff()){box.innerHTML='';return}
+  const visited=monthEntries.filter(e=>e.status==='방문');
+  // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
+  const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
+  const pend=monthEntries.filter(e=>e.status==='예약');
+  const forecast=actual+pendingExp;               // 이번 달 최종 예상 = 확정 + 남은 예약
+  const diff=actual-doneExp;                      // 방문 건에서 예상 대비 증감
+  const rate=doneExp?Math.round(actual/doneExp*100):0;
+  const pctD=forecast?Math.round(actual/forecast*100):0;
+  const pctP=forecast?Math.round(pendingExp/forecast*100):0;
+  box.innerHTML=`
+    <div class="fc-t">💰 Expected vs actual · ยอดคาด/ยอดจริง · 예상 매출 대비 실제</div>
+    <div class="fc-g">
+      <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정 매출<br>ยอดจริง (${visited.length})</div></div>
+      <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.length})</div></div>
+      <div class="fc-c fore"><div class="fv">${fmt(forecast)}</div><div class="fl">월 예상 합계<br>รวมคาดการณ์</div></div>
+    </div>
+    <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
+    <div class="fc-lg"><span>✅ 확정 ${pctD}%</span><span>⏳ 예약분 ${pctP}%</span></div>
+    ${doneExp?`<div class="fc-diff">
+      <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(actual)}</span>
+      <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
+    </div>`:''}`;
+}
 function renderStatBox(s){
   const hb=s.visitCount||0;
   const pc=v=>hb?Math.round((v||0)/hb*100):0;
@@ -1959,6 +2006,7 @@ function render(){
   const newP=sumSeats(visited.filter(e=>e.visit==='신규'));
   const preP=sumSeats(visited.filter(isPrepaidCust));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP});
+  renderForecast(monthEntries,total,expSum);
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2264,7 +2312,14 @@ function renderDay(){
   $('pDate').textContent=`📅 ${Number(mm)}/${Number(dd)} (${dw}) · ${dayE.length}`;
   let ps;
   if(isStaff()){ps=vis.length?`${T('visitN')} ${vis.length}`:(dayE.length?`${T('bookN')} ${dayE.length}`:'');}
-  else{ps=rev?`${T('visitN')} ${vis.length} · ${fmt(rev)}`:(dayE.length?`${T('bookN')} ${dayE.length}`:'');}
+  else{
+    // 사장 모드: 확정 매출 + 남은 예약의 예상 매출을 함께 표시
+    const parts=[];
+    if(vis.length)parts.push(`${T('visitN')} ${vis.length} · ${fmt(rev)}`);
+    if(expD)parts.push(`⏳ ${fmt(expD)}`);
+    if(rev&&expD)parts.push(`= ${fmt(rev+expD)}`);
+    ps=parts.length?parts.join(' · '):(dayE.length?`${T('bookN')} ${dayE.length}`:'');
+  }
   const _poffs=offStaffFor(selDate);
   $('pSum').textContent=ps+(_poffs.length?` · 🏖 ${_poffs.join(', ')}`:'');
   const list=$('bkList');
