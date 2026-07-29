@@ -3613,7 +3613,7 @@ function parsePasteImport(){
   let p;
   if(multi.blocks.length===1){
     const b=multi.blocks[0];
-    p={date:multi.date,time:b.time,name:b.name,phone:b.phone,src:b.src,srcid:b.srcid,treat:b.treat,price:b.price,dur:b.dur,visit:b.visit,note:(b.memo||[]).join(' · ')};
+    p={date:multi.date,time:b.time,name:b.name,phone:b.phone,src:b.src,srcid:b.srcid,line:b.line,treat:b.treat,price:b.price,dur:b.dur,visit:b.visit,note:(b.memo||[]).join(' · ')};
   }else{
     p=parseBookingText(t);
   }
@@ -3627,9 +3627,30 @@ function parsePasteImport(){
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=rows.map(r=>`<b style="color:var(--gold-d)">${r[0]}</b> ${esc(String(r[1]))}`).join('<br>')+
     '<div style="margin-top:8px;color:var(--muted);font-size:11px">Booking form filled — review and save. · กรอกให้แล้ว ตรวจสอบแล้วบันทึก</div>';
-  // 예약창 채우기
-  closePasteImport();
-  openModal(null);
+  // 이미 같은 예약이 있는지 확인 (1건 붙여넣기도 중복 방지)
+  const tgt=p.date||selDate||todayStr();
+  const exist=bulkFindExisting(tgt,{phone:p.phone,time:p.time,name:p.name});
+  if(exist){
+    if(!confirm(`⚠️ Already booked · มีคิวนี้แล้ว · 이미 등록된 예약이 있어요\n${exist.date} ${exist.time||''} ${exist.name||''}\n\n[OK] Open it and fill only empty fields · เปิดคิวเดิม เติมช่องว่าง · 기존 예약 열어 빈칸만 채우기\n[Cancel] Add as a separate booking · เพิ่มเป็นคิวใหม่ · 새 예약으로 추가`)){
+      closePasteImport();openModal(null);
+    }else{
+      closePasteImport();openModal(exist.id);
+      // 기존 예약 → 비어 있는 칸만 채움 (입력된 값은 유지)
+      const fillEmpty=(id,v)=>{const el=$(id);if(el&&v!=null&&v!==''&&!String(el.value||'').trim())el.value=v;};
+      setTimeout(()=>{
+        fillEmpty('m_time',p.time);fillEmpty('m_phone',p.phone);fillEmpty('m_line',p.line);
+        fillEmpty('m_srcid',p.srcid);fillEmpty('m_memo',[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean).join(' · '));
+        if(p.src&&(!$('m_src').value||$('m_src').value==='기타'))$('m_src').value=p.src;
+        if(p.dur&&$('m_dur')&&$('m_dur').value==='60')$('m_dur').value=p.dur;
+        if(p.price!=null&&$('m_bkamt')&&!Number($('m_bkamt').value))$('m_bkamt').value=p.price;
+        if(typeof updateEndTime==='function')updateEndTime();
+        if(typeof phoneLookup==='function')phoneLookup();
+      },60);
+      return;
+    }
+  }else{
+    closePasteImport();openModal(null);
+  }
   if(p.date){$('m_date').value=p.date; if(typeof onModalDateChange==='function')onModalDateChange();}
   if(p.time)$('m_time').value=p.time;
   if(p.dur&&$('m_dur')){$('m_dur').value=p.dur;if(!$('m_dur').value)$('m_dur').value='60';}
