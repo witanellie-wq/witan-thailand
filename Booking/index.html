@@ -140,7 +140,6 @@
   .staffload.warn{background:#fbe9e9;border-color:#e3a9a9;color:#8e2a20}
   .staffload b{font-weight:800}
   .staffload .sl-th{display:block;font-size:10px;opacity:.8;margin-top:2px}
-  .cell .offmark.thin{color:#b5341f;font-weight:700}
   .anonnm{color:#7a8090;font-weight:700}
   .tl-block .anonnm{color:#dfe4ee}
   /* 선결제 아이콘 */
@@ -199,6 +198,8 @@
   .heatlg{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:9.5px;color:var(--muted);margin-top:8px;padding-top:7px;border-top:1px solid var(--soft)}
   .heatlg i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:3px;vertical-align:-1px;border:1px solid rgba(0,0,0,.08)}
   .heatlg .l1 i{background:#EDF1F7}.heatlg .l2 i{background:#FDEFC4}.heatlg .l3 i{background:#C9E9D5}.heatlg .l4 i{background:#fbe9e9}
+  .heatlg .l5 i.o1{background:#E7EFFA;border-color:#BCD3EE}.heatlg .l5 i.o2{background:#FDE7C7;border-color:#E9B872}.heatlg .l5 i.o3{background:#F7CFCB;border-color:#D98D85}
+  .heatlg .l5 i{margin-left:4px}
   .cell .fullbadge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:700;color:#fff;background:#d34d4d;
     border-radius:2px;padding:1px 4px;line-height:1.3}
   .cell.sel .fullbadge{background:#fff;color:var(--gold-d)}
@@ -336,7 +337,12 @@
   .offcal-g .dh{font-size:9px;color:var(--muted);font-weight:700}
   .offd{border:1.2px solid var(--line);background:#fff;border-radius:3px;padding:7px 0;font-size:11.5px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .offd.on{background:#c0392b;border-color:#c0392b;color:#fff;font-weight:700}
-  .cell .offmark{position:absolute;bottom:2px;left:3px;font-size:8px;line-height:1}
+  .cell .offmark{position:absolute;bottom:2px;left:3px;font-size:8.5px;line-height:1;padding:1px 2px;border-radius:3px;
+    border:1px solid transparent}
+  .cell .offmark.lv1{background:#E7EFFA;border-color:#BCD3EE}
+  .cell .offmark.lv2{background:#FDE7C7;border-color:#E9B872}
+  .cell .offmark.lv3{background:#F7CFCB;border-color:#D98D85}
+  .cell.sel .offmark{background:rgba(255,255,255,.9);border-color:transparent}
   .seg{display:flex;gap:8px}.seg .chip{flex:1;text-align:center}
   .mrow{display:flex;gap:8px;margin-top:16px}
   .save{flex:1;background:linear-gradient(150deg,#26365A,#111D36);color:#fff;border:none;border-radius:4px;padding:14px;font:700 15px/1 'Noto Sans KR';cursor:pointer}
@@ -638,6 +644,7 @@
       <span class="l2"><i></i>4~7 보통</span>
       <span class="l3"><i></i>8+ 많음 👍</span>
       <span class="l4"><i></i>베드 초과</span>
+      <span class="l5">🏖 휴무 <i class="o1"></i>여유 <i class="o2"></i>부족 <i class="o3"></i>1명 이하</span>
     </div>
   </div>
 
@@ -2638,7 +2645,12 @@ function render(){
       ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
       ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
-      ${(()=>{const of=offStaffFor(ds);return of.length?`<div class="offmark${staffList.length&&(staffList.length-of.length)<=1?' thin':''}" title="Day off: ${esc(of.join(', '))} · 근무 ${staffList.length-of.length}명">🏖${of.length}</div>`:''})()}
+      ${(()=>{
+        const of=offStaffFor(ds); if(!of.length)return '';
+        const work=staffList.length-of.length;
+        const lv=work<=1?'lv3':(work*2<=staffList.length?'lv2':'lv1');   // 근무 1명↓ 빨강 / 절반↓ 주황 / 그 외 파랑
+        return `<div class="offmark ${lv}" title="🏖 휴무 ${of.length} (${esc(of.join(', '))}) · 근무 ${work}명">🏖</div>`;
+      })()}
     </div>`;
   }
   $('calGrid').innerHTML=html;
