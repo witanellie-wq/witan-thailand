@@ -134,6 +134,13 @@
   .memotr .mt-copy{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
     padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;flex:0 0 auto;font-weight:700}
   .memo-th{font-size:10.5px;color:#2a5b93;margin-top:2px;word-break:break-word}
+  .paysplit{border:1.3px solid var(--line);border-radius:4px;overflow:hidden;margin-top:3px}
+  .paysplit .ps-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--soft)}
+  .paysplit .ps-l{flex:1;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .paysplit .ps-l small{display:block;font-size:9.5px;color:var(--muted);font-weight:400}
+  .paysplit input{flex:0 0 120px;text-align:right;font-weight:700;font-size:15px;color:var(--gold-d);padding:8px 10px}
+  .paysplit .ps-sum{display:flex;justify-content:space-between;padding:8px 11px;background:var(--soft2);font-size:12.5px;font-weight:700;color:var(--wine-d)}
+  .paysplit .ps-sum b{font-size:15px;color:var(--wine)}
   .revprev{background:var(--soft2);border:1.2px dashed var(--line);border-radius:4px;padding:9px 11px;margin-top:8px;font-size:12px;line-height:1.7;color:#40506a}
   .revprev b{color:var(--wine)}
   .revprev .rp-res{font-size:14px;font-weight:800;color:var(--gold-d)}
@@ -1034,15 +1041,29 @@
     <div class="sub">두 가지 중에 골라 넣으세요 · เลือกวิธีบันทึก<br>
       <b>📊 하루 총 매출</b> — "이 날 매출이 총 얼마다" (예약 포함) → <b>예약과 합산하지 않고</b> 이 금액이 그날 매출<br>
       <b>➕ 예약 외 수익금</b> — "예약 말고 따로 들어온 돈이 얼마다" → 예약 매출에 <b>더해집니다</b></div>
-    <div class="g2">
-      <div><label class="lab">📅 Date · วันที่</label><input type="date" id="r_date" onchange="revPreview()"></div>
-      <div><label class="lab">💰 Amount ฿ · ยอดเงิน</label><input id="r_amt" inputmode="numeric" placeholder="0" oninput="revPreview()" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)"></div>
+    <label class="lab">📅 Date · วันที่</label>
+    <input type="date" id="r_date" onchange="revPreview()">
+    <div id="r_splitwrap">
+      <label class="lab">💳 결제수단별 금액 · แยกตามวิธีชำระ <span style="color:var(--muted)">(해당 없는 칸은 비워두세요)</span></label>
+      <div class="paysplit">
+        <div class="ps-row"><span class="ps-l">🏦 Transfer · โอน<small>이체</small></span>
+          <input id="r_tr" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
+        <div class="ps-row"><span class="ps-l">💵 Cash · เงินสด<small>현금</small></span>
+          <input id="r_cash" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
+        <div class="ps-row"><span class="ps-l">💳 Credit card · บัตร<small>신용카드</small></span>
+          <input id="r_card" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
+        <div class="ps-sum">합계 · รวม <b id="r_splitsum">฿0</b></div>
+      </div>
     </div>
-    <label class="lab">💳 Payment · วิธีชำระ · 결제수단</label>
-    <div class="statusseg" id="r_payseg">
-      <div class="chip on" data-pay="현금" onclick="revPickPay(this)">💵 Cash · เงินสด<small>현금</small></div>
-      <div class="chip" data-pay="이체" onclick="revPickPay(this)">🏦 Transfer · โอน<small>이체</small></div>
-      <div class="chip" data-pay="카드" onclick="revPickPay(this)">💳 Card · บัตร<small>신용카드</small></div>
+    <div id="r_singlewrap" style="display:none">
+      <label class="lab">💰 Amount ฿ · ยอดเงิน</label>
+      <input id="r_amt" inputmode="numeric" placeholder="0" oninput="revPreview()" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)">
+      <label class="lab">💳 Payment · วิธีชำระ · 결제수단</label>
+      <div class="statusseg" id="r_payseg">
+        <div class="chip on" data-pay="현금" onclick="revPickPay(this)">💵 Cash · เงินสด<small>현금</small></div>
+        <div class="chip" data-pay="이체" onclick="revPickPay(this)">🏦 Transfer · โอน<small>이체</small></div>
+        <div class="chip" data-pay="카드" onclick="revPickPay(this)">💳 Card · บัตร<small>신용카드</small></div>
+      </div>
     </div>
     <label class="lab">🧮 How to count · วิธีนับ · 집계 방식</label>
     <div class="statusseg" id="r_modeseg">
@@ -2447,7 +2468,7 @@ function renderTrend(){
 let _revPay='현금',_revMode='total';
 function openManualRev(){
   $('r_date').value=selDate||todayStr();
-  $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
+  ['r_amt','r_cnt','r_memo','r_tr','r_cash','r_card'].forEach(id=>{if($(id))$(id).value='';});
   revSetPay('현금');revSetMode('total');
   $('revOverlay').classList.add('on');revPreview();
   renderRevList();
@@ -2455,21 +2476,35 @@ function openManualRev(){
 function closeManualRev(){$('revOverlay').classList.remove('on');}
 function revPickPay(el){revSetPay(el.dataset.pay);}
 function revPickMode(el){revSetMode(el.dataset.m);}
-function revSetMode(m){_revMode=m;document.querySelectorAll('#r_modeseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===m));revPreview();}
+function revSetMode(m){
+  _revMode=m;
+  document.querySelectorAll('#r_modeseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===m));
+  $('r_splitwrap').style.display=(m==='add')?'none':'block';
+  $('r_singlewrap').style.display=(m==='add')?'block':'none';
+  revPreview();
+}
+const _revNum=id=>Math.round(parseFloat((($(id)&&$(id).value)||'').replace(/[^0-9.]/g,''))||0);
+function revSplitParts(){return [['이체',_revNum('r_tr')],['현금',_revNum('r_cash')],['카드',_revNum('r_card')]].filter(x=>x[1]>0);}
 // 선택한 방식으로 그날 매출이 얼마가 되는지 즉시 보여주기
 function revPreview(){
   const box=$('r_preview'); if(!box)return;
   const d=$('r_date').value;
-  const amt=Math.round(parseFloat(($('r_amt').value||'').replace(/[^0-9.]/g,''))||0);
+  const parts=revSplitParts();
+  const splitSum=parts.reduce((s,x)=>s+x[1],0);
+  if($('r_splitsum'))$('r_splitsum').textContent=fmt(splitSum);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){box.innerHTML='';return}
   const pt=dayRevParts(d);
-  const already=pt.bookRev;
-  const result=_revMode==='add'?(pt.total+amt):(amt+pt.manAdd);
-  box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(already)}</b>`
+  const amt=_revMode==='add'?_revNum('r_amt'):splitSum;
+  // 하루 총 매출은 결제수단별 줄을 모두 합친 값이 그날 매출 (이미 넣은 줄에 이어서 누적)
+  const newTotal=pt.manTotal+amt;
+  const result=_revMode==='add'?(pt.total+amt):(newTotal+pt.manAdd);
+  const ico=p=>p==='이체'?'🏦':(p==='카드'?'💳':'💵');
+  box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(pt.bookRev)}</b>`
     +(pt.hasMan?` · 💵 이미 입력됨 <b>${fmt(pt.manTotal)}</b>`:'')
-    +`<br>${_revMode==='add'?'➕ 예약 매출 + 입력액 (합산)':'📊 이 금액이 그날 매출 (예약과 합산 안 함)'}`
+    +(_revMode!=='add'&&parts.length?`<br>${parts.map(x=>ico(x[0])+x[0]+' '+fmt(x[1])).join(' + ')}${parts.length>1?' = <b>'+fmt(splitSum)+'</b>':''}`:'')
+    +`<br>${_revMode==='add'?'➕ 예약 매출 + 입력액 (합산)':'📊 결제수단 합계가 그날 매출 (예약과 합산 안 함)'}`
     +`<br>→ 이 날 매출 <span class="rp-res">${fmt(result)}</span>`
-    +(_revMode!=='add'&&amt&&already?`<br><span style="font-size:11px;color:${amt>=already?'#8a6d1f':'#b5341f'}">${amt>=already?`📋 미기록 ${fmt(amt-already)}`:`⚠️ 기록이 ${fmt(already-amt)} 더 큼 — 금액 확인`}</span>`:'');
+    +(_revMode!=='add'&&newTotal&&pt.bookRev?`<br><span style="font-size:11px;color:${newTotal>=pt.bookRev?'#8a6d1f':'#b5341f'}">${newTotal>=pt.bookRev?`📋 미기록 ${fmt(newTotal-pt.bookRev)}`:`⚠️ 기록이 ${fmt(pt.bookRev-newTotal)} 더 큼 — 금액 확인`}</span>`:'');
 }
 function revSetPay(p){
   _revPay=p;
@@ -2478,13 +2513,22 @@ function revSetPay(p){
 function addManualRev(){
   const d=$('r_date').value;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){alert('Check the date · ตรวจวันที่ · 날짜를 확인하세요');return}
-  const amt=Math.round(parseFloat(($('r_amt').value||'').replace(/[^0-9.]/g,''))||0);
-  if(amt<=0){alert('Enter the amount · กรอกยอดเงิน · 금액을 입력하세요');$('r_amt').focus();return}
-  manualRev.push({id:Date.now(),date:d,amt,pay:_revPay,mode:_revMode,cnt:parseInt($('r_cnt').value)||0,memo:$('r_memo').value.trim()});
+  const cnt=parseInt($('r_cnt').value)||0, memo=$('r_memo').value.trim();
+  if(_revMode==='add'){
+    const amt=_revNum('r_amt');
+    if(amt<=0){alert('Enter the amount · กรอกยอดเงิน · 금액을 입력하세요');$('r_amt').focus();return}
+    manualRev.push({id:Date.now(),date:d,amt,pay:_revPay,mode:'add',cnt,memo});
+    $('r_amt').value='';
+  }else{
+    const parts=revSplitParts();
+    if(!parts.length){alert('결제수단별 금액을 하나 이상 입력하세요 · กรอกอย่างน้อย 1 ช่อง');$('r_tr').focus();return}
+    parts.forEach((x,i)=>manualRev.push({id:Date.now()+i,date:d,amt:x[1],pay:x[0],mode:'total',cnt:i===0?cnt:0,memo:i===0?memo:''}));
+    ['r_tr','r_cash','r_card'].forEach(id=>{if($(id))$(id).value='';});
+  }
   saveManualRev();
-  $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
+  $('r_cnt').value='';$('r_memo').value='';
   selDate=d;cur=new Date(d+'T00:00');cur.setDate(1);
-  renderRevList();render();
+  renderRevList();render();revPreview();
 }
 function delManualRev(id){
   const r=manualRev.find(x=>x.id==id); if(!r)return;
