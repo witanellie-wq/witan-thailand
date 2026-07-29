@@ -1881,10 +1881,33 @@ function renderRevTrend(y,m,days){
     </div>
     <div class="at-foot"><span>Month ${fmt(monthTotal)}</span><span>Days ${activeDays} · Daily avg ${fmt(dayAvg)} · <span style="color:#8f6d38">— 추세선</span></span></div>`;
 }
+/* 💳 그 달에 새로 받은 선결제(멤버십 충전·회차권 구매) 내역 */
+function prepaidEvents(y,m){
+  const out=[];
+  const inM=d=>{if(!d)return false;const p=String(d).split('-');return +p[0]===y&&+p[1]===m+1;};
+  const moneyOf=(c,h)=>Number(h.amt!=null?h.amt:((c.type!=='course'&&h.delta>0)?h.delta:0))||0;
+  (customers||[]).forEach(c=>{
+    const hist=c.history||[];
+    let later=0;
+    hist.forEach(h=>{
+      const amt=moneyOf(c,h); if(amt<=0)return;
+      later+=amt;
+      const d=String(h.t||'').slice(0,10);
+      if(inM(d))out.push({d,name:c.name||'',amt,kind:c.type==='course'?'🎟️':'💳',label:c.type==='course'?'회차권 추가':'멤버십 충전'});
+    });
+    // 최초 등록분 (이후 충전/추가구매분은 위에서 이미 집계)
+    const reg=Math.max(0,(c.type==='course'?Number(c.price||0):Number(c.charged||0))-later);
+    if(reg>0&&inM(c.buyDate))out.push({d:c.buyDate,name:c.name||'',amt:reg,kind:c.type==='course'?'🎟️':'💳',label:c.type==='course'?'회차권 구매':'멤버십 신규'});
+  });
+  return out.sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+}
+let _preOpen=false;
+function togglePreList(){_preOpen=!_preOpen;render();}
 /* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
-function renderForecast(monthEntries,actual,pendingExp){
+function renderForecast(monthEntries,actual,pendingExp,memUsed,pre){
   const box=$('fcBox'); if(!box)return;
   if(isStaff()){box.innerHTML='';return}
+  memUsed=Number(memUsed)||0; pre=pre||[];
   const visited=monthEntries.filter(e=>e.status==='방문');
   // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
   const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
@@ -1906,7 +1929,29 @@ function renderForecast(monthEntries,actual,pendingExp){
     ${doneExp?`<div class="fc-diff">
       <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(actual)}</span>
       <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
-    </div>`:''}`;
+    </div>`:''}
+    ${renderPrepaidSection(actual,memUsed,pre)}`;
+}
+/* 💳 선결제 구역: 현장결제 / 선결제 사용 / 이번 달 선결제 입금 → 총 입금 매출 */
+function renderPrepaidSection(actual,memUsed,pre){
+  const preTotal=pre.reduce((s,x)=>s+x.amt,0);
+  const onsite=Math.max(0,actual-memUsed);        // 현장에서 새로 받은 돈
+  const cashIn=onsite+preTotal;                   // 이번 달 실제 입금 (이중계상 없음)
+  if(!preTotal&&!memUsed)return '';
+  const list=_preOpen&&pre.length?`<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px">`+
+    pre.map(x=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:#4A5678;padding:2px 0">
+      <span>${x.kind} ${String(x.d).slice(5)} ${esc(x.name)} <span style="color:var(--muted)">${x.label}</span></span><b>${fmt(x.amt)}</b></div>`).join('')+`</div>`:'';
+  return `
+    <div class="fc-diff" style="display:block">
+      <div style="font-size:11px;font-weight:700;color:var(--wine-d);margin-bottom:7px">💳 선결제 · เงินจ่ายล่วงหน้า</div>
+      <div class="fc-g">
+        <div class="fc-c done"><div class="fv">${fmt(onsite)}</div><div class="fl">현장 결제<br>จ่ายหน้าร้าน</div></div>
+        <div class="fc-c pend" ${pre.length?'onclick="togglePreList()" style="cursor:pointer"':''}><div class="fv">${fmt(preTotal)}</div><div class="fl">선결제 입금 (${pre.length})${pre.length?' ▾':''}<br>เติม/ซื้อคอร์ส</div></div>
+        <div class="fc-c fore"><div class="fv">${fmt(cashIn)}</div><div class="fl">총 입금 매출<br>รวมเงินเข้า</div></div>
+      </div>
+      ${list}
+      ${memUsed?`<div style="font-size:10px;color:var(--muted);margin-top:7px;line-height:1.5">※ 이번 달 선결제 잔액 사용 ${fmt(memUsed)} — 이미 받은 돈이라 입금 매출에 다시 더하지 않습니다 · ใช้ยอดสมาชิก ${fmt(memUsed)} (ไม่นับซ้ำ)</div>`:''}
+    </div>`;
 }
 function renderStatBox(s){
   const hb=s.visitCount||0;
@@ -2006,7 +2051,8 @@ function render(){
   const newP=sumSeats(visited.filter(e=>e.visit==='신규'));
   const preP=sumSeats(visited.filter(isPrepaidCust));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP});
-  renderForecast(monthEntries,total,expSum);
+  const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
+  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m));
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2233,6 +2279,10 @@ function openDayReview(){
   const payMap={};
   vis.forEach(e=>{const k=e.memPaid?'💳 สมาชิก멤버십':(e.pay||'기타');(payMap[k]=payMap[k]||{n:0,amt:0});payMap[k].n++;payMap[k].amt+=Number(e.amount)||0;});
   const payChips=Object.entries(payMap).map(([k,v])=>'<div class="rs">'+esc(k)+' <b>'+v.n+'</b> · <b>'+fmt(v.amt)+'</b></div>').join('');
+  // 그날 새로 받은 선결제(멤버십 충전·회차권 구매)와 멤버십 잔액 사용액
+  const preDay=prepaidEvents(y,mo-1).filter(x=>x.d===day);
+  const preSum=preDay.reduce((s,x)=>s+x.amt,0);
+  const memUsedDay=vis.filter(e=>e.memPaid).reduce((s,e)=>s+(Number(e.amount)||0),0);
   $('printSheet').innerHTML=`
     <div class="ps-head">
       <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>
@@ -2262,8 +2312,11 @@ function openDayReview(){
       <div class="rs">ยอดจอง 예약가 합계 <b>${fmt(sumExp)}</b></div>
       <div class="rs">ยอดชำระ 결제 합계 <b>${fmt(sumPaid)}</b></div>
       ${payChips}
+      ${preDay.length?'<div class="rs">💳 선결제 입금 เงินล่วงหน้า <b>'+preDay.length+'</b> · <b>'+fmt(preSum)+'</b></div>':''}
+      ${(preSum||memUsedDay)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,sumPaid-memUsedDay)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
+    ${preDay.length?'<div class="ps-note" style="margin-top:6px">💳 선결제 내역 · '+preDay.map(x=>esc(x.name)+' '+x.label+' '+fmt(x.amt)).join(' / ')+'</div>':''}
     <div class="ps-note">※ จ่ายจริง = เฉพาะคิวที่มา ✓ · 결제액은 방문 완료 건만 집계 · 💳 = ชำระด้วยยอดสมาชิก 멤버십 잔액 결제 · 🎟️ = คอร์ส 회차권 (오늘 차감 −n · 잔여/전체)</div>`;
   window.__sheetDay=day;
   $('sheetView').classList.add('on');
@@ -2936,8 +2989,11 @@ function addCourseSession(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
   const v=prompt(`${c.name} · Sessions to add (rebuy) · เพิ่มกี่ครั้ง?`,'3');if(v===null)return;
   const n=parseInt(v)||0;if(n<=0){alert('Check the number · ตรวจจำนวน');return}
+  const pv=prompt(`${c.name} · Amount paid now (฿) · จ่ายเท่าไร? · 이번에 받은 금액\n(0 = 결제 없음 · 매출로 안 잡힘)`,'');
+  const amt=pv===null?0:(parseFloat(String(pv).replace(/[^0-9.]/g,''))||0);
   c.total=(c.total||0)+n;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Sessions +${n} (${c.used||0}/${c.total})`,delta:n});
+  if(amt>0)c.price=(Number(c.price)||0)+amt;
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Sessions +${n} (${c.used||0}/${c.total})${amt>0?' · 선결제 +'+fmt(amt):''}`,delta:n,amt:amt||0});
   saveCusts();renderLedSum();renderCustList();
 }
 function chargeUse(id){
@@ -2958,7 +3014,7 @@ function topupMember(id){
   const amt=parseFloat(String(v).replace(/[^0-9.]/g,''))||0;
   if(amt<=0){alert('Check the amount · ตรวจยอดเงิน');return}
   c.balance=(c.balance||0)+amt;c.charged=(c.charged||0)+amt;
-  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Top-up +${fmt(amt)} · balance ${fmt(c.balance)}`,delta:amt});
+  (c.history=c.history||[]).unshift({t:nowStamp(),note:`Top-up +${fmt(amt)} · balance ${fmt(c.balance)}`,delta:amt,amt});
   saveCusts();renderLedSum();renderCustList();
 }
 function toggleHist(id){const el=document.getElementById('hist_'+id);if(el)el.classList.toggle('on');}
