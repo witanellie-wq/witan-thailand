@@ -134,6 +134,9 @@
   .memotr .mt-copy{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
     padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;flex:0 0 auto;font-weight:700}
   .memo-th{font-size:10.5px;color:#2a5b93;margin-top:2px;word-break:break-word}
+  .revprev{background:var(--soft2);border:1.2px dashed var(--line);border-radius:4px;padding:9px 11px;margin-top:8px;font-size:12px;line-height:1.7;color:#40506a}
+  .revprev b{color:var(--wine)}
+  .revprev .rp-res{font-size:14px;font-weight:800;color:var(--gold-d)}
   /* 휴무·근무 인원 배너 */
   .staffload{background:#FFF8E4;border:1.3px solid #EBD48A;border-radius:4px;padding:8px 11px;margin-bottom:9px;
     font-size:12px;color:#7a5f16;line-height:1.5}
@@ -1028,10 +1031,12 @@
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0">💵 Daily revenue entry · บันทึกยอดขาย · 매출 직접 입력</h2>
       <button class="sheet-x" onclick="closeManualRev()" aria-label="Close">✕</button></div>
-    <div class="sub">그날 실제 입금된 매출을 직접 넣습니다. <b>예약 기록과 합산하지 않고</b> 그 값이 그날 매출이 되며, 예약 기록과 나란히 비교됩니다. · บันทึกยอดขายจริงของวันนั้น (ไม่บวกซ้ำ)</div>
+    <div class="sub">두 가지 중에 골라 넣으세요 · เลือกวิธีบันทึก<br>
+      <b>📊 하루 총 매출</b> — "이 날 매출이 총 얼마다" (예약 포함) → <b>예약과 합산하지 않고</b> 이 금액이 그날 매출<br>
+      <b>➕ 예약 외 수익금</b> — "예약 말고 따로 들어온 돈이 얼마다" → 예약 매출에 <b>더해집니다</b></div>
     <div class="g2">
-      <div><label class="lab">📅 Date · วันที่</label><input type="date" id="r_date"></div>
-      <div><label class="lab">💰 Amount ฿ · ยอดเงิน</label><input id="r_amt" inputmode="numeric" placeholder="0" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)"></div>
+      <div><label class="lab">📅 Date · วันที่</label><input type="date" id="r_date" onchange="revPreview()"></div>
+      <div><label class="lab">💰 Amount ฿ · ยอดเงิน</label><input id="r_amt" inputmode="numeric" placeholder="0" oninput="revPreview()" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)"></div>
     </div>
     <label class="lab">💳 Payment · วิธีชำระ · 결제수단</label>
     <div class="statusseg" id="r_payseg">
@@ -1041,9 +1046,10 @@
     </div>
     <label class="lab">🧮 How to count · วิธีนับ · 집계 방식</label>
     <div class="statusseg" id="r_modeseg">
-      <div class="chip on" data-m="total" onclick="revPickMode(this)">💵 그날 실입금 총액<small>예약기록 대신 이 값 사용</small></div>
-      <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 별도 추가 입금<small>기록에 더함 (제품판매 등)</small></div>
+      <div class="chip on" data-m="total" onclick="revPickMode(this)">📊 하루 총 매출<small>예약 포함한 총액<br>= 이 금액이 그날 매출</small></div>
+      <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 예약 외 수익금<small>예약 매출에 더함<br>(제품판매 등)</small></div>
     </div>
+    <div id="r_preview" class="revprev"></div>
     <label class="lab">👥 Customers (opt.) · จำนวนลูกค้า</label>
     <input id="r_cnt" inputmode="numeric" placeholder="예: 6 (비워도 됨)">
     <label class="lab">📝 Memo (opt.)</label>
@@ -2443,13 +2449,28 @@ function openManualRev(){
   $('r_date').value=selDate||todayStr();
   $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
   revSetPay('현금');revSetMode('total');
-  $('revOverlay').classList.add('on');
+  $('revOverlay').classList.add('on');revPreview();
   renderRevList();
 }
 function closeManualRev(){$('revOverlay').classList.remove('on');}
 function revPickPay(el){revSetPay(el.dataset.pay);}
 function revPickMode(el){revSetMode(el.dataset.m);}
-function revSetMode(m){_revMode=m;document.querySelectorAll('#r_modeseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===m));}
+function revSetMode(m){_revMode=m;document.querySelectorAll('#r_modeseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===m));revPreview();}
+// 선택한 방식으로 그날 매출이 얼마가 되는지 즉시 보여주기
+function revPreview(){
+  const box=$('r_preview'); if(!box)return;
+  const d=$('r_date').value;
+  const amt=Math.round(parseFloat(($('r_amt').value||'').replace(/[^0-9.]/g,''))||0);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){box.innerHTML='';return}
+  const pt=dayRevParts(d);
+  const already=pt.bookRev;
+  const result=_revMode==='add'?(pt.total+amt):(amt+pt.manAdd);
+  box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(already)}</b>`
+    +(pt.hasMan?` · 💵 이미 입력됨 <b>${fmt(pt.manTotal)}</b>`:'')
+    +`<br>${_revMode==='add'?'➕ 예약 매출 + 입력액 (합산)':'📊 이 금액이 그날 매출 (예약과 합산 안 함)'}`
+    +`<br>→ 이 날 매출 <span class="rp-res">${fmt(result)}</span>`
+    +(_revMode!=='add'&&amt&&already?`<br><span style="font-size:11px;color:${amt>=already?'#8a6d1f':'#b5341f'}">${amt>=already?`📋 미기록 ${fmt(amt-already)}`:`⚠️ 기록이 ${fmt(already-amt)} 더 큼 — 금액 확인`}</span>`:'');
+}
 function revSetPay(p){
   _revPay=p;
   document.querySelectorAll('#r_payseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.pay===p));
@@ -2512,7 +2533,7 @@ function renderRevList(){
   box.innerHTML=`<div class="sr-sum">${y}.${m+1} · <b>${rows.length}</b>건 · 합계 <b>${fmt(tot)}</b><br>
       ${Object.entries(byPay).map(([k,v])=>icon(k)+' '+k+' '+fmt(v)).join(' · ')}</div>`
     +rows.map(r=>{const pt=dayRevParts(r.date);
-      const tag=r.mode==='add'?'<span style="color:#2a5b93">➕별도추가</span>':'<span style="color:#8a6d1f">💵실입금</span>';
+      const tag=r.mode==='add'?'<span style="color:#2a5b93">➕예약 외 수익금</span>':'<span style="color:#8a6d1f">📊하루 총 매출</span>';
       const cmp=(r.mode!=='add'&&pt.bookRev)
         ? `<br><span class="sl-ph">📋기록 ${fmt(pt.bookRev)} · ${pt.diff>0?`미기록 <b style="color:#8a6d1f">${fmt(pt.diff)}</b>`:(pt.diff<0?`<b style="color:#b5341f">⚠️기록이 ${fmt(-pt.diff)} 더 큼 — 확인</b>`:'<b style="color:#1c7a41">일치 ✅</b>')}</span>`:'';
       return `<div class="sl-item">
