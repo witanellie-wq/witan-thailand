@@ -2266,7 +2266,7 @@ function renderDay(){
     const cls=['tl-block',e.status==='예약'?'pending':'',p.conflict?'conflict':''].join(' ');
     blocks+=`<div class="${cls}" style="top:${top}px;height:${h}px;left:${left};width:${w}" onclick="openModal('${e.id}')">
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
-      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.converted?' 🔄':''}</div>
+      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}</div>
       <div class="tb-m">${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div>
     </div>`;
   });
@@ -2382,7 +2382,10 @@ function closeModal(){$('overlay').classList.remove('on')}
 function saveBooking(){
   const name=$('m_name').value.trim();
   if(!name){alert('Enter a name · กรอกชื่อ');$('m_name').focus();return false}
-  if(!$('m_phone').value.trim()){alert('Enter phone number · กรอกเบอร์โทร');$('m_phone').focus();return false}
+  if(!$('m_phone').value.trim()){
+    // 전화번호 누락 시에도 저장은 허용하되 알림으로 입력 유도
+    if(!confirm('⚠️ No phone number! · ไม่มีเบอร์โทร!\n전화번호가 비어 있어요 — 고객 원장·중복확인·멤버십 연결에 필요합니다.\n\n[OK] Save anyway, add later · บันทึกก่อน เติมทีหลัง\n[Cancel] Enter now · กรอกตอนนี้')){$('m_phone').focus();return false}
+  }
   if(!$('m_srcid').value.trim() && $('m_src').value!=='워크인 Walk-in'){alert('Enter booking source info — ID / booking no. · กรอกข้อมูลช่องทางจอง (ไอดี/เลขจอง)');$('m_srcid').focus();return false}
   const status=getStatus();
   // 베드 충돌 체크 (노쇼 아니고 시간 있을 때)
@@ -3133,7 +3136,7 @@ function renderCheckin(){
     const st=e.status;
     return `<div class="ckrow s${st}">
       <div class="ck-top">
-        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${ckStatusBadge(st)}</div>
+        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${ckStatusBadge(st)}</div>
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
       <div class="ck-meta">${meta||'—'}</div>
