@@ -819,7 +819,8 @@
       </div>
       <div><label class="lab" data-i18n="mVisit">방문</label><select id="m_visit" data-i18n-opt="opt_visit"><option value="신규">신규</option><option value="재방문">재방문</option></select></div>
     </div>
-    <label class="lab" data-i18n="mStaff">담당 (1~2명)</label>
+    <label class="lab" data-i18n="mStaff">담당 (여러 명 선택 가능)</label>
+    <div id="staffCount" style="font-size:10.5px;color:var(--gold-d);font-weight:700;margin:-2px 0 3px"></div>
     <div class="chips" id="m_staff"></div>
     <label class="lab" data-i18n="mMemo">메모</label>
     <textarea id="m_memo" data-i18n-ph="ph_memo" placeholder="피부고민·특이사항·다음 예약 등" oninput="renderMemoTrans()"></textarea>
@@ -1521,7 +1522,7 @@ const I18N={
   mAmtPh:{ko:'฿금액',th:'฿ราคา',en:'฿amount'},mSubtotal:{ko:'소계',th:'ยอดรวม',en:'Subtotal'},mDisc:{ko:'할인',th:'ส่วนลด',en:'Discount'},
   mManual:{ko:'직접 입력',th:'กรอกเอง',en:'Manual'},mFinal:{ko:'최종 결제',th:'ชำระจริง',en:'Final'},mEditBtn:{ko:'✎ 수정',th:'✎ แก้',en:'✎ Edit'},
   mRound:{ko:'원단위 절삭',th:'ปัดเศษ',en:'Round'},mAuto:{ko:'↺ 자동',th:'↺ อัตโนมัติ',en:'↺ Auto'},
-  mPay:{ko:'결제',th:'ชำระ',en:'Payment'},mStaff:{ko:'담당 (1~2명 선택)',th:'ผู้ทำ(เลือก1-2)',en:'Staff (1-2)'},mVisit:{ko:'방문',th:'การเข้า',en:'Visit'},
+  mPay:{ko:'결제',th:'ชำระ',en:'Payment'},mStaff:{ko:'담당 (여러 명 선택 가능)',th:'ผู้ทำ (เลือกได้หลายคน)',en:'Staff (multi-select)'},mVisit:{ko:'방문',th:'การเข้า',en:'Visit'},
   mMemo:{ko:'메모',th:'บันทึก',en:'Memo'},mCare:{ko:'시술 관리 기록 (시술 내용)',th:'บันทึกการทำ',en:'Treatment notes'},mService:{ko:'서비스 제공내역 (증정·무료)',th:'บริการเพิ่มเติม(แถม)',en:'Free services'},
   mSave:{ko:'저장',th:'บันทึก',en:'Save'},mDel:{ko:'삭제',th:'ลบ',en:'Delete'},mClose:{ko:'닫기',th:'ปิด',en:'Close'},
   rebookBtn:{ko:'재예약 만들기',th:'สร้างการจองใหม่',en:'Create rebooking'},rebookTag:{ko:'재예약',th:'จองใหม่จาก',en:'Rebooked from'},
@@ -1821,13 +1822,16 @@ function loadStaff(){try{const a=JSON.parse(localStorage.getItem(STKEY));if(Arra
 let staffList=loadStaff();
 function saveStaff(){try{localStorage.setItem(STKEY,JSON.stringify(staffList))}catch(e){}queueSync('staff');}
 function staffToggle(c){
+  // 인원 제한 없음 — 여러 명 동시 선택 가능 (최소 1명은 유지)
   if(c.classList.contains('on')){
-    if(document.querySelectorAll('#m_staff .chip.on:not(.stadd)').length>1)c.classList.remove('on'); // 최소 1명
-  }else{
-    const on=document.querySelectorAll('#m_staff .chip.on:not(.stadd)');
-    if(on.length>=2)on[0].classList.remove('on'); // 최대 2명
-    c.classList.add('on');
-  }
+    if(document.querySelectorAll('#m_staff .chip.on:not(.stadd)').length>1)c.classList.remove('on');
+  }else c.classList.add('on');
+  updateStaffCount();
+}
+function updateStaffCount(){
+  const el=$('staffCount'); if(!el)return;
+  const sel=[...document.querySelectorAll('#m_staff .chip.on:not(.stadd)')].map(c=>c.dataset.st);
+  el.textContent=sel.length>1?`· ${sel.length}명 함께 · ${sel.length} คน`:'';
 }
 function renderStaffChips(selected){
   const sel=(selected&&selected.length)?selected:[staffList[0]||'Muay'];
@@ -1842,6 +1846,7 @@ function renderStaffChips(selected){
   box.querySelectorAll('.chip:not(.stadd)').forEach(c=>c.onclick=()=>staffToggle(c));
   if(!box.querySelector('.chip.on:not(.stadd)')){const f=box.querySelector('.chip:not(.stadd)');if(f)f.classList.add('on');}
   const addc=box.querySelector('.stadd');if(addc)addc.textContent=T('stAdd');
+  updateStaffCount();
 }
 function addStaffQuick(){
   const n=prompt(T('stPrompt'));
