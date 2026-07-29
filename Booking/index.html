@@ -119,6 +119,9 @@
   .trbar.cur i{background:repeating-linear-gradient(135deg,#C5CDDC 0 3px,#E8ECF3 3px 6px);border:1px solid #9AA6BD}
   .trbar .tv{position:absolute;top:-15px;font-size:8.5px;font-weight:700;color:var(--wine-d);white-space:nowrap}
   .trbar .tm{position:absolute;bottom:-19px;font-size:8.5px;color:var(--muted);white-space:nowrap}
+  .trbars.dense{gap:2px;margin-bottom:22px}
+  .trbars.dense .trbar i{max-width:none;border-radius:2px 2px 0 0}
+  .trbars.dense .tm{font-size:8px}
   .trhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px;flex-wrap:wrap}
   .trhead .th-t{font-size:13px;font-weight:800;color:var(--wine-d)}
   .trhead .th-d{font-size:12px;font-weight:800}
@@ -1017,6 +1020,7 @@
       <button class="sheet-x" onclick="closeTrend()" aria-label="Close">✕</button></div>
     <div class="sub">주별·월별 예약수·손님수·객단가·매출 흐름을 한눈에 봅니다 · ดูแนวโน้มรายสัปดาห์/เดือน</div>
     <div class="trseg" id="trMode" style="margin-bottom:6px">
+      <div class="chip" data-p="day" onclick="trPickMode(this)">📅 일간<small>รายวัน</small></div>
       <div class="chip on" data-p="week" onclick="trPickMode(this)">📆 주간<small>รายสัปดาห์</small></div>
       <div class="chip" data-p="month" onclick="trPickMode(this)">🗓 월간<small>รายเดือน</small></div>
     </div>
@@ -2370,7 +2374,7 @@ function nextMonthKey(k){let[y,m]=k.split('-').map(Number);m++;if(m>12){m=1;y++;
 // 주/월 집계 (예약수·손님수·매출·객단가) — 직접입력 매출·선입금 포함
 function trendBuckets(mode){
   const map={};
-  const keyOf=d=>mode==='week'?weekStartStr(d):String(d).slice(0,7);
+  const keyOf=d=>mode==='day'?String(d):(mode==='week'?weekStartStr(d):String(d).slice(0,7));
   const get=k=>map[k]||(map[k]={book:0,cust:0,rev:0,custBk:0,re:0,pre:0});
   data.forEach(e=>{
     if(!e.date||e.status==='캔슬'||e.status==='연기대기')return;
@@ -2397,14 +2401,23 @@ function trendBuckets(mode){
   let keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
   if(!keys.length)return [];
   // 빈 구간도 0으로 채워 연속 표시 (최대 26칸)
-  const full=[];let k=keys[0],last=keys[keys.length-1],guard=0;
-  const curK=mode==='week'?weekStartStr(todayStr()):todayStr().slice(0,7);
-  if(curK>last)last=curK;
-  while(k<=last&&guard<200){full.push(k);k=mode==='week'?shiftWeek(k,1):nextMonthKey(k);guard++;}
+  const full=[];let guard=0;
+  if(mode==='day'){
+    // 달력에서 보고 있는 달의 1일~말일
+    const y=cur.getFullYear(),m=cur.getMonth();
+    const last=new Date(y,m+1,0).getDate();
+    for(let d=1;d<=last;d++)full.push(ymd(y,m,d));
+  }else{
+    let k=keys[0],last=keys[keys.length-1];
+    const curK=mode==='week'?weekStartStr(todayStr()):todayStr().slice(0,7);
+    if(curK>last)last=curK;
+    while(k<=last&&guard<200){full.push(k);k=mode==='week'?shiftWeek(k,1):nextMonthKey(k);guard++;}
+  }
   return full.map(key=>{
     const v=map[key]||{book:0,cust:0,rev:0,custBk:0,re:0,pre:0};
     let label;
-    if(mode==='week'){const p=key.split('-');const e2=shiftDate(key,6).split('-');label=+p[1]+'/'+ +p[2]+'~'+ +e2[2];}
+    if(mode==='day'){const p=key.split('-');label=+p[1]+'/'+ +p[2];}
+    else if(mode==='week'){const p=key.split('-');const e2=shiftDate(key,6).split('-');label=+p[1]+'/'+ +p[2]+'~'+ +e2[2];}
     else label=key.slice(2).replace('-','/');
     return {key,label,book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0,
       custBk:v.custBk,re:v.re,pre:v.pre,
@@ -2412,14 +2425,25 @@ function trendBuckets(mode){
       prePct:v.custBk?Math.round(v.pre/v.custBk*100):0};
   });
 }
+// 주·월 단위 매출의 하루 평균 (영업일 기준)
+function trDailyAvg(buckets,isWeek){
+  let rev=0,days=0;
+  buckets.forEach(b=>{
+    rev+=b.rev;
+    if(isWeek){for(let i=0;i<7;i++){const d=shiftDate(b.key,i);if(dayRevParts(d).total>0)days++;}}
+    else{const[y,m]=b.key.split('-').map(Number);const last=new Date(y,m,0).getDate();
+      for(let d=1;d<=last;d++){if(dayRevParts(ymd(y,m-1,d)).total>0)days++;}}
+  });
+  return days?Math.round(rev/days):0;
+}
 function renderTrend(){
   const chart=$('trChart'),tbl=$('trTable'); if(!chart)return;
-  const wk=_trMode==='week';
+  const wk=_trMode==='week',dy=_trMode==='day';
   const all=trendBuckets(_trMode);
   if(!all.length){chart.innerHTML='<div class="at-empty">데이터가 없어요 · ยังไม่มีข้อมูล</div>';tbl.innerHTML='';return}
-  const N=wk?12:12;
+  const N=dy?31:12;
   const win=all.length>N?all.slice(-N):all;
-  const curKey=wk?weekStartStr(todayStr()):todayStr().slice(0,7);
+  const curKey=dy?todayStr():(wk?weekStartStr(todayStr()):todayStr().slice(0,7));
   const META={cust:{t:'👥 손님수 · ลูกค้า',f:v=>v+'명'},book:{t:'📋 예약수 · จำนวนคิว',f:v=>v+'건'},
               avg:{t:'💵 객단가 · ต่อคน',f:v=>fmt(v)},rev:{t:'💰 매출 · ยอดขาย',f:v=>fmt(v)},
               rePct:{t:'🔁 재방문 비율 · ลูกค้าเก่า',f:v=>v+'%',sub:x=>x.re+'/'+x.custBk+'명'},
@@ -2428,32 +2452,49 @@ function renderTrend(){
   const vals=win.map(x=>x[_trKey]);
   const max=Math.max(...vals,1);
   // 마감월(진행 중인 이번 달 제외) 기준 증감
-  const closed=win.filter(x=>x.key!==curKey);
-  const unit=wk?'주':'월';
+  const closed=win.filter(x=>x.key!==curKey&&(dy?x.key<=todayStr():true));
+  const unit=dy?'일':(wk?'주':'월');
   let diffHtml='<span class="at-flat">― 데이터 부족</span>';
-  if(closed.length>=2){
+  if(dy){
+    // 일간은 하루하루 편차가 커서 앞 절반 평균 ↔ 뒤 절반 평균으로 흐름을 봄
+    const act=closed.filter(x=>x[_trKey]>0);
+    if(act.length>=4){
+      const h=Math.floor(act.length/2);
+      const av=a=>a.reduce((s,x)=>s+x[_trKey],0)/a.length;
+      const a1=av(act.slice(0,h)),a2=av(act.slice(-h));
+      const pct=a1>0?Math.round((a2-a1)/a1*100):(a2>0?100:0);
+      const cls=pct>0?'at-up':(pct<0?'at-down':'at-flat');
+      diffHtml=`<span class="${cls}">${pct>0?'▲ +':(pct<0?'▼ ':'― ')}${pct}% <span style="font-weight:600;font-size:10.5px">(전반 평균 ${meta.f(Math.round(a1))} → 후반 ${meta.f(Math.round(a2))})</span></span>`;
+    }
+  }else if(closed.length>=2){
     const a=closed[0][_trKey],b=closed[closed.length-1][_trKey];
     const pct=a>0?Math.round((b-a)/a*100):(b>0?100:0);
     const cls=pct>0?'at-up':(pct<0?'at-down':'at-flat');
     diffHtml=`<span class="${cls}">${pct>0?'▲ +':(pct<0?'▼ ':'― ')}${pct}% <span style="font-weight:600;font-size:10.5px">(${closed[0].label} ${meta.f(a)} → ${closed[closed.length-1].label} ${meta.f(b)})</span></span>`;
   }
-  const avgAll=closed.length?Math.round(closed.reduce((s,x)=>s+x[_trKey],0)/closed.length):0;
+  const base=dy?closed.filter(x=>x[_trKey]>0):closed;      // 일간은 영업일 기준 평균
+  const avgAll=base.length?Math.round(base.reduce((s,x)=>s+x[_trKey],0)/base.length):0;
   chart.innerHTML=`<div class="trhead"><span class="th-t">${meta.t}</span><span class="th-d">${diffHtml}</span></div>
-    <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">마감${unit} 평균 ${meta.f(avgAll)} · 최근 ${win.length}${wk?'주':'개월'}${wk?' (월요일 시작)':''}</div>
-    <div class="trbars">${win.map(x=>{
+    <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">${dy
+      ?`${cur.getFullYear()}.${cur.getMonth()+1} · 영업일 ${base.length}일 · <b style="color:var(--wine-d)">일평균 ${meta.f(avgAll)}</b>`
+      :`마감${unit} 평균 ${meta.f(avgAll)}${(_trKey==='rev'&&!dy)?` · <b style="color:var(--wine-d)">일평균 ${fmt(trDailyAvg(closed,wk))}</b>`:''} · 최근 ${win.length}${wk?'주':'개월'}${wk?' (월요일 시작)':''}`}</div>
+    <div class="trbars${dy?' dense':''}">${win.map((x,i)=>{
       const h=Math.max(2,Math.round(x[_trKey]/max*118));
+      // 일간은 막대가 많아 값 라벨을 숨기고 날짜도 5일 간격으로만 표시
+      const showTick=!dy||i===0||i===win.length-1||((+String(x.key).slice(-2))%5===0);
+      const val=(!dy&&x[_trKey])?meta.f(x[_trKey]).replace('฿',''):'';
       return `<div class="trbar${x.key===curKey?' cur':''}" title="${x.label} · ${meta.f(x[_trKey])}${meta.sub?' ('+meta.sub(x)+')':''}">
-        <span class="tv">${x[_trKey]?meta.f(x[_trKey]).replace('฿',''):''}</span><i style="height:${h}px"></i><span class="tm">${x.label}</span></div>`;
+        ${val?`<span class="tv">${val}</span>`:''}<i style="height:${h}px"></i>${showTick?`<span class="tm">${dy?String(x.label).split('/')[1]:x.label}</span>`:''}</div>`;
     }).join('')}</div>`;
   // 표: 월별 전체 지표 + 전월 대비
   const rows=win.slice().reverse();
   tbl.innerHTML=`<table class="trtbl"><thead><tr>
-      <th style="text-align:left">${wk?'주':'월'}</th><th>예약</th><th>손님</th><th>🔁재방문</th><th>💳멤버십</th><th>객단가</th><th>매출</th><th>${wk?'전주비':'전월비'}</th></tr></thead><tbody>
+      <th style="text-align:left">${dy?'날짜':(wk?'주':'월')}</th><th>예약</th><th>손님</th><th>🔁재방문</th><th>💳멤버십</th><th>객단가</th><th>매출</th><th>${dy?'전일비':(wk?'전주비':'전월비')}</th></tr></thead><tbody>
     ${rows.map((x,i)=>{
       const prev=rows[i+1];
       const pv=prev?prev[_trKey]:null;
       const d=(pv!=null&&pv>0)?Math.round((x[_trKey]-pv)/pv*100):null;
-      return `<tr class="${x.key===curKey?'cur':''}"><td>${x.label}${x.key===curKey?' *':''}</td>
+      return `<tr class="${x.key===curKey?'cur':''}" ${dy&&!x.rev&&!x.book?'style="opacity:.45"':''}><td>${x.label}${x.key===curKey?' *':''}</td>
         <td>${x.book}</td><td>${x.cust}</td>
         <td>${x.custBk?x.rePct+'%':'—'}<span style="color:var(--muted);font-size:9.5px"> ${x.custBk?x.re:''}</span></td>
         <td>${x.custBk?x.prePct+'%':'—'}<span style="color:var(--muted);font-size:9.5px"> ${x.custBk?x.pre:''}</span></td>
@@ -2461,7 +2502,7 @@ function renderTrend(){
         <td class="${d>0?'up':(d<0?'dn':'')}">${d==null?'—':(d>0?'+':'')+d+'%'}</td></tr>`;
     }).join('')}
   </tbody></table>
-  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">* 진행 중인 ${unit} (추세 계산 제외) · ${wk?'전주비':'전월비'}는 선택한 지표 기준 · 매출은 직접 입력분·선입금 포함 · 캔슬·연기대기 제외</div>`;
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">* 진행 중인 ${unit} (추세 계산 제외) · ${dy?'전일비':(wk?'전주비':'전월비')}는 선택한 지표 기준 · 매출은 직접 입력분·선입금 포함 · 캔슬·연기대기 제외</div>`;
 }
 /* ============================================================
    💵 매출 직접 입력 (예약 기록이 없는 날의 입금 매출)
