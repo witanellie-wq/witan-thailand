@@ -194,7 +194,9 @@
   .cell.h3 .cnt{font-weight:700}
   .cell.over{background:#fbe9e9;border-color:#e3a9a9}
   .cell.over .cnt,.cell.over .rev{color:#b5341f}
-  .cell.full.sel,.cell.over.sel,.cell.h2.sel,.cell.h3.sel{background:linear-gradient(150deg,#26365A,#111D36);border-color:var(--gold-d)}
+  /* 선택된 날짜는 항상 남색 배경 — 히트맵 색이 덮지 않도록 (흰 글씨가 사라지는 문제 방지) */
+  .cell.sel,.cell.h1.sel,.cell.h2.sel,.cell.h3.sel,.cell.full.sel,.cell.over.sel{
+    background:linear-gradient(150deg,#26365A,#111D36);border-color:var(--gold-d)}
   .heatlg{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:9.5px;color:var(--muted);margin-top:8px;padding-top:7px;border-top:1px solid var(--soft)}
   .heatlg i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:3px;vertical-align:-1px;border:1px solid rgba(0,0,0,.08)}
   .heatlg .l1 i{background:#EDF1F7}.heatlg .l2 i{background:#FDEFC4}.heatlg .l3 i{background:#C9E9D5}.heatlg .l4 i{background:#fbe9e9}
