@@ -61,6 +61,7 @@
   .stat{background:#fff;border-radius:2px;padding:12px 8px;text-align:center;box-shadow:0 3px 12px rgba(17,29,54,.06)}
   .stat .v{font:700 18px/1 'Noto Sans KR';color:var(--gold-d)}
   .stat .l{font-size:10px;color:var(--muted);margin-top:4px}
+  .stat .l2{font-size:8.5px;color:var(--muted);margin-top:2px;line-height:1.35}
 
   /* calendar */
   .cal{background:#fff;border-radius:2px;padding:10px;box-shadow:0 4px 16px rgba(17,29,54,.08);margin-bottom:14px}
@@ -641,7 +642,7 @@
   <div class="sum owner-only">
     <div class="stat"><div class="v" id="mCount">0</div><div class="l" data-i18n="custCount">손님 수</div></div>
     <div class="stat"><div class="v" id="mTotal">฿0</div><div class="l" data-i18n="monthRev">월 매출(확정)</div></div>
-    <div class="stat"><div class="v" id="mAvg">฿0</div><div class="l" data-i18n="avgSpend">객단가</div></div>
+    <div class="stat"><div class="v" id="mAvg">฿0</div><div class="l" data-i18n="avgSpend">객단가</div><div class="l2" id="mAvgNote"></div></div>
   </div>
   <div class="fcbox owner-only" id="fcBox"></div>
   <div class="statbox owner-only" id="statBox"></div>
@@ -1071,8 +1072,8 @@
       <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 예약 외 수익금<small>예약 매출에 더함<br>(제품판매 등)</small></div>
     </div>
     <div id="r_preview" class="revprev"></div>
-    <label class="lab">👥 Customers (opt.) · จำนวนลูกค้า</label>
-    <input id="r_cnt" inputmode="numeric" placeholder="예: 6 (비워도 됨)">
+    <label class="lab">👥 Customers · จำนวนลูกค้า · 손님 수 <span style="color:var(--gold-d)">(객단가 계산에 사용 — 대략이라도 넣어주세요)</span></label>
+    <input id="r_cnt" inputmode="numeric" placeholder="예: 6 · 비우면 예약 기록 인원으로 계산">
     <label class="lab">📝 Memo (opt.)</label>
     <input id="r_memo" placeholder="예: 예약장부 정리 전 입금 합계">
     <button class="save" style="width:100%;margin-top:12px" onclick="addManualRev()">➕ Add · เพิ่ม · 추가</button>
@@ -2765,9 +2766,30 @@ function render(){
     .reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
   const expSkipped=monthEntries.filter(e=>e.status==='예약'&&_fin.has(e.date))
     .reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
+  // 객단가 = 인원이 파악된 매출 ÷ 파악된 인원 (인원 미상 실입금은 제외)
+  let avgRev=0,avgHead=0,unknownRev=0;
+  revDates(y,m).forEach(ds=>{
+    const pt=dayRevParts(ds);
+    const dayVis=data.filter(e=>e.date===ds&&e.status==='방문');
+    const bkHead=dayVis.reduce((s,e)=>s+(parseInt(e.seats)||1),0);
+    const manCnt=manualRevDay(ds).reduce((s,r)=>s+(parseInt(r.cnt)||0),0);
+    if(pt.hasMan){
+      // 실입금으로 확정된 날: 직접 적어준 인원이 있어야 객단가에 반영
+      if(manCnt>0){avgRev+=pt.total;avgHead+=manCnt;}
+      else if(bkHead>0){avgRev+=pt.total;avgHead+=bkHead;}   // 인원 미기재면 예약 기록 인원으로 대체
+      else unknownRev+=pt.total;
+    }else{
+      const dayRev=pt.total;
+      const head=bkHead+manCnt;
+      if(head>0){avgRev+=dayRev;avgHead+=head;}
+      else if(dayRev)unknownRev+=dayRev;
+    }
+  });
   $('mCount').textContent=headcount;
   $('mTotal').textContent=fmt(total);
-  $('mAvg').textContent=fmt(headcount?Math.round(total/headcount):0);
+  $('mAvg').textContent=fmt(avgHead?Math.round(avgRev/avgHead):0);
+  const _an=$('mAvgNote');
+  if(_an)_an.innerHTML=avgHead?`${avgHead}명 기준${unknownRev?`<br><span style="color:#b5341f">인원미상 ${fmt(unknownRev)} 제외</span>`:''}`:'';
   // 모든 상태도 "사람 수" 기준으로 통일 → 손님수 == 방문
   const bookedP=sumSeats(monthEntries.filter(e=>e.status==='예약'));
   const noshowP=sumSeats(monthEntries.filter(e=>e.status==='노쇼'));
