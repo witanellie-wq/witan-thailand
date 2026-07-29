@@ -2828,9 +2828,13 @@ function render(){
   });
   $('mCount').textContent=headcount;
   $('mTotal').textContent=fmt(total);
-  $('mAvg').textContent=fmt(avgHead?Math.round(avgRev/avgHead):0);
+  $('mAvg').textContent=avgHead?fmt(Math.round(avgRev/avgHead)):'—';
   const _an=$('mAvgNote');
-  if(_an)_an.innerHTML=avgHead?`${avgHead}명 기준${unknownRev?`<br><span style="color:#b5341f">인원미상 ${fmt(unknownRev)} 제외</span>`:''}`:'';
+  if(_an){
+    if(avgHead)_an.innerHTML=`${avgHead}명 기준${unknownRev?`<br><span style="color:#b5341f">인원미상 ${fmt(unknownRev)} 제외</span>`:''}`;
+    else if(unknownRev)_an.innerHTML=`<span style="color:#b5341f">손님 수 미입력<br>매출 ${fmt(unknownRev)}</span>`;
+    else _an.innerHTML='';
+  }
   // 모든 상태도 "사람 수" 기준으로 통일 → 손님수 == 방문
   const bookedP=sumSeats(monthEntries.filter(e=>e.status==='예약'));
   const noshowP=sumSeats(monthEntries.filter(e=>e.status==='노쇼'));
