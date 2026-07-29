@@ -106,6 +106,27 @@
   .fc-diff{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px;font-size:11px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .fc-diff b{font-weight:700}
   .fc-up{color:#1c7a41}.fc-down{color:#c0392b}
+  /* 추이 분석 화면 */
+  .statbox .stt .trendbtn{margin-left:auto;border:1.2px solid var(--line);background:#fff;color:var(--gold-d);
+    border-radius:3px;padding:4px 9px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .trseg{display:flex;gap:6px;margin:4px 0 12px;flex-wrap:wrap}
+  .trseg .chip{flex:1 1 22%;text-align:center;min-width:70px;padding:7px 4px;font-size:11.5px;line-height:1.25}
+  .trseg .chip small{display:block;font-size:8.5px;opacity:.75;font-weight:400}
+  .trbars{display:flex;align-items:flex-end;gap:4px;height:150px;margin:6px 0 26px;position:relative}
+  .trbar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative}
+  .trbar i{display:block;width:100%;max-width:26px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#3D5178,#1B2A4A);min-height:2px}
+  .trbar.cur i{background:repeating-linear-gradient(135deg,#C5CDDC 0 3px,#E8ECF3 3px 6px);border:1px solid #9AA6BD}
+  .trbar .tv{position:absolute;top:-15px;font-size:8.5px;font-weight:700;color:var(--wine-d);white-space:nowrap}
+  .trbar .tm{position:absolute;bottom:-19px;font-size:8.5px;color:var(--muted);white-space:nowrap}
+  .trhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px;flex-wrap:wrap}
+  .trhead .th-t{font-size:13px;font-weight:800;color:var(--wine-d)}
+  .trhead .th-d{font-size:12px;font-weight:800}
+  .trtbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+  .trtbl th{background:var(--soft);color:var(--wine-d);font-size:10px;padding:6px 4px;border-bottom:1px solid var(--line)}
+  .trtbl td{padding:6px 4px;border-bottom:1px solid var(--soft);text-align:right}
+  .trtbl td:first-child{text-align:left;font-weight:700}
+  .trtbl tr.cur td{background:var(--soft2)}
+  .trtbl .up{color:#1c7a41;font-weight:700}.trtbl .dn{color:#c0392b;font-weight:700}
   /* 메모 자동 번역 */
   .memotr{margin-top:6px;background:var(--soft2);border:1.2px dashed var(--line);border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.6;color:#40506a}
   .memotr b{color:var(--gold-d);font-weight:700;margin-right:4px}
@@ -919,6 +940,24 @@
 </div>
 
 <!-- CHECK-IN LIST MODAL -->
+<!-- TREND / STATS MODAL -->
+<div class="overlay" id="trendOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">📈 Trends · แนวโน้ม · 추이 분석</h2>
+      <button class="sheet-x" onclick="closeTrend()" aria-label="Close">✕</button></div>
+    <div class="sub">월별 예약수·손님수·객단가·매출 흐름을 한눈에 봅니다 · ดูแนวโน้มรายเดือน</div>
+    <div class="trseg" id="trSeg">
+      <div class="chip on" data-k="cust" onclick="trPick(this)">👥 손님수<small>ลูกค้า</small></div>
+      <div class="chip" data-k="book" onclick="trPick(this)">📋 예약수<small>คิว</small></div>
+      <div class="chip" data-k="avg" onclick="trPick(this)">💵 객단가<small>ต่อคน</small></div>
+      <div class="chip" data-k="rev" onclick="trPick(this)">💰 매출<small>ยอดขาย</small></div>
+    </div>
+    <div id="trChart"></div>
+    <div id="trTable"></div>
+    <button class="cancel" onclick="closeTrend()">닫기</button>
+  </div>
+</div>
+
 <!-- MANUAL REVENUE MODAL -->
 <div class="overlay" id="revOverlay">
   <div class="sheet">
@@ -2032,7 +2071,7 @@ function renderStatBox(s){
         <div class="bar"><i style="width:${pc(v)}%;background:${grad}"></i></div>
       </div>`;
   $('statBox').innerHTML=`
-    <div class="stt">${T('statTitle')}</div>
+    <div class="stt">${T('statTitle')}<button type="button" class="trendbtn owner-only" onclick="openTrend()">📈 추이 보기 · แนวโน้ม</button></div>
     <div class="st-grid">
       <div class="st-cell book" onclick="showStatList('예약')"><div class="n">${s.booked}</div><div class="t">${T('stBook')}</div></div>
       <div class="st-cell visit" onclick="showStatList('방문')"><div class="n">${s.visitCount}</div><div class="t">${T('stVisit')}</div></div>
@@ -2049,6 +2088,76 @@ function renderStatBox(s){
   _statListStatus=null;
 }
 /* 💳🎟️ 선결제 고객 아이콘 — 예약 리스트 어디서나 한눈에 */
+/* ============================================================
+   📈 추이 분석 — 월별 손님수·예약수·객단가·매출
+   ============================================================ */
+let _trKey='cust';
+function openTrend(){$('trendOverlay').classList.add('on');renderTrend();}
+function closeTrend(){$('trendOverlay').classList.remove('on');}
+function trPick(el){_trKey=el.dataset.k;document.querySelectorAll('#trSeg .chip').forEach(c=>c.classList.toggle('on',c.dataset.k===_trKey));renderTrend();}
+// 월별 집계 (예약수·손님수·매출·객단가) — 직접입력 매출·선입금 포함
+function trendMonths(){
+  const map={};
+  const get=k=>map[k]||(map[k]={book:0,cust:0,rev:0});
+  data.forEach(e=>{
+    if(!e.date)return;
+    const k=String(e.date).slice(0,7);
+    if(e.status==='캔슬')return;
+    const seats=parseInt(e.seats)||1;
+    get(k).book+=1;
+    if(e.status==='방문'){get(k).cust+=seats;get(k).rev+=Number(e.amount||0);}
+    get(k).rev+=depositOf(e);
+  });
+  (manualRev||[]).forEach(r=>{const k=String(r.date).slice(0,7);get(k).rev+=r.amt;get(k).cust+=parseInt(r.cnt)||0;});
+  const keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
+  return keys.map(k=>{
+    const v=map[k];
+    return {key:k,label:k.slice(2).replace('-','/'),book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0};
+  });
+}
+function renderTrend(){
+  const chart=$('trChart'),tbl=$('trTable'); if(!chart)return;
+  const all=trendMonths();
+  if(!all.length){chart.innerHTML='<div class="at-empty">데이터가 없어요 · ยังไม่มีข้อมูล</div>';tbl.innerHTML='';return}
+  const win=all.length>12?all.slice(-12):all;
+  const curKey=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
+  const META={cust:{t:'👥 손님수 · ลูกค้า',f:v=>v+'명',u:''},book:{t:'📋 예약수 · จำนวนคิว',f:v=>v+'건',u:''},
+              avg:{t:'💵 객단가 · ต่อคน',f:v=>fmt(v),u:''},rev:{t:'💰 매출 · ยอดขาย',f:v=>fmt(v),u:''}};
+  const meta=META[_trKey];
+  const vals=win.map(x=>x[_trKey]);
+  const max=Math.max(...vals,1);
+  // 마감월(진행 중인 이번 달 제외) 기준 증감
+  const closed=win.filter(x=>x.key!==curKey);
+  let diffHtml='<span class="at-flat">― 데이터 부족</span>';
+  if(closed.length>=2){
+    const a=closed[0][_trKey],b=closed[closed.length-1][_trKey];
+    const pct=a>0?Math.round((b-a)/a*100):(b>0?100:0);
+    const cls=pct>0?'at-up':(pct<0?'at-down':'at-flat');
+    diffHtml=`<span class="${cls}">${pct>0?'▲ +':(pct<0?'▼ ':'― ')}${pct}% <span style="font-weight:600;font-size:10.5px">(${closed[0].label} ${meta.f(a)} → ${closed[closed.length-1].label} ${meta.f(b)})</span></span>`;
+  }
+  const avgAll=closed.length?Math.round(closed.reduce((s,x)=>s+x[_trKey],0)/closed.length):0;
+  chart.innerHTML=`<div class="trhead"><span class="th-t">${meta.t}</span><span class="th-d">${diffHtml}</span></div>
+    <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">마감월 평균 ${meta.f(avgAll)} · 최근 ${win.length}개월</div>
+    <div class="trbars">${win.map(x=>{
+      const h=Math.max(2,Math.round(x[_trKey]/max*118));
+      return `<div class="trbar${x.key===curKey?' cur':''}" title="${x.label} · ${meta.f(x[_trKey])}">
+        <span class="tv">${x[_trKey]?meta.f(x[_trKey]).replace('฿',''):''}</span><i style="height:${h}px"></i><span class="tm">${x.label}</span></div>`;
+    }).join('')}</div>`;
+  // 표: 월별 전체 지표 + 전월 대비
+  const rows=win.slice().reverse();
+  tbl.innerHTML=`<table class="trtbl"><thead><tr>
+      <th style="text-align:left">월</th><th>예약</th><th>손님</th><th>객단가</th><th>매출</th><th>전월비</th></tr></thead><tbody>
+    ${rows.map((x,i)=>{
+      const prev=rows[i+1];
+      const pv=prev?prev[_trKey]:null;
+      const d=(pv!=null&&pv>0)?Math.round((x[_trKey]-pv)/pv*100):null;
+      return `<tr class="${x.key===curKey?'cur':''}"><td>${x.label}${x.key===curKey?' *':''}</td>
+        <td>${x.book}</td><td>${x.cust}</td><td>${fmt(x.avg)}</td><td>${fmt(x.rev)}</td>
+        <td class="${d>0?'up':(d<0?'dn':'')}">${d==null?'—':(d>0?'+':'')+d+'%'}</td></tr>`;
+    }).join('')}
+  </tbody></table>
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">* 진행 중인 달 · 전월비는 선택한 지표 기준 · 매출은 직접 입력분·선입금 포함 · 캔슬 제외</div>`;
+}
 /* ============================================================
    💵 매출 직접 입력 (예약 기록이 없는 날의 입금 매출)
    ============================================================ */
