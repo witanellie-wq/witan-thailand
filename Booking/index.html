@@ -134,6 +134,8 @@
   .memotr .mt-copy{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
     padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;flex:0 0 auto;font-weight:700}
   .memo-th{font-size:10.5px;color:#2a5b93;margin-top:2px;word-break:break-word}
+  .anonnm{color:#7a8090;font-weight:700}
+  .tl-block .anonnm{color:#dfe4ee}
   /* 선결제 아이콘 */
   .preic{display:inline-flex;align-items:center;gap:1px;font-size:.86em;font-weight:700;letter-spacing:-.02em;
     background:rgba(183,155,94,.16);border-radius:3px;padding:0 3px;margin-left:3px;vertical-align:middle;white-space:nowrap}
@@ -2105,10 +2107,18 @@ function renderStatBox(s){
       ${mixRow('re','🔁 재방문 · ลูกค้าเก่า',s.reP,'linear-gradient(90deg,#2f8f5b,#57b184)')}
       ${mixRow('new','🆕 신규 · ลูกค้าใหม่',s.newP,'linear-gradient(90deg,#3b6fb0,#6f9bd4)')}
       ${mixRow('pre','💳 멤버십·회차권 보유 · สมาชิก/คอร์ส',s.preP,'linear-gradient(90deg,#B79B5E,#8C7647)')}
+      ${s.anonP?mixRow('anon','🚶 무기명 워크인 · ไม่ระบุชื่อ',s.anonP,'linear-gradient(90deg,#9AA6BD,#6F7C94)'):''}
     </div>
     <div id="statList"></div>
     <div class="conv"><span>${T('convRate')}</span><b>${s.convRate}%</b></div>`;
   _statListStatus=null;
+}
+/* 🚶 무기명(워크인) 표시: 이름을 안 받은 예약 */
+function isAnon(e){return !!(e&&(e.anon||!String(e.name||'').trim()));}
+function dispName(e){
+  const n=String((e&&e.name)||'').trim();
+  if(n)return esc(n);
+  return '<span class="anonnm">🚶 무기명 · ไม่ระบุชื่อ</span>';
 }
 /* 💳🎟️ 선결제 고객 아이콘 — 예약 리스트 어디서나 한눈에 */
 /* ============================================================
@@ -2371,14 +2381,14 @@ function showMixList(kind){
   _statListStatus=key; highlightStatCell(null);
   const y=cur.getFullYear(), m=cur.getMonth();
   const vis=data.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em===m+1&&e.status==='방문'});
-  const hits=(kind==='pre'?vis.filter(isPrepaidCust):vis.filter(e=>e.visit===(kind==='re'?'재방문':'신규')))
+  const hits=(kind==='pre'?vis.filter(isPrepaidCust):(kind==='anon'?vis.filter(isAnon):vis.filter(e=>e.visit===(kind==='re'?'재방문':'신규'))))
     .sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));
   if(!hits.length){box.innerHTML=`<div class="sl-empty">0</div>`;return}
   box.innerHTML=hits.map(e=>{
     const [yy,mo,d]=e.date.split('-');
     const amt=isStaff()?'':(fmt(e.amount||0));
     return `<div class="sl-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
+      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
       <div class="sl-r">${esc(e.treat||e.bktreat||'')}${amt?' · '+amt:''}${e.phone?'<br><span class="sl-ph">'+esc(e.phone)+'</span>':''}</div>
     </div>`}).join('');
 }
@@ -2396,7 +2406,7 @@ function showStatList(st){
     const [yy,mo,d]=e.date.split('-');
     const amt=isStaff()?'':(e.status==='방문'?fmt(e.amount||0):(e.expAmt?'~'+fmt(e.expAmt):''));
     return `<div class="sl-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
+      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
       <div class="sl-r">${esc(e.treat||e.bktreat||'')}${amt?' · '+amt:''}${e.phone?'<br><span class="sl-ph">'+esc(e.phone)+'</span>':''}</div>
     </div>`}).join('');
 }
@@ -2434,7 +2444,8 @@ function render(){
   const reP=sumSeats(visited.filter(e=>e.visit==='재방문'));
   const newP=sumSeats(visited.filter(e=>e.visit==='신규'));
   const preP=sumSeats(visited.filter(isPrepaidCust));
-  renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP});
+  const anonP=sumSeats(visited.filter(isAnon));
+  renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP,anonP});
   const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
   renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev);
 
@@ -2647,7 +2658,7 @@ function openDayReview(){
     return '<tr>'
       +'<td class="p-no">'+(i+1)+'</td>'
       +'<td class="rv-c">'+(e.time||'—')+'</td>'
-      +'<td>'+esc(e.name||'')+(e.phone?'<span class="rv-sub">'+esc(e.phone)+'</span>':'')+'</td>'
+      +'<td>'+(String(e.name||'').trim()?esc(e.name):'🚶 무기명')+(e.phone?'<span class="rv-sub">'+esc(e.phone)+'</span>':'')+'</td>'
       +'<td class="rv-c">'+stCell(e.status)+'</td>'
       +'<td>'+esc(e.treat||e.bktreat||'')+'</td>'
       +'<td class="p-price">'+(exp?fmt(exp):'')+'</td>'
@@ -2795,7 +2806,7 @@ function renderDay(){
     const cls=['tl-block',e.status==='예약'?'pending':'',p.conflict?'conflict':''].join(' ');
     blocks+=`<div class="${cls}${h<58?' short':''}" style="top:${top}px;height:${h}px;left:${left};width:${w}" onclick="openModal('${e.id}')">
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
-      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}</div>
+      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}</div>
       <div class="tb-menu">${esc(e.treat||e.bktreat||T('noMenu')||'—')}</div>
       ${(e.status==='방문')?(isStaff()?'':`<div class="tb-pr">✅ ${fmt(e.amount)}</div>`):(isStaff()?'':(e.expAmt?`<div class="tb-pr">~${fmt(e.expAmt)}</div>`:''))}
     </div>`;
@@ -2809,10 +2820,10 @@ function renderDay(){
   const noshowHtml=inactiveEntries.map(em=>{
     const ic=em.status==='캔슬'?'❌':(em.status==='연기대기'?'⏸':'🚫');
     const info=[em.time||null, esc(em.treat||em.bktreat||''), (!isStaff()&&em.expAmt)?'~'+fmt(em.expAmt):null, em.phone?esc(em.phone):null].filter(Boolean).join(' · ');
-    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${esc(em.name)}${prepaidIcon(em)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
+    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${dispName(em)}${prepaidIcon(em)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
   }).join('');
   const inactiveLabel = inactiveEntries.length?T('inactiveLbl'):'';
-  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${esc(e.name)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
+  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${dispName(e)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
 
   list.innerHTML=`${conflictBanner}
     <div class="tl-headrow">${heads}</div>
@@ -2915,10 +2926,14 @@ function onModalDateChange(){
 function closeModal(){$('overlay').classList.remove('on')}
 
 function saveBooking(){
-  const name=$('m_name').value.trim();
-  if(!name){alert('Enter a name · กรอกชื่อ');$('m_name').focus();return false}
-  // 필수 정보 누락 시에도 저장은 허용하되 한 번에 모아 경고
-  {
+  let name=$('m_name').value.trim();
+  let anon=false;
+  if(!name){
+    if(!confirm('🚶 No name · ไม่มีชื่อ · 이름이 비어 있어요\n워크인처럼 고객 정보를 안 받은 경우 무기명으로 저장합니다 (매출은 정상 집계, 무기명 목록에서 따로 관리).\n\n[OK] Save as walk-in (no name) · บันทึกแบบไม่ระบุชื่อ\n[Cancel] Enter name · กรอกชื่อ')){$('m_name').focus();return false}
+    anon=true;
+  }
+  // 필수 정보 누락 시에도 저장은 허용하되 한 번에 모아 경고 (무기명은 이미 확인했으므로 생략)
+  if(!anon){
     const missing=[];
     if(!$('m_phone').value.trim())missing.push('· 📞 Phone 전화번호 · เบอร์โทร');
     if(!$('m_srcid').value.trim() && $('m_src').value!=='워크인 Walk-in')missing.push('· 🛎 Account/Booking no. 계정·예약번호 · ไอดี/เลขจอง');
@@ -2957,7 +2972,7 @@ function saveBooking(){
     treat=bktreat;
   }
   const tgtDate=$('m_date').value||selDate;
-  const obj={date:tgtDate,status,name,time:$('m_time').value.trim(),phone:$('m_phone').value.trim(),
+  const obj={date:tgtDate,status,name,anon,time:$('m_time').value.trim(),phone:$('m_phone').value.trim(),
     seats:$('m_seats').value,companion:$('m_companion').value.trim(),dur:$('m_dur').value,
     line:$('m_line').value.trim(),src:$('m_src').value,srcid:$('m_srcid').value.trim(),cap:capImg,
     nat:$('m_nat').value,natc:$('m_nat').value==='외국'?$('m_natc').value:'',gender:$('m_gender').value,
@@ -3121,7 +3136,7 @@ function doSearch(){
     const [y,mo,d]=e.date.split('-');
     const st=({'예약':'📅'+T('s_예약'),'방문':'✅'+T('s_방문'),'노쇼':'🚫'+T('s_노쇼'),'캔슬':'❌'+T('s_캔슬')}[e.status]||e.status);
     return `<div class="sr-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="si-l"><div class="si-nm">${e.gender?genIcon(e.gender)+' ':''}${esc(e.name)}${prepaidIcon(e)} <span style="font-size:10px;color:var(--gold-d)">${st}</span></div>
+      <div class="si-l"><div class="si-nm">${e.gender?genIcon(e.gender)+' ':''}${dispName(e)}${prepaidIcon(e)} <span style="font-size:10px;color:var(--gold-d)">${st}</span></div>
         <div class="si-meta">${esc(e.treat)}${e.srcid?' · '+esc(e.srcid):''}${e.phone?' · '+esc(e.phone):''}${e.line?' · '+esc(e.line):''}</div></div>
       <div class="si-r"><div class="si-date">${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</div>
         <div class="si-pr">${isStaff()?'':(e.status==='방문'?fmt(e.amount):'')}</div></div>
@@ -3721,7 +3736,7 @@ function renderCheckin(){
     const st=e.status;
     return `<div class="ckrow s${st}">
       <div class="ck-top">
-        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}</div>
+        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}</div>
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
       <div class="ck-meta">${meta||'—'}</div>
@@ -3744,7 +3759,7 @@ function renderPending(pendAll){
   $('ckList').innerHTML=`<div class="listcount">${T('ckPendHdr')} · ${pendAll.length}</div>`+pendAll.map(e=>{
     const meta=[e.treat||e.bktreat||'', e.line?esc(e.line):'', e.phone?esc(e.phone):'', `${T('ckOrig')} ${e.date}${e.time?' '+e.time:''}`, (!isStaff()&&e.expAmt)?'~'+fmt(e.expAmt):''].filter(Boolean).join(' · ');
     return `<div class="ckrow s연기대기">
-      <div class="ck-top"><div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${ckStatusBadge('연기대기')}</div></div>
+      <div class="ck-top"><div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${ckStatusBadge('연기대기')}</div></div>
       <div class="ck-meta">${meta||'—'}</div>
       <div class="ckacts">
         <button class="ckbtn wait on" onclick="ckRebook('${e.id}')">${T('ckRebook')}</button>
