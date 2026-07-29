@@ -2133,7 +2133,7 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,re
     <div class="fc-t">💰 Expected vs actual · ยอดคาด/ยอดจริง · 예상 매출 대비 실제</div>
     <div class="fc-g">
       <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정 매출<br>ยอดจริง (${visited.length}${manTot?'+직접'+man.length:''})</div></div>
-      <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.length})</div></div>
+      <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.filter(e=>!isFinalDay(e.date)).length})${recon.expSkipped?`<br><span style="color:#8a6d1f">확정일 ${fmt(recon.expSkipped)} 제외</span>`:''}</div></div>
       <div class="fc-c fore"><div class="fv">${fmt(forecast)}</div><div class="fl">월 예상 합계<br>รวมคาดการณ์</div></div>
     </div>
     <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
@@ -2558,6 +2558,13 @@ function dayRevParts(ds){
           total:actual,actual,
           diff:hasMan?(manTotal-bookRev):0};                  // 실입금 − 기록 (음수면 기록이 더 큼)
 }
+// 실입금(하루 총 매출)을 넣은 날 = 그날 매출 확정 → 남은 예약분을 예상에 더하지 않음
+function finalDays(){
+  const set=new Set();
+  (manualRev||[]).forEach(r=>{if(r.mode!=='add')set.add(r.date)});
+  return set;
+}
+function isFinalDay(ds){return (manualRev||[]).some(r=>r.date===ds&&r.mode!=='add');}
 function revDates(y,m){
   const set=new Set();
   data.forEach(e=>{const p=String(e.date||'').split('-');if(+p[0]===y&&+p[1]===m+1)set.add(e.date)});
@@ -2753,7 +2760,11 @@ function render(){
   const manRev=total-bookSum;   // 실입금 기준과 기록의 차이(참고용)
   // 손님 수 = 실제 온 사람 수 (동반 인원 seats 합산)
   const headcount=sumSeats(visited)+manualRevMonth(y,m).reduce((s,r)=>s+(parseInt(r.cnt)||0),0);
-  const expSum=monthEntries.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
+  const _fin=finalDays();
+  const expSum=monthEntries.filter(e=>e.status==='예약'&&!_fin.has(e.date))
+    .reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
+  const expSkipped=monthEntries.filter(e=>e.status==='예약'&&_fin.has(e.date))
+    .reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
   $('mCount').textContent=headcount;
   $('mTotal').textContent=fmt(total);
   $('mAvg').textContent=fmt(headcount?Math.round(total/headcount):0);
@@ -2771,7 +2782,7 @@ function render(){
   const anonP=sumSeats(visited.filter(isAnon));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP,anonP});
   const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev,{bookSum,manDays,gapDays,total});
+  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev,{bookSum,manDays,gapDays,total,expSkipped});
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2786,7 +2797,7 @@ function render(){
     const dayE=data.filter(e=>e.date===ds);
     const vis=dayE.filter(e=>e.status==='방문');
     const rev=dayRevParts(ds).total;
-    const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
+    const expD=isFinalDay(ds)?0:dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
     const {peak,over}=peakOccupancy(dayE,beds);
     const isFull=peak>=beds;
     const dow=new Date(y,m,d).getDay();
@@ -3092,7 +3103,7 @@ function renderDay(){
   const _pt=dayRevParts(selDate);
   const manD=_pt.hasMan?_pt.manTotal:0;
   const rev=_pt.total;
-  const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
+  const expD=isFinalDay(selDate)?0:dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
   const [yy,mm,dd]=selDate.split('-');
   const dows=I18N.dow[LANG]||I18N.dow.ko;
   const dw=dows[new Date(Number(yy),Number(mm)-1,Number(dd)).getDay()];
