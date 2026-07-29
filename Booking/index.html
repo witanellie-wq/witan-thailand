@@ -2343,6 +2343,7 @@ function saveAndAddCompanion(){
 
 function openModal(id){
   editId=id;
+  _memPayPlan=null;
   const ov=$('overlay');
   if(id){
     const e=data.find(x=>x.id==id);
@@ -2452,6 +2453,28 @@ function saveBooking(){
     items,treat,bktreat,subtotal,discount,discname,disctype,discval,adjust,amount,expAmt,
     pay:$('m_pay').value,staff:getStaff(),visit:$('m_visit').value,
     memo:$('m_memo').value.trim(),care:$('m_care').value.trim(),service:$('m_service').value.trim()};
+  // 💳 멤버십 잔액 결제 (모달에서 예약해둔 경우 저장 시점에 확정 금액으로 차감)
+  if(_memPayPlan){
+    const mc=customers.find(x=>x.id==_memPayPlan.cid);
+    const prevRec=editId?data.find(x=>x.id==editId):null;
+    if(!mc||(prevRec&&prevRec.memPaid)){_memPayPlan=null;}
+    else if(status!=='방문'||!(amount>0)){
+      alert('⚠️ 멤버십 차감 안 됨 — 상태 "방문" + 결제금액이 필요해요. 예약 저장은 계속합니다.\nยังไม่หักสมาชิก (ต้องสถานะมา + มียอดเงิน) บันทึกคิวต่อ');
+      _memPayPlan=null;
+    }else{
+      const bal=Number(mc.balance||0);
+      if(amount>bal && !confirm(`Payment (${fmt(amount)}) exceeds balance (${fmt(bal)}) · เกินยอดคงเหลือ\nBalance goes negative — proceed? · ทำต่อไหม?`)){
+        _memPayPlan=null;
+      }else{
+        mc.balance=bal-amount;
+        (mc.history=mc.history||[]).unshift({t:nowStamp(),note:`결제 차감 −${fmt(amount)} · 잔액 ${fmt(mc.balance)} (${tgtDate} ${name})`,delta:-amount});
+        obj.memPaid=true;
+        obj.memo=(obj.memo?obj.memo+' / ':'')+`💳멤버십결제 ${fmt(amount)}`;
+        saveCusts();
+        _memPayPlan=null;
+      }
+    }
+  }
   if(editId){
     const i=data.findIndex(x=>x.id==editId);
     const prev=data[i];
@@ -3069,12 +3092,30 @@ function ledgerBadgeHtml(phoneRaw){
         ${rem>0?`<button type="button" class="lb-use" onclick="useCourse(${c.id});phoneLookup();">이 방문 −1회</button>`:'<span style="font-size:11px;color:#c0392b;font-weight:700">소진</span>'}</div>
         <div class="lb-sum">${c.expiry?'만료 '+c.expiry+' · ':''}구매 ${c.buyDate||'-'}</div></div>`;
     }else{
+      const cure=(typeof editId!=='undefined'&&editId)?data.find(x=>x.id==editId):null;
+      const planned=_memPayPlan&&_memPayPlan.cid==c.id;
+      let payRow;
+      if(cure&&cure.memPaid){
+        payRow=`<div class="lb-sum" style="font-weight:700;color:#1c7a41;margin-top:6px">✅ 이 예약 멤버십 결제 완료 · ชำระด้วยยอดสมาชิกแล้ว</div>`;
+      }else{
+        payRow=`<button type="button" class="lb-use" style="width:100%;margin-top:7px;${planned?'background:#1c7a41':''}" onclick="modalMemPlan(${c.id})">${planned?'✅ 저장하면 결제금액만큼 차감돼요 — 취소하려면 탭':'💳 이 예약을 멤버십 잔액으로 결제 (저장 시 차감)'}</button>`;
+      }
       return `<div class="ledger-badge mem">
         <div class="lb-h"><span>💳 멤버십${c.tier?' ('+esc(c.tier)+')':''} — 잔액 <b>${fmt(c.balance||0)}</b></span>
-        <button type="button" class="lb-use" onclick="chargeUse(${c.id});phoneLookup();">차감</button></div>
-        <div class="lb-sum">충전 ${fmt(c.charged||0)}${c.bonus?' +보너스 '+fmt(c.bonus):''}</div></div>`;
+        <button type="button" class="lb-use" style="background:#5b6b8c" onclick="chargeUse(${c.id});phoneLookup();">수동차감</button></div>
+        <div class="lb-sum">충전 ${fmt(c.charged||0)}${c.bonus?' +보너스 '+fmt(c.bonus):''}</div>
+        ${payRow}</div>`;
     }
   }).join('');
+}
+/* 모달에서 멤버십 결제 예약: 저장 시점에 확정 금액으로 차감 */
+let _memPayPlan=null;
+function modalMemPlan(cid){
+  _memPayPlan=(_memPayPlan&&_memPayPlan.cid==cid)?null:{cid};
+  if(_memPayPlan&&typeof getStatus==='function'&&getStatus()!=='방문'){
+    alert('ℹ️ 상태를 "방문"으로 바꾸고 결제금액을 입력한 뒤 저장하면 그 금액만큼 잔액에서 차감됩니다.\nหักจากยอดสมาชิกตอนบันทึก เมื่อสถานะ=มา + มียอดเงิน');
+  }
+  phoneLookup();
 }
 
 /* ============================================================
