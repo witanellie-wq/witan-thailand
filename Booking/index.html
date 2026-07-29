@@ -1012,6 +1012,8 @@
       <div class="chip" data-k="book" onclick="trPick(this)">📋 예약수<small>คิว</small></div>
       <div class="chip" data-k="avg" onclick="trPick(this)">💵 객단가<small>ต่อคน</small></div>
       <div class="chip" data-k="rev" onclick="trPick(this)">💰 매출<small>ยอดขาย</small></div>
+      <div class="chip" data-k="rePct" onclick="trPick(this)">🔁 재방문%<small>ลูกค้าเก่า</small></div>
+      <div class="chip" data-k="prePct" onclick="trPick(this)">💳 멤버십%<small>สมาชิก</small></div>
     </div>
     <div id="trChart"></div>
     <div id="trTable"></div>
@@ -2313,13 +2315,19 @@ function nextMonthKey(k){let[y,m]=k.split('-').map(Number);m++;if(m>12){m=1;y++;
 function trendBuckets(mode){
   const map={};
   const keyOf=d=>mode==='week'?weekStartStr(d):String(d).slice(0,7);
-  const get=k=>map[k]||(map[k]={book:0,cust:0,rev:0});
+  const get=k=>map[k]||(map[k]={book:0,cust:0,rev:0,custBk:0,re:0,pre:0});
   data.forEach(e=>{
     if(!e.date||e.status==='캔슬'||e.status==='연기대기')return;
     const k=keyOf(e.date), seats=parseInt(e.seats)||1;
-    get(k).book+=1;
-    if(e.status==='방문'){get(k).cust+=seats;get(k).rev+=Number(e.amount||0);}
-    get(k).rev+=depositOf(e);
+    const b=get(k);
+    b.book+=1;
+    if(e.status==='방문'){
+      b.cust+=seats;b.rev+=Number(e.amount||0);
+      b.custBk+=seats;                                   // 예약 기록 기준 방문 인원 (비율 분모)
+      if(e.visit==='재방문')b.re+=seats;
+      if(isPrepaidCust(e)||e.memPaid)b.pre+=seats;       // 멤버십·회차권 보유(또는 잔액 결제)
+    }
+    b.rev+=depositOf(e);
   });
   (manualRev||[]).forEach(r=>{const k=keyOf(r.date);get(k).rev+=r.amt;get(k).cust+=parseInt(r.cnt)||0;});
   let keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
@@ -2330,11 +2338,14 @@ function trendBuckets(mode){
   if(curK>last)last=curK;
   while(k<=last&&guard<200){full.push(k);k=mode==='week'?shiftWeek(k,1):nextMonthKey(k);guard++;}
   return full.map(key=>{
-    const v=map[key]||{book:0,cust:0,rev:0};
+    const v=map[key]||{book:0,cust:0,rev:0,custBk:0,re:0,pre:0};
     let label;
     if(mode==='week'){const p=key.split('-');const e2=shiftDate(key,6).split('-');label=+p[1]+'/'+ +p[2]+'~'+ +e2[2];}
     else label=key.slice(2).replace('-','/');
-    return {key,label,book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0};
+    return {key,label,book:v.book,cust:v.cust,rev:v.rev,avg:v.cust?Math.round(v.rev/v.cust):0,
+      custBk:v.custBk,re:v.re,pre:v.pre,
+      rePct:v.custBk?Math.round(v.re/v.custBk*100):0,
+      prePct:v.custBk?Math.round(v.pre/v.custBk*100):0};
   });
 }
 function renderTrend(){
@@ -2345,8 +2356,10 @@ function renderTrend(){
   const N=wk?12:12;
   const win=all.length>N?all.slice(-N):all;
   const curKey=wk?weekStartStr(todayStr()):todayStr().slice(0,7);
-  const META={cust:{t:'👥 손님수 · ลูกค้า',f:v=>v+'명',u:''},book:{t:'📋 예약수 · จำนวนคิว',f:v=>v+'건',u:''},
-              avg:{t:'💵 객단가 · ต่อคน',f:v=>fmt(v),u:''},rev:{t:'💰 매출 · ยอดขาย',f:v=>fmt(v),u:''}};
+  const META={cust:{t:'👥 손님수 · ลูกค้า',f:v=>v+'명'},book:{t:'📋 예약수 · จำนวนคิว',f:v=>v+'건'},
+              avg:{t:'💵 객단가 · ต่อคน',f:v=>fmt(v)},rev:{t:'💰 매출 · ยอดขาย',f:v=>fmt(v)},
+              rePct:{t:'🔁 재방문 비율 · ลูกค้าเก่า',f:v=>v+'%',sub:x=>x.re+'/'+x.custBk+'명'},
+              prePct:{t:'💳 멤버십·회차권 비율 · สมาชิก',f:v=>v+'%',sub:x=>x.pre+'/'+x.custBk+'명'}};
   const meta=META[_trKey];
   const vals=win.map(x=>x[_trKey]);
   const max=Math.max(...vals,1);
@@ -2365,19 +2378,22 @@ function renderTrend(){
     <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px">마감${unit} 평균 ${meta.f(avgAll)} · 최근 ${win.length}${wk?'주':'개월'}${wk?' (월요일 시작)':''}</div>
     <div class="trbars">${win.map(x=>{
       const h=Math.max(2,Math.round(x[_trKey]/max*118));
-      return `<div class="trbar${x.key===curKey?' cur':''}" title="${x.label} · ${meta.f(x[_trKey])}">
+      return `<div class="trbar${x.key===curKey?' cur':''}" title="${x.label} · ${meta.f(x[_trKey])}${meta.sub?' ('+meta.sub(x)+')':''}">
         <span class="tv">${x[_trKey]?meta.f(x[_trKey]).replace('฿',''):''}</span><i style="height:${h}px"></i><span class="tm">${x.label}</span></div>`;
     }).join('')}</div>`;
   // 표: 월별 전체 지표 + 전월 대비
   const rows=win.slice().reverse();
   tbl.innerHTML=`<table class="trtbl"><thead><tr>
-      <th style="text-align:left">${wk?'주':'월'}</th><th>예약</th><th>손님</th><th>객단가</th><th>매출</th><th>${wk?'전주비':'전월비'}</th></tr></thead><tbody>
+      <th style="text-align:left">${wk?'주':'월'}</th><th>예약</th><th>손님</th><th>🔁재방문</th><th>💳멤버십</th><th>객단가</th><th>매출</th><th>${wk?'전주비':'전월비'}</th></tr></thead><tbody>
     ${rows.map((x,i)=>{
       const prev=rows[i+1];
       const pv=prev?prev[_trKey]:null;
       const d=(pv!=null&&pv>0)?Math.round((x[_trKey]-pv)/pv*100):null;
       return `<tr class="${x.key===curKey?'cur':''}"><td>${x.label}${x.key===curKey?' *':''}</td>
-        <td>${x.book}</td><td>${x.cust}</td><td>${fmt(x.avg)}</td><td>${fmt(x.rev)}</td>
+        <td>${x.book}</td><td>${x.cust}</td>
+        <td>${x.custBk?x.rePct+'%':'—'}<span style="color:var(--muted);font-size:9.5px"> ${x.custBk?x.re:''}</span></td>
+        <td>${x.custBk?x.prePct+'%':'—'}<span style="color:var(--muted);font-size:9.5px"> ${x.custBk?x.pre:''}</span></td>
+        <td>${fmt(x.avg)}</td><td>${fmt(x.rev)}</td>
         <td class="${d>0?'up':(d<0?'dn':'')}">${d==null?'—':(d>0?'+':'')+d+'%'}</td></tr>`;
     }).join('')}
   </tbody></table>
