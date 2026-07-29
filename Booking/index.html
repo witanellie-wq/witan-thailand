@@ -337,8 +337,8 @@
   .offcal-g .dh{font-size:9px;color:var(--muted);font-weight:700}
   .offd{border:1.2px solid var(--line);background:#fff;border-radius:3px;padding:7px 0;font-size:11.5px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .offd.on{background:#c0392b;border-color:#c0392b;color:#fff;font-weight:700}
-  .cell .offmark{position:absolute;bottom:2px;left:3px;font-size:8.5px;line-height:1;padding:1px 2px;border-radius:3px;
-    border:1px solid transparent}
+  .cell .offmark{display:inline-block;font-size:8px;line-height:1;padding:1px 2px;border-radius:3px;
+    border:1px solid transparent;margin-left:2px;vertical-align:1px}
   .cell .offmark.lv1{background:#E7EFFA;border-color:#BCD3EE}
   .cell .offmark.lv2{background:#FDE7C7;border-color:#E9B872}
   .cell .offmark.lv3{background:#F7CFCB;border-color:#D98D85}
@@ -2657,16 +2657,15 @@ function render(){
     const cls=['cell',dow===0?'sun':'',dayE.length?'has':'',heat,ds===todayStr()?'today':'',over?'over':'',ds===selDate?'sel':''].join(' ');
     html+=`<div class="${cls}" onclick="selectDay('${ds}')">
       ${isFull?`<div class="fullbadge">${over?'OVER':'FULL'}</div>`:''}
-      <div class="dnum">${d}</div>
+      <div class="dnum">${d}${(()=>{
+        const of=offStaffFor(ds); if(!of.length)return '';
+        const work=staffList.length-of.length;
+        const lv=work<=1?'lv3':(work*2<=staffList.length?'lv2':'lv1');
+        return `<span class="offmark ${lv}" title="🏖 휴무 ${of.length} (${esc(of.join(', '))}) · 근무 ${work}명">🏖</span>`;
+      })()}</div>
       ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
       ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
-      ${(()=>{
-        const of=offStaffFor(ds); if(!of.length)return '';
-        const work=staffList.length-of.length;
-        const lv=work<=1?'lv3':(work*2<=staffList.length?'lv2':'lv1');   // 근무 1명↓ 빨강 / 절반↓ 주황 / 그 외 파랑
-        return `<div class="offmark ${lv}" title="🏖 휴무 ${of.length} (${esc(of.join(', '))}) · 근무 ${work}명">🏖</div>`;
-      })()}
     </div>`;
   }
   $('calGrid').innerHTML=html;
