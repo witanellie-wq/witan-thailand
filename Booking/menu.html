@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HANAHAYAN Clinic & Beauty · Menu v50</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Prompt:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B2A4A; --navy-d:#111D36; --gold:#AE9B6B; --gold-l:#C6B486; --gold-d:#8D7B57;
+    --gold-soft:#E6DDCB; --ink:#22262E; --muted:#8A8578; --line:#E4DCC9; --bg:#FFFFFF; --soft:#F7F4EE;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);
+    font-family:'Prompt','Noto Sans KR','Noto Sans JP','Noto Sans SC',sans-serif;line-height:1.5;
+    -webkit-font-smoothing:antialiased}
+  .page{max-width:760px;margin:0 auto;padding:0 22px 60px}
+
+  .benefits{margin:26px 0 6px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--soft)}
+  .bn-head{background:linear-gradient(135deg,var(--navy),var(--navy-d));color:var(--gold-l);
+    padding:12px 18px;font-size:13px;letter-spacing:2.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .bn-row{display:flex;gap:12px;align-items:baseline;padding:11px 18px;border-top:1px solid var(--line);background:#fff}
+  .bn-row:first-of-type{border-top:none}
+  .bn-badge{flex:0 0 auto;min-width:52px;text-align:center;background:var(--navy);color:var(--gold-l);
+    border-radius:8px;padding:3px 8px;font-size:12.5px;font-weight:600;letter-spacing:.5px}
+  .bn-badge.gold{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#fff}
+  .bn-body{flex:1}
+  .bn-t{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .bn-x{font-size:12px;color:var(--muted);margin-top:1px}
+  .bn-note{padding:9px 18px;font-size:11px;color:var(--muted);background:var(--soft);border-top:1px solid var(--line)}
+  .ba{display:flex;gap:8px;margin-top:9px}
+  .ba figure{flex:1;max-width:150px;margin:0;position:relative;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .ba img{width:100%;height:96px;object-fit:cover;display:block}
+  .ba figcaption{position:absolute;top:6px;left:6px;background:rgba(17,29,54,.82);color:var(--gold-l);
+    font-size:9.5px;letter-spacing:1.5px;font-weight:600;padding:2px 7px;border-radius:5px}
+  @media print{.ba img{height:80px}}
+  .pdfbtn{position:fixed;right:18px;bottom:18px;z-index:30;display:flex;align-items:center;gap:7px;
+    background:linear-gradient(135deg,var(--navy),var(--navy-d));color:var(--gold-l);border:1px solid var(--gold-d);
+    border-radius:999px;padding:11px 18px;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;
+    box-shadow:0 4px 14px rgba(17,29,54,.28);font-family:inherit}
+  .pdfbtn:active{transform:scale(.97)}
+  @media print{
+    .langbar,.pdfbtn{display:none!important}
+    body{background:#fff}
+    .page{max-width:100%;padding:0}
+    .benefits,.bn-row,.grp-wrap,.prog{break-inside:avoid;page-break-inside:avoid}
+    .section{break-before:auto}
+    .sec-head{break-after:avoid;page-break-after:avoid}
+  }
+  @page{margin:12mm}
+  .langbar{position:sticky;top:0;z-index:20;display:flex;gap:6px;justify-content:center;
+    padding:12px 0;background:linear-gradient(180deg,var(--bg) 70%,rgba(255,255,255,0));margin-bottom:4px}
+  .langbtn{border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;
+    padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Prompt',sans-serif;font-weight:500;transition:.15s}
+  .langbtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .langbtn:focus-visible{outline:2px solid var(--gold-d);outline-offset:2px}
+
+  .hero{text-align:center;padding:30px 0 26px}
+  .brand{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;
+    letter-spacing:.22em;color:var(--navy);line-height:1;text-indent:.22em}
+  .brand-sub{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;
+    letter-spacing:.32em;color:var(--gold-d);margin-top:8px;text-indent:.32em}
+  .subt{font-family:'Prompt',sans-serif;font-size:11px;letter-spacing:.34em;
+    color:var(--gold-d);margin-top:9px;font-weight:500;text-transform:uppercase}
+  .tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;
+    color:var(--muted);margin-top:16px}
+  .tagline-x{font-size:12px;color:var(--muted);margin-top:3px}
+  .rule{width:48px;height:2px;background:var(--gold);margin:20px auto 0;border-radius:2px}
+
+  .section{margin-top:40px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .sec-no{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;
+    color:var(--gold-l);line-height:1;min-width:40px}
+  .sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;
+    color:var(--navy);letter-spacing:.01em}
+  .sec-sub{font-size:12px;color:var(--gold-d);font-weight:500;letter-spacing:.04em;margin-top:1px}
+  .sec-desc{font-size:12px;color:var(--muted);margin:8px 0 18px;padding-left:54px;line-height:1.55}
+
+  /* ===== Before/After Gallery ===== */
+  .ba-gallery{padding-left:54px;margin:0 0 22px}
+  .ba-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold,#AE9B6B);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .ba-strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+  .ba-pair{flex:0 0 auto;scroll-snap-align:start;background:#fff;border:1px solid #ece7dc;border-radius:10px;padding:8px;box-shadow:0 1px 4px rgba(27,42,74,.06)}
+  .ba-imgs{display:flex;gap:6px}
+  .ba-slot{position:relative;width:118px;height:150px;border-radius:7px;overflow:hidden;background:#f4f1ea;display:flex;align-items:center;justify-content:center}
+  .ba-slot img{width:100%;height:100%;object-fit:cover;display:block}
+  .ba-slot .ba-lab{position:absolute;left:0;bottom:0;right:0;font-size:10px;text-align:center;color:#fff;background:linear-gradient(transparent,rgba(27,42,74,.72));padding:10px 0 3px;font-weight:600;letter-spacing:.05em}
+  .ba-slot.empty{cursor:pointer;flex-direction:column;gap:4px;color:#b7ad97;font-size:11px;border:1.5px dashed #d8d0bd}
+  .ba-slot.empty:hover{background:#efe9db;color:#8c8577}
+  .ba-slot.empty .ba-hint{font-size:8.5px;color:#c3bba6;margin-top:2px;line-height:1.2;text-align:center;padding:0 4px}
+  .ba-slot.armed{border:2px solid var(--gold,#AE9B6B);background:#f6efdd;color:#8a7a4e;box-shadow:0 0 0 3px rgba(174,155,107,.18)}
+  .ba-slot.armed .ba-hint{color:#8a7a4e;font-weight:600}
+  .ba-slot.dragover{border:2px solid var(--navy,#1B2A4A);background:#e8ecf4}
+  .ba-slot .ba-plus{font-size:22px;line-height:1}
+  .ba-cap{font-size:10px;color:var(--muted,#8a8578);text-align:center;margin-top:5px;min-height:12px}
+  .ba-cap-input{display:none;width:100%;box-sizing:border-box;margin-top:6px;font-size:11px;text-align:center;border:1px solid #e0d9c8;border-radius:6px;padding:4px 6px;color:#3a4b6b;font-family:inherit;background:#fffdf8}
+  .ba-cap-input:focus{outline:none;border-color:var(--gold,#AE9B6B)}
+  .ba-cap-view{font-size:11px;color:#3a4b6b;text-align:center;margin-top:6px;min-height:14px;font-weight:500}
+  .edit-on .ba-cap-input{display:block}
+  .edit-on .ba-cap-view{display:none}
+  .ba-slot.filled{cursor:default}
+  .edit-on .ba-slot.filled{cursor:move}
+  .ba-focus-hint{position:absolute;top:4px;left:4px;font-size:8.5px;background:rgba(27,42,74,.72);color:#fff;padding:2px 5px;border-radius:4px;display:none;pointer-events:none}
+  .edit-on .ba-slot.filled:hover .ba-focus-hint{display:block}
+  .ba-slot-tools{position:absolute;bottom:4px;left:0;right:0;display:none;justify-content:center;gap:5px}
+  .edit-on .ba-slot.filled:hover .ba-slot-tools{display:flex}
+  .ba-tbtn{width:24px;height:24px;border-radius:50%;background:rgba(27,42,74,.82);color:#fff;border:none;font-size:12px;line-height:24px;cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .ba-tbtn:hover{background:rgba(27,42,74,1)}
+  .ba-tbtn.danger:hover{background:#b3403a}
+  .ba-toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy,#1B2A4A);color:#fff;padding:10px 14px;border-radius:24px;font-size:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:100}
+  .ba-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .ba-toast button{background:var(--gold,#AE9B6B);color:#fff;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  @media print{.ba-cap-input{display:none!important}.ba-cap-view{display:block!important}.ba-focus-hint,.ba-slot-tools{display:none!important}}
+  .ba-del{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(27,42,74,.82);color:#fff;border:none;font-size:12px;line-height:20px;cursor:pointer;display:none;padding:0}
+  .edit-on .ba-del{display:block}
+  .ba-addpair{flex:0 0 auto;width:60px;min-height:150px;border:1.5px dashed #d8d0bd;border-radius:10px;background:transparent;color:#b7ad97;font-size:24px;cursor:pointer;display:none;align-items:center;justify-content:center}
+  .edit-on .ba-addpair{display:flex}
+  .ba-gallery.empty-hide{display:none}
+  .edit-on .ba-gallery.empty-hide{display:block}
+  .edit-badge{position:fixed;bottom:16px;right:16px;z-index:99;background:var(--navy,#1B2A4A);color:#fff;border:none;border-radius:22px;padding:9px 16px;font-size:12px;font-weight:600;box-shadow:0 3px 12px rgba(0,0,0,.25);cursor:pointer;letter-spacing:.03em}
+  .edit-badge.on{background:var(--gold,#AE9B6B)}
+  @media print{.ba-gallery.empty-hide{display:none!important}.ba-addpair,.ba-del,.edit-badge,.ba-slot.empty{display:none!important}.ba-strip{flex-wrap:wrap;overflow:visible}}
+
+
+  .item{display:flex;align-items:flex-start;gap:14px;padding:15px 0;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:none}
+  .item-body{flex:1;min-width:0}
+  .item-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--ink);line-height:1.2}
+  .item-dev{font-size:10px;color:#B7AFA2;margin-top:2px;letter-spacing:.02em;font-family:'Prompt',sans-serif}
+  .feature .f-dev{font-size:9.5px;color:rgba(255,255,255,.62);margin-top:2px;letter-spacing:.02em}
+  .item-x{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .item-meta{font-size:10.5px;color:var(--gold-d);margin-top:4px;letter-spacing:.02em;font-weight:500}
+  .pack3{display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:6px;
+    background:var(--soft);border:1px solid var(--gold-l);border-radius:8px;padding:4px 10px;
+    font-size:11px;color:var(--navy);font-weight:600;font-family:'Prompt',sans-serif}
+  .pack3 .lab{background:var(--navy);color:#fff;border-radius:5px;padding:1px 7px;font-size:9.5px;font-weight:700;letter-spacing:.03em}
+  .pack3 .sep{color:var(--gold-l)}
+  .pack3 .tot{color:var(--gold-d);font-weight:700}
+  .pack3 .tot b{color:var(--navy);font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:700}
+  .durs{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .dur{flex:1 1 88px;min-width:88px;border:1px solid var(--gold-l);border-radius:9px;padding:5px 6px 6px;
+    text-align:center;background:var(--soft);font-family:'Prompt',sans-serif}
+  .dur.on{border:1.5px solid var(--gold-d);background:#fff;box-shadow:0 1px 5px rgba(174,155,107,.18)}
+  .dur .dtag{display:block;font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--gold-d);min-height:11px}
+  .dur.on .dtag{color:#fff;background:var(--gold-d);border-radius:4px;padding:0 3px;margin:0 auto 1px;width:fit-content}
+  .dur .dm{display:block;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .dur .dp{display:block;font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--navy);line-height:1.15}
+  .dur .d3{display:block;font-size:8.5px;color:var(--gold-d);font-weight:600;letter-spacing:.01em}
+  .dur .dx{display:block;font-size:8.5px;color:var(--muted);line-height:1.3;margin-top:2px}
+  .feature .dur{background:rgba(255,255,255,.12);border-color:rgba(198,180,133,.45)}
+  .feature .dur.on{background:rgba(255,255,255,.2);border-color:var(--gold-l)}
+  .feature .dur .dp{color:#fff}
+  .feature .dur .dm,.feature .dur .dx{color:rgba(255,255,255,.66)}
+  .feature .dur .d3{color:var(--gold-l)}
+  .feature .dur .dtag{color:var(--gold-l)}
+  .feature .dur.on .dtag{background:var(--gold);color:var(--navy-d)}
+  .price-note{display:block;font-size:9.5px;color:var(--muted);text-align:right;letter-spacing:.02em}
+  .feature .price-note{color:rgba(255,255,255,.6)}
+  .tier3{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+  .tier3 .t-lab{font-size:8px;color:var(--muted);letter-spacing:.04em}
+  .tier3 .t-reg{font-size:11px;color:var(--muted)}
+  .tier3 .t-reg s{color:var(--muted)}
+  .tier3 .t-mem{font-size:12.5px;color:var(--gold-d);font-weight:600}
+  .tier3 .t-promo{display:flex;flex-direction:column;align-items:flex-end;margin-top:2px}
+  .tier3 .t-badge{font-size:8.5px;font-weight:700;letter-spacing:.04em;background:#C0392B;color:#fff;
+    border-radius:20px;padding:2px 8px;margin-bottom:2px}
+  .tier3 .t-big{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:700;color:#C0392B;line-height:1}
+  .tier3 .t-big .b{font-size:15px;vertical-align:top;margin-right:1px}
+  .addon-off{display:inline-block;background:var(--gold-soft);color:var(--gold-d);border:1px solid var(--gold-l);
+    border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;font-family:'Prompt',sans-serif;white-space:nowrap}
+  .feature .addon-off{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(198,180,133,.5)}
+  .feature .pack3{background:rgba(255,255,255,.13);border-color:rgba(198,180,133,.5);color:#fff;margin-top:7px}
+  .feature .pack3 .lab{background:var(--gold);color:var(--navy-d)}
+  .feature .pack3 .sep{color:rgba(255,255,255,.4)}
+  .feature .pack3 .tot{color:var(--gold-l)}
+  .feature .pack3 .tot b{color:#fff}
+  .badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.05em;
+    background:var(--gold);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px;
+    vertical-align:middle;font-family:'Prompt',sans-serif}
+  .item-price{text-align:right;white-space:nowrap;flex-shrink:0}
+  .price{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--navy)}
+  .price .b{font-size:14px;vertical-align:top;margin-right:1px}
+  .was{display:block;font-size:11px;color:var(--muted);text-decoration:line-through;margin-bottom:1px}
+  .price-note{font-size:10px;color:var(--gold);margin-top:2px}
+  .free-tag{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:.05em}
+
+  .grp{font-family:'Prompt',sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gold-d);margin:24px 0 4px;padding-bottom:6px;
+    border-bottom:1.5px solid var(--gold);display:inline-block}
+  .grp-wrap{margin-top:8px}
+
+  .feature{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-d) 100%);
+    color:#fff;border-radius:14px;padding:18px 20px;margin-top:16px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    box-shadow:0 8px 22px rgba(174,155,107,.26)}
+  .feature .f-name{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600}
+  .feature .f-x{font-size:11px;opacity:.92;margin-top:3px}
+  .feature .f-meta{font-size:10px;opacity:.82;margin-top:5px;letter-spacing:.03em}
+  .feature .f-price{text-align:right;white-space:nowrap}
+  .feature .f-price .p{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600}
+  .feature .f-price .was{color:#fff;opacity:.65;font-size:11px}
+  .feature .f-price .save{font-size:10px;color:var(--gold-l);margin-top:2px;font-weight:600}
+  .feature .star{font-size:9px;background:var(--gold);color:var(--navy-d);font-weight:700;
+    padding:2px 9px;border-radius:20px;letter-spacing:.05em;display:inline-block;margin-bottom:6px}
+
+  .note{background:var(--soft);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
+    padding:11px 15px;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6}
+  .note b{color:var(--gold-d)}
+
+  /* care program cards */
+  .prog{border:1.3px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden;background:#fff}
+  .prog-head{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-d) 100%);color:#fff;
+    padding:13px 17px;display:flex;align-items:center;gap:11px}
+  .prog-head .pico{font-size:20px;line-height:1}
+  .prog-head .pt{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;line-height:1.15}
+  .prog-head .ps{font-size:10.5px;opacity:.9;margin-top:1px;letter-spacing:.02em}
+  .prog-body{padding:2px 17px 8px}
+  .prog-body .item:first-child{border-top:none}
+
+  /* membership tiers */
+  .tiers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .tier{border:1.3px solid var(--line);border-radius:12px;padding:14px 15px;background:#fff;position:relative}
+  .tier.best{border-color:var(--gold);background:var(--soft)}
+  .tier .tname{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--ink)}
+  .tier .tload{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;color:var(--navy);margin-top:4px}
+  .tier .tbonus{font-size:11px;color:var(--gold);font-weight:600;margin-top:3px}
+  .tier .tval{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  .tier .tstar{position:absolute;top:-9px;right:12px;font-size:9px;font-weight:700;letter-spacing:.05em;
+    background:var(--gold);color:#fff;padding:2px 9px;border-radius:20px;font-family:'Prompt',sans-serif}
+  @media(max-width:440px){.tiers{grid-template-columns:1fr}}
+
+  .foot{margin-top:48px;padding-top:26px;border-top:1.5px solid var(--gold);text-align:center}
+  .foot-brand{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:.1em;color:var(--navy)}
+  .foot-line{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.7}
+  .foot-line b{color:var(--gold-d)}
+  .foot-tags{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .ftag{font-size:10px;color:var(--gold-d);border:1px solid var(--line);border-radius:20px;padding:4px 11px}
+  .disclaimer{font-size:10px;color:var(--muted);margin-top:16px;line-height:1.5}
+
+  /* ── A4 print: each section on its own page ── */
+  @page{size:A4;margin:14mm 13mm}
+  @media print{
+    .langbar{display:none!important}
+    .page{max-width:100%;padding:0}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
+    .hero{page-break-after:always;padding-top:60px}
+    .section{page-break-before:always;margin-top:0;padding-top:8px}
+    .prog,.feature,.tier,.tiers,.item,.sec-head{break-inside:avoid}
+    .foot{page-break-before:always}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div id="langbar" class="langbar"></div>
+  <button class="pdfbtn" onclick="makePdf()" id="pdfbtn">⤓ PDF</button>
+  <div id="menu"></div>
+</div>
+<script>
+const LANGS=[['ko','한'],['en','EN'],['th','ไทย'],['ja','日'],['zh','中']];
+let LANG=localStorage.getItem('hnh_menu_lang')||'th';
+
+const BENEFITS={
+  head:{ko:'MEMBER & BENEFITS',en:'MEMBER & BENEFITS',th:'MEMBER & BENEFITS',ja:'MEMBER & BENEFITS',zh:'MEMBER & BENEFITS'},
+  rows:[
+    {badge:'−5%',t:{ko:'프렌즈 동반',en:'Friends Together',th:'มากับเพื่อน',ja:'フレンズ同伴',zh:'好友同行'},
+     x:{ko:'2인 이상 동시 방문·시술 시 각자 5% 할인',en:'Visit & treat together (2+): 5% off each',th:'มาทำพร้อมกัน 2 คนขึ้นไป ลด 5% ทุกคน',ja:'2名以上同時施術で各5%OFF',zh:'2人以上同时护理 每人95折'}},
+    {badge:'−10%',t:{ko:'전후사진 동의',en:'Before & After Photos',th:'ยินยอมถ่ายรูป Before/After',ja:'ビフォーアフター撮影同意',zh:'前后对比照同意'},
+     x:{ko:'전후사진 촬영·SNS 활용 동의 시 10% 할인 (얼굴 일부 가림 가능 · 1회가 단독 적용)',en:'10% off when you consent to before/after photos for our SNS (partial face blur OK · single-session price only)',th:'ลด 10% เมื่อยินยอมให้ถ่ายรูป Before/After ลง SNS (เบลอบางส่วนได้ · เฉพาะราคาครั้งเดียว)',ja:'ビフォーアフター写真のSNS活用に同意で10%OFF(顔一部隠し可 · 1回価格のみ)',zh:'同意拍摄前后对比照用于SNS即享9折(可部分遮挡·仅限单次价)'}},
+    {badge:'−10~15%',t:{ko:'3회 코스',en:'3-Session Course',th:'คอร์ส 3 ครั้ง',ja:'3回コース',zh:'3次卡'},
+     x:{ko:'단품 10% · 콤보 15% 할인 — 각 메뉴의 3회권 가격 참조',en:'Singles 10% · combos 15% off — see 3-pack price on each menu',th:'เมนูเดี่ยวลด 10% · คอมโบลด 15% — ดูราคาแพ็ก 3 ในแต่ละเมนู',ja:'単品10%・コンボ15%OFF(各メニューの3回券価格)',zh:'单项9折·套餐85折(见各项3次卡价)'}},
+    {badge:'+10~25%',gold:1,t:{ko:'멤버십 충전',en:'Membership Top-up',th:'เติมเงินสมาชิก',ja:'メンバーチャージ',zh:'会员储值'},
+     x:{ko:'฿5,000→+10% · ฿10,000→+15% · ฿30,000→+20% · ฿50,000→+25% 보너스 크레딧 · 모든 메뉴·프로모가·3회권에 사용 가능',en:'฿5,000→+10% · ฿10,000→+15% · ฿30,000→+20% · ฿50,000→+25% bonus credit · valid on all menus, promos & 3-packs',th:'฿5,000→+10% · ฿10,000→+15% · ฿30,000→+20% · ฿50,000→+25% เครดิตโบนัส · ใช้ได้ทุกเมนู โปรฯ และแพ็ก 3',ja:'฿5,000→+10% · ฿10,000→+15% · ฿30,000→+20% · ฿50,000→+25% ボーナス · 全メニュー·プロモ·3回券に利用可',zh:'฿5,000→+10% · ฿10,000→+15% · ฿30,000→+20% · ฿50,000→+25% 赠送储值 · 全部项目·促销价·3次卡通用'}},
+  ],
+  note:{ko:'프렌즈 동반 5%는 3회 코스를 포함한 모든 시술 가격에 중복 적용됩니다. 전후사진 동의 10%는 1회가에만 단독 적용(다른 할인과 중복 불가). 멤버십 크레딧은 결제 수단으로 모든 가격에 사용 가능합니다.',
+    en:'Friends 5% applies on top of any treatment price, including 3-session courses. Photo consent 10% applies to single-session prices only and cannot be combined with other discounts. Membership credit is a payment method and works with any price.',
+    th:'ส่วนลดมากับเพื่อน 5% ใช้ได้กับทุกราคา รวมถึงคอร์ส 3 ครั้ง · ส่วนลดถ่ายรูป 10% ใช้กับราคาครั้งเดียวเท่านั้น ไม่รวมกับส่วนลดอื่น · เครดิตสมาชิกใช้ชำระได้กับทุกราคา',
+    ja:'フレンズ5%は3回コースを含む全施術価格に併用可。写真同意10%は1回価格のみ・他割引と併用不可。メンバークレジットは支払い手段として全価格に利用できます。',
+    zh:'好友同行5%适用于包括3次卡在内的所有价格。对比照同意9折仅限单次价格，不可与其他折扣叠加。会员储值为支付方式，可用于任何价格。'}
+};
+const UI={
+  sub:{ko:'KOREAN PREMIUM AESTHETIC',en:'KOREAN PREMIUM AESTHETIC',th:'KOREAN PREMIUM AESTHETIC',ja:'KOREAN PREMIUM AESTHETIC',zh:'KOREAN PREMIUM AESTHETIC'},
+  tagx:{ko:'한국식 피부·바디·두피 토탈 케어',en:'Korean skin · body · scalp total care',th:'ดูแลผิว·รูปร่าง·หนังศีรษะ สไตล์เกาหลี',ja:'韓国式 スキン·ボディ·スカルプ トータルケア',zh:'韩式 肌肤·身形·头皮 全面护理'},
+  free:{ko:'무료',en:'Free',th:'ฟรี',ja:'無料',zh:'免费'},
+  min:{ko:'분',en:'min',th:'นาที',ja:'分',zh:'分钟'},
+  byConsult:{ko:'상담 후 견적',en:'By consultation',th:'ประเมินราคาหลังปรึกษา',ja:'カウンセリング後',zh:'咨询后报价'},
+  mem:{ko:'3회권',en:'3-Pack',th:'แพ็ก 3 ครั้ง',ja:'3回券',zh:'3次卡'},
+  sess:{ko:'3회',en:'3 sessions',th:'3 ครั้ง',ja:'3回',zh:'3次'},
+  per:{ko:'회당',en:'each',th:'ต่อครั้ง',ja:'1回',zh:'每次'},
+  total:{ko:'총',en:'total',th:'รวม',ja:'計',zh:'共'},
+  member:{ko:'멤버',en:'Member',th:'สมาชิก',ja:'会員',zh:'会员'},
+  regular:{ko:'정상가',en:'Regular',th:'ปกติ',ja:'通常',zh:'原价'},
+  bigPromo:{ko:'이달 한정',en:'THIS MONTH',th:'เฉพาะเดือนนี้',ja:'今月限定',zh:'本月限定'},
+  addonOff:{ko:'함께하면',en:'as add-on',th:'ทำพร้อมกัน',ja:'同時',zh:'同场加做'}, solo:{ko:'단독',en:'alone',th:'เดี่ยว',ja:'単独',zh:'单做'},
+  promo:{ko:'프로모션가',en:'Promo',th:'ราคาโปรฯ',ja:'プロモ',zh:'促销价'},
+  from:{ko:'부터',en:'from',th:'เริ่มต้น',ja:'〜',zh:'起'},
+  popular:{ko:'인기',en:'POPULAR',th:'ยอดนิยม',ja:'人気',zh:'热门'},
+  hours:{ko:'매일 10:30–19:30 · 연중무휴 (일요일도 영업)',en:'Open daily 10:30–19:30 · incl. Sundays',th:'เปิดทุกวัน 10:30–19:30 · เปิดวันอาทิตย์ด้วย',ja:'年中無休 10:30–19:30 (日曜も営業)',zh:'每日 10:30–19:30 · 全年无休(周日照常)'},
+  disc:{ko:'가격은 행사에 따라 변동될 수 있습니다 · 비의료 미용 서비스입니다',en:'Prices may vary by promotion · Non-medical aesthetic services',th:'ราคาอาจเปลี่ยนแปลงตามโปรโมชั่น · บริการเสริมความงามที่ไม่ใช่หัตถการทางการแพทย์',ja:'価格はキャンペーンにより変動する場合があります · 医療行為ではない美容サービスです',zh:'价格可能因促销而变动 · 非医疗美容服务'},
+};
+function tx(o){return o[LANG]||o.ko}
+function mins(n){return n+' '+tx(UI.min)}
+
+const /* 전후사진 사용법: 아무 항목에나 ba 필드 추가 → 항목 아래 BEFORE/AFTER 썸네일 표시.
+   예) {name:{...}, price:'990', ..., ba:{before:'photos/bbglow_b.jpg', after:'photos/bbglow_a.jpg'}}
+   사진은 이 HTML 파일과 같은 폴더의 photos/ 폴더에 넣으세요. ba 없는 항목은 아무것도 표시되지 않음. */
+SECTIONS=[
+  /* ── 01 유입 엔진 ── */
+  {no:'01',title:'Signature Care',
+   sub:{ko:'시그니처 케어',en:'Signature Care',th:'ทรีตเมนต์ยอดนิยม',ja:'シグネチャーケア',zh:'招牌护理'},
+   desc:{ko:'가장 인기 있는 입문 메뉴 · 무료 피부측정 후 맞춤 추천 · 3회권가는 −5% 회원가',en:'Most-loved entry menu · free skin analysis first · 3-pack = member price (−5%)',th:'เมนูยอดนิยมสำหรับเริ่มต้น · วัดผิวฟรีก่อน · แพ็ก 3 ครั้ง = ราคาสมาชิก (−5%)',ja:'一番人気の入門メニュー · 無料肌測定後にご提案 · 3回券=会員価格(−5%)',zh:'最受欢迎的入门菜单·先免费测肤·3次卡=会员价(−5%)'},
+   items:[
+     {name:'Skin Analysis',free:1,m:10,
+      x:{ko:'수분·모공·주름·색소 측정 후 맞춤 상담',en:'Moisture, pores, wrinkles & pigment analysis',th:'วัดความชุ่มชื้น รูขุมขน ริ้วรอย จุดด่างดำ',ja:'水分・毛穴・シワ・色素を測定',zh:'检测水分·毛孔·皱纹·色素'}},
+     {name:'BB Glow + BB Blush',price:'990',was:'฿2,900',mem:'1,490',limited:1,m:60,p3:'940',meta:{ko:'클렌징 → 각질 → 중화 → 세럼 → BB글로우 미세침 → LED · BB 블러쉬 포함',en:'Cleanse → Exfoliate → Neutralize → Serum → BB Glow microneedling → LED · BB Blush incl.',th:'ทำความสะอาด → ผลัดเซลล์ → ปรับสมดุล → เซรั่ม → BB Glow ไมโครนีดเดิล → LED · รวม BB Blush',ja:'クレンジング→角質→中和→美容液→BBグロウマイクロニードル→LED · BBブラッシュ込み',zh:'清洁→去角质→中和→精华→BB Glow微针→LED·含BB腮红'},
+      x:{ko:'피부 속 반영구 톤업 · 잡티 커버·화사한 물광 광채',en:'Semi-permanent tone-up in the skin · covers blemishes, dewy radiance',th:'ปรับโทนกึ่งถาวรในผิว · กลบจุดด่างดำ·ผิวฉ่ำวาว',ja:'肌内の半永久トーンアップ · シミカバー·ツヤ光',zh:'肌肤半永久提亮·遮瑕·水光焕亮'}},
+
+     {name:'LALA Peel',price:'890',was:'฿2,490',mem:'1,490',limited:1,m:45,p3:'850',meta:{ko:'클렌징 → 필링 → 진정 → 세럼 → 마무리',en:'Cleansing → Peel → Neutralize → Serum → Finish',th:'ทำความสะอาด → พีล → ปลอบผิว → เซรั่ม → ปิดท้าย',ja:'クレンジング→ピール→鎮静→美容液→仕上げ',zh:'清洁→焕肤→舒缓→精华→收尾'},
+      x:{ko:'한국 LHA 필링 · 모공·결·톤 정돈, 민감성도 OK',en:'Korean LHA peel · pores, texture & tone, sensitive-safe',th:'พีลลิ่ง LHA เกาหลี · รูขุมขน·ผิวเนียน·กระจ่างใส',ja:'韓国LHAピール · 毛穴·キメ·トーン、敏感肌OK',zh:'韩国LHA焕肤·毛孔·肤质·肤色·敏感肌适用'}},
+     {name:'Milk Peel',price:'690',was:'฿1,790',mem:'990',limited:1,m:40,p3:'660',meta:{ko:'클렌징 → 우유 필링 → 진정 → 마무리',en:'Cleansing → Milk peel → Soothe → Finish',th:'ทำความสะอาด → พีลนม → ปลอบผิว → ปิดท้าย',ja:'クレンジング→ミルクピール→鎮静→仕上げ',zh:'清洁→牛奶焕肤→舒缓→收尾'},
+      x:{ko:'저자극 우유 필링 · 각질 정리·수분·톤업',en:'Gentle milk peel · exfoliate, hydrate, brighten',th:'พีลลิ่งนม อ่อนโยน · ผลัดเซลล์·เพิ่มน้ำ·กระจ่าง',ja:'低刺激ミルクピール · 角質·うるおい·トーンUP',zh:'温和牛奶焕肤·去角质·补水·提亮'}},
+     {name:'Bakuchiol Peel',price:'1,490',was:'฿2,290',m:50,p3:'1,420',meta:{ko:'오가니시티 바쿠치올 레티놀 도포 후 MTS · 바쿠치올 세럼 증정',en:'Organicity Bakuchiol Retinol + MTS · free Bakuchiol serum',th:'Organicity Bakuchiol Retinol + MTS · แถมเซรั่มบาคูชิออล',ja:'Organicity バクチオールレチノール塗布後MTS · バクチオール美容液プレゼント',zh:'Organicity 补骨脂酚视黄醇涂抹后MTS·赠补骨脂酚精华'},
+      x:{ko:'저자극 마일드 리서페이싱 · 레티놀 대체 바쿠치올로 잔주름·톤·결·모공 · 자극 없이 안티에이징 (임산부·민감성도 OK)',en:'Gentle mild resurfacing · bakuchiol (retinol alternative) for fine lines, tone, texture & pores · no irritation, pregnancy/sensitive-safe',th:'รีเซอร์เฟสอ่อนโยน · บาคูชิออล(แทนเรตินอล) ริ้วรอย·โทน·ผิวเนียน·รูขุมขน · ไม่ระคายเคือง แม่ตั้งครรภ์·ผิวแพ้ง่ายก็ได้',ja:'低刺激マイルドリサーフェシング · バクチオール(レチノール代替)で小じわ·トーン·キメ·毛穴 · 刺激なし、妊娠中·敏感肌OK',zh:'温和轻焕肤·补骨脂酚(视黄醇替代)改善细纹·肤色·肤质·毛孔·无刺激孕妇敏感肌适用'}},
+     {name:'MesoGlaze · HA & Collagen',price:'590',was:'฿990',mem:'790',limited:1,m:45,p3:'560',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'히알루론산·콜라겐 물광 · 수분·탄력',en:'HA & collagen glow · hydration & bounce',th:'ไฮยา·คอลลาเจน ฉ่ำวาว · ชุ่มชื้น·ยืดหยุ่น',ja:'ヒアルロン·コラーゲンツヤ · 保湿·ハリ',zh:'玻尿酸·胶原水光·补水·弹润'}},
+     {name:'MesoGlaze · Brightening',price:'590',was:'฿990',mem:'790',limited:1,m:45,p3:'560',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'미백·톤업 물광 · 칙칙함·색소 케어',en:'Brightening glow · dullness & pigment',th:'ไวท์เทนนิ่ง ฉ่ำวาว · ผิวหมองคล้ำ·จุดด่างดำ',ja:'美白·トーンUPツヤ · くすみ·色素',zh:'美白·提亮水光·暗沉·色素'}},
+     {name:'MesoGlaze · Tox Peptide',price:'890',was:'฿1,490',mem:'1,290',limited:1,m:45,p3:'850',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'펩타이드 탄력·잔주름 · 매끄러운 결',en:'Peptide firmness & fine lines · smooth texture',th:'เปปไทด์ กระชับ·ริ้วรอยเล็ก · ผิวเรียบ',ja:'ペプチドでハリ·小じわ · なめらか',zh:'胜肽紧致·细纹·平滑肤质'}},
+     {name:'MesoGlaze · PDRN',price:'990',was:'฿1,990',mem:'990',limited:1,m:50,p3:'940',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'PDRN 재생·진정 · 손상·민감 피부 집중',en:'PDRN regeneration & calming · damaged/sensitive',th:'PDRN ฟื้นฟู·ปลอบผิว · ผิวบอบบาง·เสียหาย',ja:'PDRN再生·鎮静 · ダメージ·敏感肌',zh:'PDRN修护·舒缓·受损·敏感肌'}},
+      {name:'MesoGlaze · Acne Care',price:'890',was:'฿1,490',limited:1,m:40,p3:'800',meta:{ko:'지성·막힘 피부 진정 앰플 · 활성 염증기 시술 불가',en:'sebum-control ampoule · not during active breakouts',th:'แอมพูลคุมมัน · งดช่วงสิวอักเสบ',ja:'皮脂ケア·炎症期不可',zh:'控油安瓶·爆痘期不可'},
+       x:{ko:'살리실릭-징크 앰플로 모공·번들거림 정돈',en:'Salicylic-zinc formula refines pores & oil',th:'ซาลิไซลิก-ซิงค์ รูขุมขนดูเล็ก คุมมัน',ja:'サリチル·亜鉛で毛穴·皮脂を整える',zh:'水杨酸锌·细致毛孔控油'}},
+   ],
+   groups:[
+     {label:{ko:'MesoGlaze 애드온 · 앰플 시술에 붙이는 마무리 (동시 시술 특가)',en:'MesoGlaze Add-ons · finish your ampoule session (same-visit price)',th:'MesoGlaze แอดออน · ปิดท้ายหลังแอมพูล (ราคาทำพร้อมกัน)',ja:'MesoGlazeアドオン · アンプル施術の仕上げ(同時特価)',zh:'MesoGlaze加项·安瓶护理后的收尾(同做特价)'},items:[
+       {feature:1,star:'★ BEST ADD-ON',
+        name:{ko:'+ LDM 물방울 진정 마무리',en:'+ LDM Waterdrop Calming Finish',th:'+ LDM ปลอบผิวหยดน้ำ ปิดท้าย',ja:'+ LDM 水滴鎮静仕上げ',zh:'+ LDM 水滴镇静收尾'},
+        dev:'LDM · Local Dynamic Micromassage',price:'+390',was:'฿1,290',
+        meta:{ko:'메조글레이즈 어느 앰플에나 · +15분 · 단품 ฿1,290 → 애드온 ฿390',en:'with any MesoGlaze ampoule · +15 min · ฿1,290 alone → ฿390 as add-on',th:'ใช้กับ MesoGlaze แอมพูลใดก็ได้ · +15 นาที · เดี่ยว ฿1,290 → เสริม ฿390',ja:'どのMesoGlazeアンプルにも · +15分 · 単品฿1,290 → アドオン฿390',zh:'任意MesoGlaze安瓶均可·+15分钟·单做฿1,290→加项฿390'},
+        x:{ko:'초당 수백만 번 진동하는 물방울 초음파로 앰플을 피부 속까지 밀어 넣고 붉은기를 가라앉히는 마무리 · 메조글레이즈 다음에 가장 많이 붙는 애드온 · 시술 당일 바로 화장 가능',en:'Waterdrop ultrasound drives the ampoule deeper and settles redness · the most-added finish after MesoGlaze · makeup same day, no downtime',th:'คลื่นเสียงหยดน้ำดันแอมพูลให้ซึมลึกและลดรอยแดง · แอดออนยอดนิยมที่สุดต่อจาก MesoGlaze · แต่งหน้าได้เลยวันเดียวกัน',ja:'水滴超音波でアンプルを深部へ届け赤みを鎮める仕上げ · MesoGlazeに一番足されるアドオン · 当日メイクOK',zh:'水滴超声将安瓶推入更深层并镇静泛红·MesoGlaze后最热门的收尾·当天即可化妆'}},
+       {name:{ko:'+ 크라이오 진정 마무리',en:'+ Cryo Calming Finish',th:'+ ไครโอ ปลอบผิวปิดท้าย',ja:'+ クライオ鎮静仕上げ',zh:'+ 冷疗镇静收尾'},dev:'',price:'+390',was:'฿690',
+        meta:{ko:'+10분 · 열감·붉은기 빠른 진정',en:'+10 min · fast cool-down for heat & redness',th:'+10 นาที · ลดร้อน·แดงเร็ว',ja:'+10分 · ほてり·赤みを素早く鎮静',zh:'+10分钟·快速退热退红'},
+        x:{ko:'앰플 후 열감이 오르는 피부에 · 냉각 진정 + 모델링 팩 마무리',en:'For skin that heats up after the ampoule · cryo calming + modeling pack',th:'สำหรับผิวที่ร้อนหลังแอมพูล · ความเย็น + มาส์กปิดท้าย',ja:'アンプル後にほてる肌へ · 冷却＋モデリングパック',zh:'适合安瓶后发热的肌肤·冷疗＋收尾面膜'}},
+       {name:{ko:'+ 비타민C 침투 부스터',en:'+ Vitamin C Boost',th:'+ วิตามินซี บูสเตอร์',ja:'+ ビタミンCブースター',zh:'+ 维C导入'},dev:'',price:'+490',was:'฿990',
+        meta:{ko:'+15분 · 브라이트닝 앰플과 특히 잘 맞음',en:'+15 min · pairs best with Brightening',th:'+15 นาที · เข้ากับ Brightening ที่สุด',ja:'+15分 · Brighteningと相性◎',zh:'+15分钟·与美白安瓶最搭'},
+        x:{ko:'이온의 힘으로 고농도 비타민C를 추가 침투 · 톤업·광채를 한 단계 더',en:'Ionto drives extra high-dose vitamin C · one more step of glow',th:'ไอออนดันวิตามินซีเข้มข้นเพิ่ม · ออร่าขึ้นอีกขั้น',ja:'イオンで高濃度ビタミンCを追加導入 · ツヤをもう一段',zh:'离子追加导入高浓度维C·光泽再升一级'}},
+       {name:{ko:'+ RF 콜라겐 타이트닝',en:'+ RF Collagen Tightening',th:'+ RF คอลลาเจน กระชับ',ja:'+ RFコラーゲン',zh:'+ RF胶原紧致'},dev:{ko:'고주파(RF)',en:'Radiofrequency (RF)',th:'คลื่นความถี่วิทยุ (RF)',ja:'高周波(RF)',zh:'射频(RF)'},price:'+590',was:'฿1,190',
+        meta:{ko:'+15분 · 고주파 · Tox Peptide·PDRN과 인기 조합',en:'+15 min · radiofrequency · popular with Tox Peptide & PDRN',th:'+15 นาที · คลื่นความถี่วิทยุ · นิยมคู่กับ Tox Peptide·PDRN',ja:'+15分 · 高周波 · Tox Peptide·PDRNと人気',zh:'+15分钟·射频·与Tox Peptide·PDRN热门组合'},
+        x:{ko:'고주파 열로 즉각 탄탄함까지 · 앰플 + 탄력을 한 번에',en:'Adds instant firmness on top of the ampoule',th:'เพิ่มความกระชับทันทีต่อจากแอมพูล',ja:'アンプルに即ハリをプラス',zh:'在安瓶基础上叠加即时紧致'}},
+     ]},
+     {label:{ko:'BB글로우 부위 추가 · 얼굴과 동시 시술 특가',en:'BB Glow Add-ons · with face treatment',th:'บีบีโกลว์แอดออน · ทำพร้อมหน้า ราคาพิเศษ',ja:'BBグロウ追加部位 · 顔と同時施術で特価',zh:'BB焕肤加购部位·与面部同做特价'},items:[
+       {name:{ko:'+ 목 전면',en:'+ Neck (front)',th:'+ คอด้านหน้า',ja:'+ ネック(前面)',zh:'+ 颈部(前侧)'},dev:'',price:'+590',m:20,meta:{ko:'얼굴과 목 톤 경계 없이 연결',en:'blends face & neck tone seamlessly',th:'เชื่อมโทนหน้า-คอเนียนไร้รอยต่อ',ja:'顔と首のトーンを境目なく',zh:'面颈色调无缝衔接'},
+        x:{ko:'얼굴 시술과 동시에만 · 인기 조합: 얼굴+목전면 ฿1,580',en:'With face only · popular: Face+Neck front ฿1,580',th:'ทำพร้อมหน้าเท่านั้น · ยอดฮิต: หน้า+คอหน้า ฿1,580',ja:'顔と同時のみ · 人気:顔+前面ネック ฿1,580',zh:'仅限与面部同做·热门:脸+前颈 ฿1,580'}},
+       {name:{ko:'+ 목 풀커버 (전체)',en:'+ Neck full (all around)',th:'+ คอเต็ม (รอบคอ)',ja:'+ ネック全体',zh:'+ 颈部全覆盖'},dev:'',price:'+990',m:35,meta:{ko:'앞·옆목까지 전체 커버',en:'front & sides fully covered',th:'ครอบคลุมทั้งคอ ด้านหน้า+ข้าง',ja:'前·横まで全体カバー',zh:'前侧+两侧全覆盖'},
+        x:{ko:'얼굴 시술과 동시에만 · 얼굴+목풀 ฿1,980',en:'With face only · Face+Full neck ฿1,980',th:'ทำพร้อมหน้าเท่านั้น · หน้า+คอเต็ม ฿1,980',ja:'顔と同時のみ · 顔+全ネック ฿1,980',zh:'仅限与面部同做·脸+全颈 ฿1,980'}},
+       {name:{ko:'+ 눈밑',en:'+ Under-eye',th:'+ ใต้ตา',ja:'+ 目の下',zh:'+ 眼下'},dev:'',price:'+590',m:20,meta:{ko:'다크서클 완화 · 마취크림 포함',en:'brightens dark circles · numbing incl.',th:'ลดคล้ำใต้ตา · รวมยาชา',ja:'クマ緩和·麻酔込',zh:'淡化黑眼圈·含麻膏'},
+        x:{ko:'얼굴 시술과 동시에만',en:'With face treatment only',th:'ทำพร้อมหน้าเท่านั้น',ja:'顔と同時のみ',zh:'仅限与面部同做'}},
+       {name:{ko:'+ 겨드랑이',en:'+ Underarms',th:'+ รักแร้',ja:'+ ワキ',zh:'+ 腋下'},dev:'',price:'+990',m:35,meta:{ko:'양쪽 · 어두운 톤 커버',en:'both sides · dark tone cover',th:'สองข้าง · ปกปิดสีคล้ำ',ja:'両側·暗いトーンカバー',zh:'双侧·遮盖暗沉'},
+        x:{ko:'인기 조합: 얼굴+목전면+겨드랑이 ฿2,570 ⭐',en:'Popular: Face+Neck+Underarm ฿2,570 ⭐',th:'ยอดฮิต: หน้า+คอ+รักแร้ ฿2,570 ⭐',ja:'人気:顔+首+ワキ ฿2,570 ⭐',zh:'热门:脸+颈+腋下 ฿2,570 ⭐'}},
+       {name:{ko:'+ 비키니 라인',en:'+ Bikini line',th:'+ บิกินี่ไลน์',ja:'+ ビキニライン',zh:'+ 比基尼线'},dev:'',price:'+1,390',m:45,meta:{ko:'여성 전용 · 프라이빗 룸',en:'women only · private room',th:'เฉพาะผู้หญิง · ห้องส่วนตัว',ja:'女性専用·個室',zh:'仅限女性·独立房间'},
+        x:{ko:'얼굴 시술과 동시에만 · 단독은 아래 부위별 가격',en:'With face only · standalone price below',th:'ทำพร้อมหน้าเท่านั้น · เดี่ยวดูราคาด้านล่าง',ja:'顔と同時のみ·単独は下記参照',zh:'仅限与面部同做·单做见下方价格'}},
+     ]},
+     {label:{ko:'BB글로우 부위별 · Body BB Glow (단독 시술)',en:'Body BB Glow by Area (standalone)',th:'บอดี้บีบีโกลว์ตามจุด (ทำเดี่ยว)',ja:'ボディBBグロウ部位別(単独)',zh:'身体BB焕肤·分部位(单做)'},items:[
+       {name:{ko:'넥 (목) BB글로우',en:'Neck BB Glow',th:'บีบีโกลว์ลำคอ',ja:'ネックBBグロウ',zh:'颈部BB焕肤'},dev:'',price:'1,290',was:'฿2,490',limited:1,m:40,p3:'1,160',meta:{ko:'목주름·목 톤 보정',en:'neck lines & tone correction',th:'ปรับโทน·ริ้วรอยลำคอ',ja:'首のシワ·トーン補正',zh:'颈纹·颈部提亮'},
+        x:{ko:'얼굴과 목의 톤 차이를 자연스럽게 연결',en:'Blends face-to-neck tone difference naturally',th:'ปรับสีหน้ากับลำคอให้กลมกลืน',ja:'顔と首のトーン差を自然につなぐ',zh:'自然衔接面部与颈部色差'}},
+       {name:{ko:'겨드랑이 BB글로우',en:'Underarm BB Glow',th:'บีบีโกลว์รักแร้',ja:'ワキBBグロウ',zh:'腋下BB焕肤'},dev:'',price:'1,490',was:'฿2,990',limited:1,m:40,p3:'1,340',meta:{ko:'양쪽 · 어두운 톤 커버',en:'both sides · dark tone cover',th:'สองข้าง · ปกปิดสีคล้ำ',ja:'両側 · 暗いトーンをカバー',zh:'双侧·遮盖暗沉'},
+        x:{ko:'제모 후 착색·칙칙함을 밝고 균일하게',en:'Brightens post-hair-removal darkening evenly',th:'ปรับรักแร้คล้ำหลังกำจัดขนให้กระจ่างใส',ja:'脱毛後の色素沈着を明るく均一に',zh:'改善脱毛后色沉·均匀提亮'}},
+       {name:{ko:'팔꿈치·무릎 BB글로우 (택1)',en:'Elbow or Knee BB Glow',th:'บีบีโกลว์ข้อศอกหรือเข่า (เลือก 1)',ja:'肘または膝BBグロウ',zh:'手肘或膝盖BB焕肤(选1)'},dev:'',price:'1,190',was:'฿2,290',limited:1,m:40,p3:'1,070',meta:{ko:'양쪽 · 각질 정돈 포함',en:'both sides · exfoliation incl.',th:'สองข้าง · รวมผลัดเซลล์ผิว',ja:'両側 · 角質ケア込み',zh:'双侧·含去角质'},
+        x:{ko:'거칠고 어두운 관절 부위를 부드럽고 밝게 · 더 넓게 원하시면 하프암(1,590)·종아리(1,890)로 확장하세요',en:'Softens & brightens rough, dark joints · go wider with Half Arm (1,590) or Calves (1,890)',th:'ข้อศอก·เข่าหยาบคล้ำให้เนียนสว่าง · อยากได้กว้างขึ้น เลือกครึ่งแขน (1,590) หรือ น่อง (1,890) ค่ะ',ja:'ざらつき·くすみをなめらかに明るく · より広くならハーフアーム(1,590)·ふくらはぎ(1,890)へ',zh:'粗糙暗沉关节变柔嫩透亮·想做更广可选半臂(1,590)·小腿(1,890)'}},
+       {name:{ko:'하프암 BB글로우 (팔꿈치~손목)',en:'Half Arm BB Glow (elbow to wrist)',th:'บีบีโกลว์ครึ่งแขน (ศอกถึงข้อมือ)',ja:'ハーフアームBBグロウ(肘〜手首)',zh:'半臂BB焕肤(手肘至手腕)'},dev:'',price:'1,590',was:'฿2,990',limited:1,m:45,p3:'1,430',
+        meta:{ko:'양팔 팔꿈치~손목 · 손등 포함',en:'both arms, elbow to wrist · backs of hands included',th:'สองแขน ศอกถึงข้อมือ · รวมหลังมือ',ja:'両腕 肘〜手首 · 手の甲込み',zh:'双臂 手肘至手腕·含手背'},
+        x:{ko:'반팔·민소매에 드러나는 구간만 · 팔 전체(2,490)보다 부담 없이 시작하는 입문 부위',en:'Just the part your short sleeves reveal · an easier start than Full Arms (2,490)',th:'เฉพาะส่วนที่โผล่จากเสื้อแขนสั้น · เริ่มง่ายกว่าแขนทั้งหมด (2,490)',ja:'半袖から出る部分だけ · 両腕全体(2,490)より始めやすい入門部位',zh:'只做短袖露出的部分·比全臂(2,490)更易入门'}},
+       {name:{ko:'팔 전체 BB글로우',en:'Full Arms BB Glow',th:'บีบีโกลว์แขนทั้งหมด',ja:'両腕BBグロウ',zh:'全臂BB焕肤'},dev:'',price:'2,490',was:'฿4,990',limited:1,m:60,p3:'2,240',meta:{ko:'양팔 어깨~손목',en:'both arms, shoulder to wrist',th:'สองแขน ไหล่ถึงข้อมือ',ja:'両腕 肩〜手首',zh:'双臂 肩至手腕'},
+        x:{ko:'햇빛 착색·톤 불균형을 밝고 고르게',en:'Evens sun-darkened, uneven arm tone',th:'ปรับผิวแขนคล้ำแดดให้สว่างสม่ำเสมอ',ja:'日焼け·トーンムラを明るく均一に',zh:'晒黑不均匀肤色变透亮'}},
+       {name:{ko:'종아리 BB글로우 (무릎~발목)',en:'Calves BB Glow (knee to ankle)',th:'บีบีโกลว์น่อง (เข่าถึงข้อเท้า)',ja:'ふくらはぎBBグロウ(膝〜足首)',zh:'小腿BB焕肤(膝至脚踝)'},dev:'',price:'1,890',was:'฿3,590',limited:1,m:50,p3:'1,700',
+        meta:{ko:'양다리 무릎~발목 · 발등 포함',en:'both legs, knee to ankle · tops of feet included',th:'สองขา เข่าถึงข้อเท้า · รวมหลังเท้า',ja:'両脚 膝〜足首 · 足の甲込み',zh:'双腿 膝至脚踝·含脚背'},
+        x:{ko:'스커트·반바지에 드러나는 구간 · 모기 자국·흉터·모공 착색을 원톤으로',en:'The stretch your skirt or shorts reveal · evens out bite marks, scars and pore darkening',th:'ส่วนที่โผล่จากกระโปรง·กางเกงขาสั้น · ปรับรอยยุงกัด·แผลเป็น·รูขุมขนคล้ำให้โทนเดียว',ja:'スカート·ショーパンから出る部分 · 虫刺され跡·傷跡·毛穴の色素をワントーンに',zh:'裙装·短裤露出的部分·蚊虫叮咬痕·疤痕·毛孔色沉统一色调'}},
+       {name:{ko:'허벅지 BB글로우',en:'Thighs BB Glow',th:'บีบีโกลว์ต้นขา',ja:'太ももBBグロウ',zh:'大腿BB焕肤'},dev:'',price:'1,990',was:'฿3,990',limited:1,m:50,p3:'1,790',
+        meta:{ko:'양쪽 허벅지 · 앞+뒤',en:'both thighs · front + back',th:'ต้นขาสองข้าง · หน้า+หลัง',ja:'両太もも · 前+後ろ',zh:'双侧大腿·前+后'},
+        x:{ko:'착색·튼살 자국·톤 불균형을 매끈하게 · 바디 허벅지 리프팅과 같은 날 받으면 톤과 라인을 함께 정리',en:'Smooths darkening, stretch marks and uneven tone · pair it with a thigh body treatment the same day to fix tone and line together',th:'ปรับรอยคล้ำ·รอยแตกลาย·สีไม่สม่ำเสมอให้เนียน · ทำคู่กับทรีตเมนต์ต้นขาวันเดียวกัน ได้ทั้งสีและรูปทรง',ja:'色素沈着·妊娠線·トーンムラをなめらかに · 同日に太ももボディ施術を合わせるとトーンとラインを同時に',zh:'改善色沉·妊娠纹·肤色不均·同日搭配大腿身体护理 可同时处理色调与线条'}},
+       {name:{ko:'다리 전체 BB글로우',en:'Full Legs BB Glow',th:'บีบีโกลว์ขาทั้งหมด',ja:'両脚BBグロウ',zh:'全腿BB焕肤'},dev:'',price:'2,990',was:'฿5,990',limited:1,m:70,p3:'2,690',meta:{ko:'양다리 허벅지~발목',en:'both legs, thigh to ankle',th:'สองขา ต้นขาถึงข้อเท้า',ja:'両脚 太もも〜足首',zh:'双腿 大腿至脚踝'},
+        x:{ko:'모공 착색·흉터 자국까지 매끈한 원톤 레그',en:'One-tone legs — covers pore darkening & scar marks',th:'ขาโทนเดียวเนียนใส ปกปิดรูขุมขนคล้ำ·รอยแผล',ja:'毛穴の色素·傷跡までワントーンの脚に',zh:'遮盖毛孔色沉·疤痕 打造一色美腿'}},
+       {name:{ko:'비키니 라인 BB글로우',en:'Bikini Line BB Glow',th:'บีบีโกลว์บิกินี่ไลน์',ja:'ビキニラインBBグロウ',zh:'比基尼线BB焕肤'},dev:'',price:'1,990',was:'฿3,990',limited:1,m:50,p3:'1,790',meta:{ko:'여성 전용 · 프라이빗 룸',en:'women only · private room',th:'เฉพาะผู้หญิง · ห้องส่วนตัว',ja:'女性専用 · 個室',zh:'仅限女性·独立房间'},
+        x:{ko:'제모 후 착색 라인을 자연스럽게 톤업',en:'Natural tone-up for post-waxing darkened lines',th:'ปรับสีคล้ำหลังแว็กซ์ให้เนียนใส',ja:'脱毛後の着色ラインを自然にトーンアップ',zh:'脱毛后色沉线条自然提亮'}},
+       {name:{ko:'엉덩이 BB글로우',en:'Hip BB Glow',th:'บีบีโกลว์สะโพก',ja:'ヒップBBグロウ',zh:'臀部BB焕肤'},dev:'',price:'1,990',was:'฿3,990',limited:1,m:50,p3:'1,790',meta:{ko:'양쪽 · 착색·트러블 자국 커버',en:'both sides · covers darkening & marks',th:'สองข้าง · ปกปิดรอยคล้ำ·รอยสิว',ja:'両側 · 色素沈着·跡カバー',zh:'双侧·遮盖色沉·痘印'},
+        x:{ko:'착색·앉은 자국을 매끈하고 균일한 톤으로',en:'Smooths sitting marks & darkening to an even tone',th:'รอยคล้ำ·รอยกดทับให้เนียนสม่ำเสมอ',ja:'色素沈着·跡を均一なトーンに',zh:'色沉压痕变均匀嫩滑'}},
+       {name:{ko:'등 전체 BB글로우',en:'Full Back BB Glow',th:'บีบีโกลว์แผ่นหลัง',ja:'背中BBグロウ',zh:'背部BB焕肤'},dev:'',price:'2,490',was:'฿4,990',limited:1,m:60,p3:'2,240',meta:{ko:'등드름 자국·톤 커버',en:'covers back-acne marks & tone',th:'ปกปิดรอยสิวหลัง·ปรับโทน',ja:'背中ニキビ跡·トーンカバー',zh:'遮盖背部痘印·提亮'},
+        x:{ko:'오픈백 의상을 위한 매끈한 등 · 등드름 케어와 병행 추천',en:'Backless-ready smooth back · pairs well with back-acne care',th:'หลังเนียนใสพร้อมชุดเปิดหลัง · แนะนำคู่กับทรีตเมนต์สิวหลัง',ja:'背中開き服のための美背中 · 背中ニキビケアと併用推奨',zh:'露背装必备·建议搭配背部痘痘护理'}},
+       {name:{ko:'전신 BB글로우',en:'Full Body BB Glow',th:'บีบีโกลว์ทั้งตัว',ja:'全身BBグロウ',zh:'全身BB焕肤'},dev:'',price:'8,990',was:'฿17,900',limited:1,m:150,p3:'8,090',meta:{ko:'목+팔+다리+등+엉덩이 풀세트 · 부위 합산 대비 −20%',en:'neck+arms+legs+back+hip full set · 20% less than parts combined',th:'คอ+แขน+ขา+หลัง+สะโพก ครบเซต · ถูกกว่าแยกจุด 20%',ja:'首+腕+脚+背中+ヒップ · 部位合計より−20%',zh:'颈+臂+腿+背+臀全套·比分部位省20%'},
+        x:{ko:'웨딩·촬영·이벤트 전 풀바디 톤업 시그니처',en:'Signature full-body tone-up before weddings, shoots & events',th:'โทนอัพทั้งตัวก่อนงานแต่ง·ถ่ายรูป·อีเวนต์',ja:'ウェディング·撮影前の全身トーンアップ',zh:'婚礼·拍摄·活动前全身提亮'}},
+
+     ]},
+     {label:{ko:'딥 브라이트닝 콤보 · 표피 정돈 + BB Glow (2회 방문)',en:'Deep Brightening Combo · Prep + BB Glow (2 visits)',th:'ดีปไบรท์เทนนิ่ง · เตรียมผิว + BB Glow (2 ครั้ง)',ja:'ディープブライトニング · 表皮ケア＋BBグロウ(2回来店)',zh:'深层焕亮组合·表皮护理+BB焕肤(2次到店)'},items:[
+       {name:{ko:'겨드랑이 브라이트 콤보',en:'Underarm Bright Combo',th:'รักแร้ไบรท์คอมโบ',ja:'ワキブライトコンボ',zh:'腋下焕亮组合'},dev:{ko:'각질 정돈 + BB Glow + 이온토 + LED',en:'Prep + BB Glow + Ionto + LED',th:'เตรียมผิว + BB Glow + ไอออนโต + LED',ja:'表皮ケア + BBグロウ + イオント + LED',zh:'表皮护理 + BB焕肤 + 离子 + LED'},price:'1,990',was:'฿3,990',limited:1,m:70,p3:'1,690',meta:{ko:'① 각질 정돈 → ② BB글로우 미백 앰플 → ③ 비타민C 이온토 → ④ LED 진정 (1~2주 간격 2회)',en:'① exfoliate prep → ② BB Glow whitening ampoule → ③ Vit C ionto → ④ LED calm (2 visits, 1–2 wks)',th:'① เตรียมผิว → ② BB Glow ไวท์ → ③ วิตซี ไอออนโต → ④ LED (2 ครั้ง ห่าง 1–2 สัปดาห์)',ja:'① 表皮ケア → ② BBグロウ美白 → ③ ビタCイオントLED → ④ 鎮静(2回·1–2週)',zh:'① 表皮护理 → ② BB焕肤美白 → ③ 维C离子 → ④ LED镇静(2次·间隔1–2周)'},
+        x:{ko:'옅게 만들고 + 균일하게 덮는 이중 케어 · 커버만 하는 것보다 오래 유지',en:'Lighten + cover, dual-action — lasts longer than cover alone',th:'ลดความคล้ำ + ปรับให้เนียน สองกลไก ติดทนกว่าปกปิดอย่างเดียว',ja:'薄く＋均一にカバーの二段構え · カバー単独より長持ち',zh:'先淡化再遮盖 双重机制·比单纯遮盖更持久'}},
+       {name:{ko:'비키니·사타구니 브라이트 콤보',en:'Bikini & Groin Bright Combo',th:'บิกินี่·ขาหนีบไบรท์คอมโบ',ja:'ビキニ·そけいブライトコンボ',zh:'比基尼·腹股沟焕亮组合'},dev:{ko:'각질 정돈 + BB Glow + 이온토 + LED',en:'Prep + BB Glow + Ionto + LED',th:'เตรียมผิว + BB Glow + ไอออนโต + LED',ja:'表皮ケア + BBグロウ + イオント + LED',zh:'表皮护理 + BB焕肤 + 离子 + LED'},price:'2,490',was:'฿4,990',limited:1,m:80,p3:'2,120',meta:{ko:'여성 전용 · 프라이빗 룸 · 2회 방문 구성',en:'women only · private room · 2-visit course',th:'เฉพาะผู้หญิง · ห้องส่วนตัว · คอร์ส 2 ครั้ง',ja:'女性専用 · 個室 · 2回構成',zh:'仅限女性·独立房间·2次课程'},
+        x:{ko:'왁싱·마찰 착색 라인을 개선 후 자연 톤업',en:'Improves waxing & friction darkening, then natural tone-up',th:'ลดรอยคล้ำจากแว็กซ์·เสียดสี แล้วปรับโทนธรรมชาติ',ja:'脱毛·摩擦の着色を改善後、自然にトーンアップ',zh:'改善脱毛·摩擦色沉后自然提亮'}},
+       {name:{ko:'여드름 자국 브라이트 콤보 (얼굴)',en:'Acne-Mark Bright Combo (Face)',th:'ไบรท์คอมโบรอยสิว (ใบหน้า)',ja:'ニキビ跡ブライトコンボ(顔)',zh:'痘印焕亮组合(面部)'},dev:{ko:'각질 정돈 + BB Glow + 이온토 + LED',en:'Prep + BB Glow + Ionto + LED',th:'เตรียมผิว + BB Glow + ไอออนโต + LED',ja:'表皮ケア + BBグロウ + イオント + LED',zh:'表皮护理 + BB焕肤 + 离子 + LED'},price:'1,990',was:'฿3,990',limited:1,m:100,p3:'1,690',meta:{ko:'① 각질 정돈 → ② BB글로우 미백 앰플 → ③ 이온토 → ④ LED · 붉은·갈색 자국 톤 정리',en:'① prep → ② BB Glow whitening → ③ ionto → ④ LED · evens red/brown marks',th:'① เตรียมผิว → ② BB Glow → ③ ไอออนโต → ④ LED · ปรับรอยแดง·น้ำตาล',ja:'① 表皮ケア → ② BBグロウ → ③ イオント → ④ LED · 赤·茶跡を整える',zh:'① 表皮护理 → ② BB焕肤 → ③ 离子 → ④ LED · 均匀红褐痘印'},
+        x:{ko:'여드름 지나간 자국·칙칙함을 개선하고 균일한 피부톤으로 · 활성 여드름 시기엔 시술 불가',en:'Fades post-acne marks & dullness for an even tone · not during active breakouts',th:'ลดรอยหลังสิว·ความหมอง ผิวโทนสม่ำเสมอ · งดทำช่วงสิวอักเสบ',ja:'ニキビ跡·くすみを整え均一トーンに · 活動性ニキビ時は不可',zh:'淡化痘后印记·暗沉 肤色均匀·爆痘期不可做'}},
+     ]},
+   ],
+   noteHtml:{ko:'<b>BB Glow ฿990 · MesoGlaze ฿590~</b> 프로모션가는 당분간 유지 · <b>선불 3회권</b> 구입 시 회원가(−5%)로 차감 · <b>MesoGlaze + LDM ฿390</b> 애드온이 가장 인기',en:'<b>BB Glow ฿990 · MesoGlaze ฿590+</b> promo price for now · <b>3-session pack</b> deducts at member price (−5%)',th:'<b>BB Glow ฿990 · MesoGlaze ฿590+</b> ราคาโปรฯ (ช่วงนี้) · ซื้อ <b>แพ็ก 3 ครั้ง</b> หักตามราคาสมาชิก (−5%)',ja:'<b>BB Glow ฿990 · MesoGlaze ฿590~</b> プロモ価格継続 · <b>3回券</b>は会員価格(−5%)で消化',zh:'<b>BB Glow ฿990 · MesoGlaze ฿590起</b> 促销价维持中·购<b>3次卡</b>按会员价(−5%)扣'}},
+
+  /* ── 02 장비 단품 ── */
+  {no:'02',title:'Device à la carte',
+   sub:{ko:'장비 단품',en:'Device à la carte',th:'เครื่องมือเดี่ยว',ja:'デバイス単品',zh:'仪器单项'},
+   desc:{ko:'한국 장비를 단품으로 · 가볍게 받거나 다른 시술에 애드온 · 3회권가는 −10%',en:'Korean devices, standalone · quick sessions or add-on · 3-pack = −10%',th:'เครื่องมือเกาหลีแบบเดี่ยว · ทำเดี่ยวหรือเสริมกับบริการอื่น · แพ็ก 3 = −10%',ja:'韓国デバイスを単品で · 単独/アドオン · 3回券=−10%',zh:'韩国仪器单项·单做或加项·3次卡=−10%'},
+   items:[
+     {name:'Aqua Peel',dev:'',price:'790',m:30,p3:'710',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'모공 속 노폐물·각질 흡입 딥클렌징',en:'Deep-cleanse suction for pores & debris',th:'ดูดสิ่งอุดตัน·ทำความสะอาดล้ำลึก',ja:'毛穴の汚れ·角質を吸引ディープ洗浄',zh:'吸出毛孔污垢·深层清洁'}},
+     {name:{ko:'크라이오 진정 케어',en:'Cryo Calming Care',th:'ไครโอ ปลอบผิว',ja:'クライオ鎮静ケア',zh:'冷疗镇静'},dev:'',price:'690',m:40,p3:'620',meta:{ko:'전처리 + 냉각 진정 + 모델링 팩 마무리',en:'pre-care + cryo calming + modeling pack finish',th:'เตรียมผิว + ความเย็น + มาส์กปิดท้าย',ja:'前処理＋冷却鎮静＋モデリングパック',zh:'前处理＋冷疗镇静＋收尾面膜'},
+      x:{ko:'열감 오른 피부·여드름·햇볕 화상·레이저 시술 후 진정에 · 붉은기·화끈거림을 빠르게 가라앉힘',en:'For heated, acne-prone, sunburned or post-laser skin · quickly calms redness & burning',th:'สำหรับผิวร้อน·เป็นสิว·ไหม้แดด·หลังเลเซอร์ · ลดแดง·แสบร้อนอย่างรวดเร็ว',ja:'ほてり·ニキビ·日焼け·レーザー後の鎮静に · 赤み·熱感を素早く抑える',zh:'适合发热·痘痘·晒伤·激光术后·快速镇静退红'}},
+     {name:{ko:'비타민C 침투 부스터',en:'Vitamin C Boost',th:'วิตามินซี บูสเตอร์',ja:'ビタミンCブースター',zh:'维C导入'},dev:'',price:'990',m:30,p3:'890',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+      x:{ko:'고농도 비타민C를 이온의 힘으로 피부 속까지 빠르게 침투 · 미백·톤업·광채',en:'Drives high-dose vitamin C deep & fast via ions · brighten, tone up, glow',th:'ดันวิตามินซีเข้มข้นซึมลึกเร็วด้วยไอออน · กระจ่าง·โทนอัพ·ออร่า',ja:'高濃度ビタミンCをイオンで素早く深部へ · 美白·トーンアップ·ツヤ',zh:'离子快速深层导入高浓度维C·美白·提亮·光泽'}},
+     {name:{ko:'LDM 물방울 케어 (모드 선택)',en:'LDM Waterdrop Care (pick a mode)',th:'LDM หยดน้ำ (เลือกโหมด)',ja:'LDM水滴ケア(モード選択)',zh:'LDM水滴护理(选模式)'},dev:'LDM · Local Dynamic Micromassage',price:'1,290',m:35,p3:'1,160',meta:{ko:'상담 후 모드 선택: 수분 · 미백 · 재생 · 리프팅 (18~24분 정규 프로토콜) · 3회권 −10% · 5회권 ฿1,090/회',en:'pick after consult: hydration · brightening · rejuvenation · lifting (full 18–24 min protocol) · 3-pack −10% · 5-pack ฿1,090/session',th:'เลือกโหมดหลังปรึกษา: เติมน้ำ · กระจ่าง · ฟื้นฟู · ยกกระชับ (โปรโตคอลเต็ม 18–24 นาที) · แพ็ก 3 −10% · แพ็ก 5 ฿1,090/ครั้ง',ja:'相談後モード選択: 保湿·美白·再生·リフト(18〜24分正規プロトコル) · 3回券−10% · 5回券฿1,090/回',zh:'咨询后选模式:补水·美白·再生·提拉(18–24分完整方案)·3次卡−10%·5次卡฿1,090/次'},
+      x:{ko:'LDM(물방울 초음파)을 피부 증상에 맞는 모드로 · 촉촉·투명 광채, 자극·다운타임 없음 · <b>정석은 주 2–3회 × 8–12회 코스</b> — 1회는 컨디션 케어, 결과는 코스에서',en:'Waterdrop ultrasound in the mode your skin needs · dewy glow, zero downtime · <b>the protocol is 2–3×/week for 8–12 sessions</b> — one visit refreshes, the course delivers',th:'คลื่นเสียงเติมน้ำชั้นลึก ผิวฉ่ำวาวกระจก · ไม่ระคาย ไม่ต้องพักฟื้น',ja:'水滴超音波で深部保湿、ツヤ·ガラス肌グロウ · 刺激·ダウンタイムなし',zh:'水滴超声深层补水·水润玻璃光·无刺激无恢复期'}},
+     {name:{ko:'고주파(RF) 케어 (모드 선택 · 얼굴)',en:'Radiofrequency (RF) Care (pick a mode · face)',th:'RF คลื่นความถี่วิทยุ (เลือกโหมด · ใบหน้า)',ja:'高周波(RF)ケア(モード選択·顔)',zh:'射频(RF)护理(选模式·面部)'},dev:{ko:'고주파 6MHz',en:'RF 6 MHz',th:'RF 6 MHz',ja:'高周波6MHz',zh:'射频6MHz'},price:'1,190',m:40,p3:'1,070',meta:{ko:'상담 후 모드 선택: 주름·탄력·리프팅 (22분) / 재생·부종 (14분) · 3회권 −10% · 5회권 ฿1,010/회',en:'pick after consult: wrinkle · tightening · lifting (22 min) / rejuvenation · edema (14 min) · 3-pack −10% · 5-pack ฿1,010/session',th:'เลือกโหมด: ริ้วรอย·กระชับ·ยก (22 นาที) / ฟื้นฟู·ลดบวม (14 นาที) · แพ็ก 3 −10% · แพ็ก 5 ฿1,010/ครั้ง',ja:'モード選択: シワ·ハリ·リフト(22分)/再生·むくみ(14分) · 3回券−10% · 5回券฿1,010/回',zh:'选模式:皱纹·紧致·提拉(22分)/再生·消肿(14分)·3次卡−10%·5次卡฿1,010/次'},
+      x:{ko:'표면~진피를 고주파 열로 조여 즉각 탄력·모공 축소 · 통증 적음 · <b>정석은 주 2–3회 × 10–16회 코스</b> — 얼굴은 6MHz 전용 프로브만 사용',en:'RF heat tightens surface-to-dermis for instant firmness & smaller pores · gentle, low-pain',th:'ความร้อน RF กระชับผิวชั้นบน·แน่นทันที·รูขุมขนเล็กลง · เจ็บน้อย',ja:'RF熱で表層〜真皮を引き締め即ハリ·毛穴縮小 · 痛み少なめ',zh:'射频热能收紧表层至真皮·即时紧致·收毛孔·痛感低'}},
+     
+   ],
+   groups:[
+     {label:{ko:'HIFU · 체험 🔥 정품 밀도 · 4.5mm SMAS (신규 · 월–금 · 1일 한정 · 양쪽 시술)',en:'HIFU · Trial 🔥 Full density · 4.5mm SMAS (new guests · Mon–Fri · limited/day · both sides)',th:'HIFU · ทดลอง 🔥 ความหนาแน่นเต็ม · 4.5มม. SMAS (ลูกค้าใหม่ · จ.–ศ. · จำกัดต่อวัน · ทำสองข้าง)',ja:'HIFU · 体験 🔥 正規密度 · 4.5mm SMAS (新規 · 月–金 · 1日限定 · 両側)',zh:'HIFU·体验 🔥 足密度·4.5mm SMAS(新客·周一至五·每日限量·双侧)'},items:[
+       {feature:1,star:'TRIAL',name:{ko:'포인트 체험 · 200샷',en:'Point Trial · 200 shots',th:'ทดลองจุดเดียว · 200 ช็อต',ja:'ポイント体験 · 200ショット',zh:'定点体验 · 200发'},dev:'ULFINE NEOSKIN · 4.5mm',price:'399',m:20,
+        meta:{ko:'턱각 또는 팔자(광대 밑) 중 1존 · 양쪽 각 100샷 집중 · 4.5mm SMAS 단일 심도',en:'jaw angle OR nasolabial (under-cheekbone) · 1 zone · 100 shots each side, concentrated · single 4.5 mm SMAS depth',th:'มุมกราม หรือ ร่องแก้ม (ใต้โหนกแก้ม) เลือก 1 จุด · ข้างละ 100 ช็อตแบบเข้มข้น · ระดับเดียว 4.5 มม. SMAS',ja:'エラ または ほうれい線(頬骨下)から1ゾーン · 両側各100ショット集中 · 4.5mm SMAS単一深度',zh:'下颌角 或 法令(颧骨下)选1区·每侧100发集中·4.5mm SMAS单一深度'},
+        x:{ko:'가장 가볍게 하이푸를 확인하는 회차 · <b>좁은 한 포인트에 정품 밀도로 집중</b>해 당김을 체감 · 팔자 선택 시 주름 자리가 아니라 <b>내려온 볼을 광대 밑에서 당겨</b> 올립니다 · 다른 시술 받으실 때 +399로 붙일 수도 있어요',en:'The lightest way to feel HIFU · <b>full density concentrated on one small point</b> so you feel the pull · for the nasolabial choice we work <b>above the fold, under the cheekbone</b>, lifting the dropped cheek — not the crease itself · can also be added to another treatment for +฿399',th:'วิธีที่เบาที่สุดในการสัมผัส HIFU · <b>ยิงความหนาแน่นเต็มเน้นจุดเล็ก ๆ จุดเดียว</b> ให้รู้สึกถึงการดึง · ถ้าเลือกร่องแก้ม เราทำ <b>เหนือร่อง ใต้โหนกแก้ม</b> ยกแก้มที่หย่อนลงมา ไม่ใช่ตรงร่อง · เสริมกับทรีตเมนต์อื่นได้ +฿399',ja:'一番軽くHIFUを確かめる回 · <b>狭い一点に正規密度で集中</b>し引き上げを体感 · ほうれい線を選んだ場合はシワ自体ではなく<b>頬骨下で下がった頬を引き上げ</b>ます · 他の施術に+฿399で追加も可',zh:'最轻松体验HIFU的一次·<b>在一个小点上以足密度集中施打</b>感受提拉·选法令时打<b>颧骨下·褶皱上方</b>·提起下垂的脸颊·而非皱纹本身·也可+฿399加在其他护理上'}},
+       {star:'+200',name:{ko:'+ 400샷으로',en:'Step up to 400 shots',th:'เพิ่มเป็น 400 ช็อต',ja:'400ショットへ',zh:'升至400发'},dev:'4.5mm',price:'699',m:25,
+        meta:{ko:'귀밑 존 확장 · 양쪽 각 200샷 · +300만 더 하면 샷 2배',en:'preauricular zone expanded · 200 shots each side · +฿300 doubles the shots',th:'ขยายโซนใต้ใบหู · ข้างละ 200 ช็อต · เพิ่ม ฿300 ช็อตเป็น 2 เท่า',ja:'耳下ゾーン拡張 · 両側各200ショット · +฿300でショット2倍',zh:'耳下区扩展·每侧200发·加฿300发数翻倍'},
+        x:{ko:'200샷보다 넓게 · 턱각을 넘어 귀밑 전체로 · <b>샷이 두 배라 당김이 확실히 넓게 걸립니다</b>',en:'Wider than 200 · past the jaw angle across the whole preauricular zone · <b>twice the shots, so the pull covers noticeably more</b>',th:'กว้างกว่า 200 ช็อต · เลยมุมกรามครอบทั้งใต้ใบหู · <b>ช็อต 2 เท่า การดึงกว้างขึ้นชัดเจน</b>',ja:'200ショットより広く · エラを越え耳下全体へ · <b>ショット2倍で引き上げが明確に広がる</b>',zh:'比200发更广·越过下颌角覆盖整个耳下区·<b>发数翻倍·提拉范围明显更广</b>'}},
+       {feature:1,star:'★ POPULAR',name:{ko:'+ 600샷으로',en:'Step up to 600 shots',th:'เพิ่มเป็น 600 ช็อต',ja:'600ショットへ',zh:'升至600发'},dev:'4.5mm',price:'990',m:30,
+        meta:{ko:'귀밑+턱선 · 양쪽 각 300샷 · 가장 많이 선택 · +291',en:'preauricular + jawline · 300 each side · most chosen · +฿291',th:'ใต้ใบหู+กรอบหน้า · ข้างละ 300 · เลือกมากที่สุด · +฿291',ja:'耳下+フェイスライン · 各300 · 一番人気 · +฿291',zh:'耳下+下颌线·每侧300发·最多人选·+฿291'},
+        x:{ko:'귀밑에서 턱선까지 한 번에 · <b>체험 중 가장 인기</b> · 하안면 라인이 눈에 걸리는 실질 면적',en:'Jaw angle down the jawline in one go · <b>our most popular trial step</b> · enough area to see the lower-face line move',th:'ใต้ใบหูต่อกรอบหน้าในครั้งเดียว · <b>ขั้นทดลองยอดนิยม</b> · พื้นที่พอเห็นแนวใบหน้าล่างขยับ',ja:'耳下からフェイスラインまで一度に · <b>体験で一番人気</b> · 下顔面のラインが動く実面積',zh:'耳下到下颌线一次到位·<b>体验中最热门</b>·足以看到下面部线条变化'}},
+       {feature:1,star:'BEST VALUE',name:{ko:'+ 800샷으로 · 하안면',en:'Step up to 800 shots · Lower Face',th:'เพิ่มเป็น 800 ช็อต · ใบหน้าส่วนล่าง',ja:'800ショットへ · 下顔面',zh:'升至800发·下面部'},dev:'ULFINE NEOSKIN · 4.5mm',price:'1,290',m:35,
+        meta:{ko:'귀밑 → 턱선 → 광대밑 · 양쪽 각 400샷 · <b>샷당 최저가 · 가장 이득</b> · 체험 최대치',en:'jaw angle → jawline → under-cheekbone · 400 each side · <b>lowest per-shot · best value</b> · trial maximum',th:'ใต้ใบหู → กรอบหน้า → ใต้โหนกแก้ม · ข้างละ 400 · <b>ต่อช็อตถูกสุด · คุ้มสุด</b> · สูงสุดของทดลอง',ja:'耳下→フェイスライン→頬骨下 · 各400 · <b>ショット単価最安·一番お得</b> · 体験の最大',zh:'耳下→下颌线→颧骨下·每侧400发·<b>每发最低·最划算</b>·体验上限'},
+        x:{ko:'체험으로 갈 수 있는 최대 면적 · 하안면 전체에 4.5mm 풀밀도 · <b>여기서 여러 층·더 넓은 면적을 원하시면 정규 메뉴(볼 4,000샷 4,900)로</b> · 정규 시술 예약 시 체험비 전액 차감',en:'The largest area we cover as a trial · full 4.5 mm density across the lower face · <b>to add depths or go wider, step up to the regular menu (Cheeks, 4,000 shots, ฿4,900)</b> · trial fee fully credited when you book the regular treatment',th:'พื้นที่มากที่สุดที่ทำแบบทดลองได้ · ความหนาแน่นเต็ม 4.5 มม. ทั่วใบหน้าส่วนล่าง · <b>อยากได้หลายระดับหรือกว้างขึ้น ขยับไปเมนูปกติ (แก้ม 4,000 ช็อต ฿4,900)</b> · จองเมนูปกติหักค่าทดลองเต็มจำนวน',ja:'体験で行ける最大面積 · 下顔面全体に4.5mmフル密度 · <b>多層·より広くは正規メニュー(頬4,000ショット฿4,900)へ</b> · 正規予約で体験料全額差引',zh:'体验可覆盖最大面积·下面部全区4.5mm足密度·<b>想要多层或更广请升级正规菜单(脸颊4,000发฿4,900)</b>·预约正规护理全额抵扣体验费'}},
+     ]},
+     {label:{ko:'HIFU · 다른 층 체험 · 위 사다리와 별개 (같은 날 병행 가능)',en:'HIFU · Other-depth trials · separate from the ladder (can pair same day)',th:'HIFU · ทดลองระดับอื่น · แยกจากบันไดข้างบน (ทำวันเดียวกันได้)',ja:'HIFU · 別の層の体験 · 上のラダーとは別 (同日併用可)',zh:'HIFU·其他深度体验·与上方阶梯分开(可同日搭配)'},items:[
+       {star:'NEW',name:{ko:'눈가 체험 · 600샷',en:'Eye Corner Trial · 600 shots',th:'ทดลองหางตา · 600 ช็อต',ja:'目尻体験 · 600ショット',zh:'眼尾体验 · 600发'},dev:'1.5mm',price:'599',m:30,
+        meta:{ko:'양쪽 눈꼬리 · 각 300샷 · 1.5mm 단일 심도 · 안와 뼈 바깥만',en:'both outer eye corners · 300 shots each · single 1.5 mm depth · outside the orbital rim only',th:'หางตาสองข้าง · ข้างละ 300 ช็อต · ระดับเดียว 1.5 มม. · เฉพาะนอกกระดูกเบ้าตา',ja:'両目尻 · 各300ショット · 1.5mm単一深度 · 眼窩骨の外側のみ',zh:'双侧眼尾·每侧300发·1.5mm单一深度·仅眼眶骨外侧'},
+        x:{ko:'포인트 체험과 <b>다른 층(1.5mm)·다른 부위</b>라 같은 날 따로 받으실 수 있어요 · 눈꼬리 잔주름·처짐에 · 안전을 위해 안와 뼈 바깥쪽만, 눈꺼풀 위에는 시술하지 않습니다 · 눈가 전체는 2,000샷 2,900부터',en:'A <b>different depth (1.5 mm) and area</b> from the point trial — you can have both the same day · for crow\u2019s feet and outer-corner droop · for safety we treat only outside the orbital rim, never over the eyelid · full eye area starts at 2,000 shots / ฿2,900',th:'เป็น <b>คนละระดับ (1.5 มม.) คนละจุด</b> กับทดลองจุดเดียว ทำวันเดียวกันแยกได้ค่ะ · สำหรับริ้วรอยหางตา·หางตาตก · เพื่อความปลอดภัย ยิงเฉพาะนอกกระดูกเบ้าตา ไม่ยิงบนเปลือกตา · รอบดวงตาเต็มเริ่มที่ 2,000 ช็อต ฿2,900',ja:'ポイント体験とは<b>層(1.5mm)も部位も別</b>なので同日に別々に受けられます · 目尻の小じわ·下がりに · 安全のため眼窩骨の外側のみ、まぶたの上には照射しません · 目元全体は2,000ショット฿2,900から',zh:'与定点体验<b>层次(1.5mm)不同·部位不同</b>·可同日分别体验·针对眼尾细纹·下垂·为安全仅打眼眶骨外侧·不打眼睑·眼周全区自2,000发฿2,900起'}},
+       {name:{ko:'위아래 콤보 체험 · 1,000샷',en:'Upper + Lower Combo · 1,000 shots',th:'คอมโบ บน+ล่าง · 1,000 ช็อต',ja:'上下コンボ体験 · 1,000ショット',zh:'上下组合体验·1,000发'},dev:'ULFINE NEOSKIN · 1.5 + 4.5mm',price:'1,590',m:45,
+        meta:{ko:'눈가 600샷(1.5mm) + 귀밑 400샷(4.5mm) · 따로 받으면 1,298 → 1,590',en:'Eye 600 (1.5 mm) + Preauricular 400 (4.5 mm) · ฿1,298 separately → ฿1,590',th:'หางตา 600 (1.5 มม.) + ใต้ใบหู 400 (4.5 มม.) · แยกทำ 1,298 → 1,590',ja:'目尻600(1.5mm)+耳下400(4.5mm) · 別々なら1,298 → 1,590',zh:'眼尾600(1.5mm)+耳下400(4.5mm)·分开做1,298→1,590'},
+        x:{ko:'상안면(1.5mm)과 하안면(4.5mm)을 한 번에 · <b>두 개의 다른 심도를 같은 날 경험</b>하고 어떤 층이 나한테 맞는지 확인하는 메뉴',en:'Upper face (1.5 mm) and lower face (4.5 mm) in one visit · the menu to <b>feel two depths the same day</b> and find which layer suits you',th:'ใบหน้าส่วนบน (1.5 มม.) และส่วนล่าง (4.5 มม.) ในครั้งเดียว · เมนูที่ <b>สัมผัส 2 ระดับในวันเดียว</b> เพื่อหาชั้นที่เหมาะกับคุณ',ja:'上顔面(1.5mm)と下顔面(4.5mm)を一度に · <b>2つの深度を同日に体験</b>し自分に合う層を見つけるメニュー',zh:'上面部(1.5mm)与下面部(4.5mm)一次体验·<b>同日感受两种深度</b>·找到适合自己的层次'}},
+     ]},
+     {label:{ko:'HIFU · 효과 ⭐⭐ 부위별 실용량 · 멀티 심도 (주말·재방문 OK · 3회권 −10%)',en:'HIFU · Results ⭐⭐ Full dose per area · multi-depth (weekends & repeat OK · 3-pack −10%)',th:'HIFU · เห็นผล ⭐⭐ โดสเต็มต่อจุด · หลายระดับ (เสาร์-อาทิตย์·ทำซ้ำได้ · แพ็ก 3 −10%)',ja:'HIFU · 効果 ⭐⭐ 部位別実用量·マルチ深度 (土日·再来OK · 3回券−10%)',zh:'HIFU·见效 ⭐⭐ 各部位足量·多层深度(周末·回访OK·3次卡−10%)'},items:[
+       {name:{ko:'눈가 (양쪽)',en:'Eye Area (both sides)',th:'รอบดวงตา (สองข้าง)',ja:'目元(両側)',zh:'眼周(双侧)'},dev:'1.5mm',price:'2,900',was:'฿5,900',save:'−51%',m:40,p3:'2,610',
+        meta:{ko:'2,000샷 · 1.5mm · 표준 프로토콜 100라인 상당 · 실용량',en:'2,000 shots · 1.5 mm · equals 100 lines of the standard protocol · full dose',th:'2,000 ช็อต · 1.5 มม. · เทียบเท่า 100 ไลน์มาตรฐาน · โดสเต็ม',ja:'2,000ショット · 1.5mm · 標準100ライン相当 · 実用量',zh:'2,000发·1.5mm·相当于标准100线·足量'},
+        x:{ko:'눈가 잔주름·눈썹 처짐 · 체험 599의 3배 이상 면적 · 우리가 파는 제일 저렴한 "진짜 시술"입니다',en:'Fine lines and brow droop · over 3× the area of the ฿599 trial · the most affordable real treatment on our menu',th:'ริ้วรอยรอบตา·คิ้วตก · พื้นที่มากกว่าทดลอง 599 กว่า 3 เท่า · ทรีตเมนต์จริงที่ถูกที่สุดของเรา',ja:'目元の小じわ·眉の下がり · 体験599の3倍以上の面積 · 当院で一番手頃な「本物の施術」',zh:'眼周细纹·眉毛下垂·面积是599体验的3倍以上·本店最实惠的"真正护理"'}},
+       {name:{ko:'이중턱',en:'Double Chin',th:'เหนียง',ja:'二重あご',zh:'双下巴'},dev:'4.5 + 9mm',price:'2,900',was:'฿5,900',save:'−51%',m:40,p3:'2,610',
+        meta:{ko:'2,000샷 · 4.5mm 1,200 + 9mm 800 · 표준 100라인 상당 · 2단 심도',en:'2,000 shots · 1,200 @4.5 mm + 800 @9 mm · equals 100 standard lines · two depths',th:'2,000 ช็อต · 4.5 มม. 1,200 + 9 มม. 800 · เทียบเท่า 100 ไลน์ · 2 ระดับ',ja:'2,000ショット · 4.5mm 1,200+9mm 800 · 標準100ライン相当 · 2層',zh:'2,000发·4.5mm 1,200+9mm 800·相当于标准100线·双层'},
+        x:{ko:'9mm은 이중턱 전용 심도입니다 · 턱밑 깊은 층까지 닿아 턱선을 되찾는 실용량 시술 · 체험 사다리에는 9mm이 들어가지 않아요',en:'9 mm is our double-chin-only depth · reaches the deep submental layer to bring the jawline back · the trial ladder does not include 9 mm',th:'9 มม. คือระดับเฉพาะสำหรับเหนียง · ลงถึงชั้นลึกใต้คาง คืนกรอบหน้า · บันไดทดลองไม่มี 9 มม. นะคะ',ja:'9mmは二重あご専用の深度 · あご下の深層まで届きフェイスラインを取り戻す · 体験ラダーに9mmは入りません',zh:'9mm是双下巴专用深度·直达颏下深层·找回下颌线·体验阶梯不含9mm'}},
+       {feature:1,star:'BEST SELLER',name:{ko:'볼 (양쪽)',en:'Cheeks (both sides)',th:'แก้ม (สองข้าง)',ja:'頬(両側)',zh:'脸颊(双侧)'},dev:'ULFINE NEOSKIN · 3 + 4.5mm',price:'4,900',was:'฿9,900',save:'−51%',m:60,p3:'4,410',
+        meta:{ko:'4,000샷 (각 2,000) · 3mm 1,600 + 4.5mm 2,400 · 표준 200라인 상당',en:'4,000 shots (2,000 per side) · 1,600 @3 mm + 2,400 @4.5 mm · equals 200 standard lines',th:'4,000 ช็อต (ข้างละ 2,000) · 3 มม. 1,600 + 4.5 มม. 2,400 · เทียบเท่า 200 ไลน์',ja:'4,000ショット(各2,000) · 3mm 1,600+4.5mm 2,400 · 標準200ライン相当',zh:'4,000发(每侧2,000)·3mm 1,600+4.5mm 2,400·相当于标准200线'},
+        x:{ko:'볼 처짐·팔자 주변을 표준 밀도로 풀커버 · <b>진피(3mm)와 SMAS(4.5mm) 두 층을 함께</b> — 체험은 4.5mm 한 층뿐이라 여기서 결과가 갈립니다 · 정규 메뉴의 시작점이자 가장 많이 선택되는 메뉴',en:'Full standard-density coverage of cheek laxity and the nasolabial zone · <b>dermis (3 mm) and SMAS (4.5 mm) together</b> — the trial is 4.5 mm only, and that is where the results diverge · where the real menu starts, and our most chosen item',th:'ครอบคลุมแก้มหย่อน·ร่องแก้มด้วยความหนาแน่นมาตรฐาน · <b>ชั้นหนังแท้ (3 มม.) + SMAS (4.5 มม.) พร้อมกัน</b> — ทดลองมีแค่ 4.5 มม. ผลลัพธ์จึงต่างกันตรงนี้ · จุดเริ่มต้นของเมนูจริง และเลือกมากที่สุด',ja:'頬のたるみ·ほうれい線周りを標準密度でフルカバー · <b>真皮(3mm)とSMAS(4.5mm)の二層を同時に</b> — 体験は4.5mmのみ、ここで結果が分かれます · 正規メニューの入口で一番人気',zh:'以标准密度全覆盖脸颊松弛与法令纹区·<b>真皮(3mm)与SMAS(4.5mm)双层同打</b>·体验仅4.5mm一层·差别就在这里·正规菜单的起点·最多人选'}},
+       {name:{ko:'볼 + 이중턱',en:'Cheeks + Double Chin',th:'แก้ม + เหนียง',ja:'頬+二重あご',zh:'脸颊+双下巴'},dev:'3 + 4.5 + 9mm',price:'6,900',was:'฿13,900',save:'−50%',m:75,p3:'6,210',
+        meta:{ko:'6,000샷 · 3mm 1,600 + 4.5mm 3,600 + 9mm 800 · 표준 300라인 · 애드온으로 따로 하면 6,890',en:'6,000 shots · 1,600 @3 + 3,600 @4.5 + 800 @9 mm · 300 standard lines · ฿6,890 as add-on',th:'6,000 ช็อต · 3 มม. 1,600 + 4.5 มม. 3,600 + 9 มม. 800 · 300 ไลน์ · เสริมแยก ฿6,890',ja:'6,000ショット · 3mm 1,600+4.5mm 3,600+9mm 800 · 標準300ライン · アドオン別なら฿6,890',zh:'6,000发·3mm 1,600+4.5mm 3,600+9mm 800·标准300线·分开购买฿7,800'},
+        x:{ko:'하안면 리프팅의 표준 조합 · 3·4.5·9mm <b>세 개 심도</b>로 볼을 당기고 턱선을 정리해 V라인을 만드는 구성',en:'The standard lower-face combination · <b>three depths</b> (3 / 4.5 / 9 mm) — lift the cheeks, define the jaw, build the V-line',th:'ชุดมาตรฐานยกใบหน้าส่วนล่าง · <b>3 ระดับ</b> (3/4.5/9 มม.) ยกแก้ม เก็บกรอบหน้า สร้าง V-line',ja:'下顔面リフトの標準構成 · <b>3層</b>(3/4.5/9mm)で頬を上げ、フェイスラインを整えVラインに',zh:'下面部提拉标准组合·<b>三层深度</b>(3/4.5/9mm)·提脸颊·收下颌·塑V线'}},
+     ]},
+     {label:{ko:'HIFU · 찐 ⭐⭐⭐ 전체 프로토콜 · 1.5 / 3 / 4.5mm 전 층 풀커버 (3회권 −10%)',en:'HIFU · The Real Thing ⭐⭐⭐ Complete protocol · full coverage at 1.5 / 3 / 4.5 mm (3-pack −10%)',th:'HIFU · ตัวจริง ⭐⭐⭐ โปรโตคอลเต็ม · ครบทุกชั้น 1.5 / 3 / 4.5 มม. (แพ็ก 3 −10%)',ja:'HIFU · 本気 ⭐⭐⭐ フルプロトコル · 1.5 / 3 / 4.5mm 全層フルカバー (3回券−10%)',zh:'HIFU·真章 ⭐⭐⭐ 完整方案·1.5 / 3 / 4.5mm 全层覆盖(3次卡−10%)'},items:[
+       {name:{ko:'넥 (목)',en:'Neck',th:'ลำคอ',ja:'ネック',zh:'颈部'},dev:'1.5 + 3 + 4.5mm',price:'13,900',was:'฿27,900',save:'−50%',m:90,p3:'12,510',
+        meta:{ko:'11,000샷 · 1.5mm 2,000 + 3mm 5,000 + 4.5mm 4,000 · 표준 550라인 상당',en:'11,000 shots · 2,000 @1.5 + 5,000 @3 + 4,000 @4.5 mm · equals 550 standard lines',th:'11,000 ช็อต · 1.5 มม. 2,000 + 3 มม. 5,000 + 4.5 มม. 4,000 · เทียบเท่า 550 ไลน์',ja:'11,000ショット · 1.5mm 2,000+3mm 5,000+4.5mm 4,000 · 標準550ライン相当',zh:'11,000发·1.5mm 2,000+3mm 5,000+4.5mm 4,000·相当于标准550线'},
+        x:{ko:'목주름·목 처짐 · 목은 피부가 얇아 3mm 진피층이 주력입니다 · 얼굴만 하면 경계가 보이는 분께',en:'Neck lines and laxity · neck skin is thin, so the 3 mm dermal layer carries the work · for guests where a face-only lift would show a border',th:'ริ้วรอย·ผิวคอหย่อน · ผิวคอบาง จึงเน้นชั้นหนังแท้ 3 มม. · เหมาะกับคนที่ทำเฉพาะหน้าแล้วเห็นรอยต่อ',ja:'首のシワ·たるみ · 首は皮膚が薄く3mm真皮層が主力 · 顔だけだと境目が出る方へ',zh:'颈纹·颈部松弛·颈部皮肤薄·以3mm真皮层为主·适合只做面部会有分界的人'}},
+       {feature:1,star:'SIGNATURE',name:{ko:'풀페이스',en:'Full Face',th:'เต็มหน้า',ja:'フルフェイス',zh:'全脸'},dev:'ULFINE NEOSKIN · 1.5 / 3 / 4.5mm',price:'19,900',was:'฿39,900',save:'−50%',m:120,p3:'17,910',
+        meta:{ko:'16,000샷 · 1.5mm 2,000 + 3mm 6,000 + 4.5mm 8,000 · 국제 표준 풀페이스 800라인 프로토콜 · 카트리지 약 1통',en:'16,000 shots · 2,000 @1.5 + 6,000 @3 + 8,000 @4.5 mm · the full 800-line international protocol · roughly one entire cartridge',th:'16,000 ช็อต · 1.5 มม. 2,000 + 3 มม. 6,000 + 4.5 มม. 8,000 · โปรโตคอลเต็มหน้าสากล 800 ไลน์ · ใช้คาร์ทริดจ์เกือบ 1 ตลับ',ja:'16,000ショット · 1.5mm 2,000+3mm 6,000+4.5mm 8,000 · 国際標準フルフェイス800ラインプロトコル · カートリッジほぼ1本',zh:'16,000发·1.5mm 2,000+3mm 6,000+4.5mm 8,000·国际标准全脸800线方案·约耗尽一整支探头'},
+        x:{ko:'이마·눈가·볼·턱선을 <b>1.5 / 3 / 4.5mm 세 층 전부</b>, 표준 밀도로 · 축소된 버전이 아니라 프로토콜 그대로 쏘는 시술 · 한국산 ULFINE NEOSKIN, 한국 생의학 Ph.D.가 설계한 프로토콜을 교육받은 테라피스트가 시술',en:'Forehead, eyes, cheeks and jawline at <b>all three depths (1.5 / 3 / 4.5 mm)</b>, at standard density · not a reduced version, but the protocol as written · Korean ULFINE NEOSKIN, protocol designed by a biomedical Ph.D. from Korea and performed by trained therapists',th:'หน้าผาก·รอบตา·แก้ม·กรอบหน้า ครบ <b>3 ระดับ (1.5/3/4.5 มม.)</b> ที่ความหนาแน่นมาตรฐาน · ไม่ใช่เวอร์ชันย่อ แต่ยิงตามโปรโตคอลจริง · ULFINE NEOSKIN จากเกาหลี · โปรโตคอลออกแบบโดย Ph.D. ชีวการแพทย์จากเกาหลี ทำโดยเทอราปิสต์ที่ผ่านการอบรม',ja:'額·目元·頬·フェイスラインを<b>1.5/3/4.5mmの三層すべて</b>標準密度で · 縮小版ではなくプロトコル通り · 韓国製ULFINE NEOSKIN、韓国の生医学Ph.D.が設計したプロトコルを訓練を受けたセラピストが施術',zh:'额头·眼周·脸颊·下颌线<b>三层全打(1.5/3/4.5mm)</b>·标准密度·不是缩水版而是按方案足量·韩国ULFINE NEOSKIN·由韩国生物医学博士设计方案·受训技师执行'}},
+       {feature:1,star:'MAX',name:{ko:'풀페이스 + 넥',en:'Full Face + Neck',th:'เต็มหน้า + ลำคอ',ja:'フルフェイス+ネック',zh:'全脸+颈部'},dev:'ULFINE NEOSKIN · 1.5 / 3 / 4.5mm',price:'29,900',was:'฿59,900',save:'−50%',m:150,p3:'26,910',
+        meta:{ko:'24,000샷 · 1.5mm 3,000 + 3mm 9,000 + 4.5mm 12,000 · 표준 1,200라인 · 카트리지 1.2통 · 따로 받으면 33,800',en:'24,000 shots · 3,000 @1.5 + 9,000 @3 + 12,000 @4.5 mm · the 1,200-line protocol · 1.2 cartridges · ฿33,800 separately',th:'24,000 ช็อต · 1.5 มม. 3,000 + 3 มม. 9,000 + 4.5 มม. 12,000 · 1,200 ไลน์ · คาร์ทริดจ์ 1.2 ตลับ · แยกซื้อ ฿33,800',ja:'24,000ショット · 1.5mm 3,000+3mm 9,000+4.5mm 12,000 · 標準1,200ライン · カートリッジ1.2本 · 別々なら฿33,800',zh:'24,000发·1.5mm 3,000+3mm 9,000+4.5mm 12,000·标准1,200线·1.2支探头·分开购买฿33,800'},
+        x:{ko:'얼굴과 목의 경계 없이 최대 커버 · 우리가 제공하는 최대 용량이고, 카트리지 한 통을 넘겨 쓰는 유일한 메뉴입니다 · 3–6개월 후 재평가 권장',en:'Maximum coverage with no border between face and neck · the largest dose we offer, and the only menu that uses more than a full cartridge · reassess after 3–6 months',th:'ครอบคลุมสูงสุด ไม่มีรอยต่อหน้า-คอ · โดสมากที่สุดที่เรามี และเป็นเมนูเดียวที่ใช้คาร์ทริดจ์เกิน 1 ตลับ · ประเมินซ้ำใน 3–6 เดือน',ja:'顔と首の境目なく最大カバー · 当院最大量で、カートリッジ1本を超えて使う唯一のメニュー · 3–6ヶ月後に再評価',zh:'面颈无缝最大覆盖·本店最大剂量·唯一用量超过一整支探头的菜单·建议3–6个月后复评'}},
+     ]},
+     {label:{ko:'HIFU 층 애드온 · 효과⭐⭐ 이상 시술에 층 추가 (동시 시술가)',en:'HIFU depth add-ons · add a layer to any Results⭐⭐+ treatment (same-visit price)',th:'HIFU เสริมชั้น · เพิ่มระดับให้ทรีตเมนต์ เห็นผล⭐⭐ ขึ้นไป (ราคาทำพร้อมกัน)',ja:'HIFU 層アドオン · 効果⭐⭐以上の施術に層を追加 (同時施術価)',zh:'HIFU 层次加项·为见效⭐⭐以上护理加层(同场加做价)'},items:[
+       {name:{ko:'+ 1.5mm 표면·눈가 층 (1,500샷)',en:'+ 1.5mm surface·eye layer (1,500 shots)',th:'+ 1.5มม. ชั้นผิว·รอบตา (1,500 ช็อต)',ja:'+ 1.5mm 表面·目元層(1,500ショット)',zh:'+ 1.5mm 表层·眼周(1,500发)'},dev:'1.5mm',price:'1,990',addon:1,meta:{ko:'표피 얕은 층 · 잔주름·표면결 마무리',en:'shallow epidermal layer · fine lines & surface texture finish',th:'ชั้นตื้น · ริ้วรอย·ผิวเนียนปิดท้าย',ja:'浅い表皮層 · 小じわ·キメ仕上げ',zh:'表皮浅层·细纹·表面肤质收尾'},
+        x:{ko:'SMAS·진피만 한 시술 위에 <b>표면 잔주름층을 얹어</b> 매끈함까지 · 층을 더할수록 오래갑니다',en:'Adds the <b>surface fine-line layer</b> on top of a SMAS/dermis treatment · more layers, longer-lasting',th:'เพิ่ม <b>ชั้นริ้วรอยผิวบน</b> บนทรีตเมนต์ SMAS/หนังแท้ · ยิ่งหลายชั้น ยิ่งอยู่นาน',ja:'SMAS·真皮の施術に<b>表面の小じわ層を追加</b> · 層を重ねるほど長持ち',zh:'在SMAS/真皮护理上<b>叠加表面细纹层</b>·层次越多越持久'}},
+       {name:{ko:'+ 3.0mm 진피 층 (2,000샷)',en:'+ 3.0mm dermal layer (2,000 shots)',th:'+ 3.0มม. ชั้นหนังแท้ (2,000 ช็อต)',ja:'+ 3.0mm 真皮層(2,000ショット)',zh:'+ 3.0mm 真皮层(2,000发)'},dev:'3mm',price:'2,190',addon:1,meta:{ko:'진피층 · 피부결·탄력·모공',en:'dermal layer · texture, firmness, pores',th:'ชั้นหนังแท้ · ผิวเนียน·กระชับ·รูขุมขน',ja:'真皮層 · キメ·ハリ·毛穴',zh:'真皮层·肤质·紧实·毛孔'},
+        x:{ko:'4.5mm SMAS만 한 시술에 <b>진피 탄력층을 더해</b> 결·탄력까지 · 단일 심도를 두 층으로',en:'Adds the <b>dermal firmness layer</b> to a 4.5 mm-only treatment · turns one depth into two',th:'เพิ่ม <b>ชั้นหนังแท้กระชับ</b> ให้ทรีตเมนต์ 4.5 มม. · จากระดับเดียวเป็นสองชั้น',ja:'4.5mm SMASのみの施術に<b>真皮ハリ層を追加</b> · 単一深度を二層に',zh:'在仅4.5mm护理上<b>加真皮紧实层</b>·单层变双层'}},
+       {feature:1,star:'POPULAR',name:{ko:'+ 4.5mm SMAS 부스터 (2,000샷)',en:'+ 4.5mm SMAS booster (2,000 shots)',th:'+ 4.5มม. SMAS บูสเตอร์ (2,000 ช็อต)',ja:'+ 4.5mm SMASブースター(2,000ショット)',zh:'+ 4.5mm SMAS加强(2,000发)'},dev:'4.5mm',price:'2,190',addon:1,meta:{ko:'근막 리프팅 핵심층 강화',en:'reinforces the core lifting layer',th:'เสริมชั้นยกกระชับหลัก',ja:'リフトの核となる層を強化',zh:'强化提拉核心层'},
+        x:{ko:'리프팅의 축이 되는 <b>SMAS 밀도를 더 올려</b> 당김을 강화 · 처짐이 뚜렷한 분께',en:'Raises <b>SMAS density further</b> on the core lifting layer · for clearer sagging',th:'เพิ่ม <b>ความหนาแน่น SMAS</b> ชั้นยกหลัก · เหมาะกับผิวหย่อนชัด',ja:'リフトの軸となる<b>SMAS密度をさらに上げ</b>引き上げ強化 · たるみが明確な方へ',zh:'在核心提拉层<b>进一步提高SMAS密度</b>·适合松弛明显者'}},
+       {name:{ko:'+ 9mm 이중턱 층 (1,500샷)',en:'+ 9mm double-chin layer (1,500 shots)',th:'+ 9มม. ชั้นเหนียง (1,500 ช็อต)',ja:'+ 9mm 二重あご層(1,500ショット)',zh:'+ 9mm 双下巴层(1,500发)'},dev:'9mm',price:'1,990',addon:1,meta:{ko:'턱밑 깊은 층 · 이중턱 전용',en:'deep submental layer · double-chin only',th:'ชั้นลึกใต้คาง · เฉพาะเหนียง',ja:'あご下深層 · 二重あご専用',zh:'颏下深层·双下巴专用'},
+        x:{ko:'볼·하안면 시술에 <b>턱밑 9mm을 붙여</b> 이중턱까지 · 볼(4,900)+이 애드온이 볼+이중턱 6,900과 같은 구성',en:'Adds the <b>9 mm submental depth</b> to a cheek/lower-face treatment · Cheeks (4,900) + this add-on equals the ฿6,900 Cheeks+Double Chin',th:'เพิ่ม <b>ชั้นใต้คาง 9 มม.</b> ให้ทรีตเมนต์แก้ม/ใบหน้าล่าง · แก้ม (4,900)+เสริมนี้ = แก้ม+เหนียง 6,900',ja:'頬·下顔面の施術に<b>あご下9mmを追加</b> · 頬(4,900)+このアドオン=頬+二重あご6,900と同構成',zh:'在脸颊/下面部护理上<b>加9mm颏下深度</b>·脸颊(4,900)+此加项=脸颊+双下巴6,900'}},
+     ]},
+     {label:{ko:'증상별 마무리 애드온 · LDM 물방울 & 고주파(RF) — 오늘 피부에 맞게 고르세요 (동시 시술가)',en:'Symptom Finishers · LDM Waterdrop & RF — pick what your skin needs today (same-visit price)',th:'แอดออนปิดท้ายตามอาการ · LDM หยดน้ำ & RF — เลือกตามผิววันนี้ (ราคาทำพร้อมกัน)',ja:'症状別仕上げアドオン · LDM水滴&高周波(RF) — 今日の肌に合わせて (同時施術価)',zh:'按症状收尾加项·LDM水滴&射频—按今日肤况挑选(同场加做价)'},items:[
+       {name:{ko:'+ 맥슈어 코존 · 100샷',en:'+ MacSure Nose Zone · 100 shots',th:'+ MacSure โซนจมูก · 100 ช็อต',ja:'+ マックシュア 鼻ゾーン·100',zh:'+ MacSure鼻部·100发'},dev:'MacSure',price:'+690',addon:1,m:7,meta:{ko:'모공 1번지 코존 집중 · 샷당 가격은 풀페이스 400샷(1,990)이 제일 저렴 — 이건 맛보기 미니',en:'pore zone No.1, the nose · best per-shot value is the 400-shot full face (1,990) — this is the mini taster',th:'โฟกัสรูขุมขนโซนจมูก · คุ้มต่อช็อตที่สุดคือฟูลเฟซ 400 ช็อต (1,990) — นี่คือมินิสำหรับลอง',ja:'毛穴の中心·鼻ゾーン集中 · ショット単価はフルフェイス400(1,990)が最安 — これはお試しミニ',zh:'毛孔重灾区·鼻部集中·按发数最划算是全脸400发(1,990)·此为尝鲜迷你版'},
+        x:{ko:'프락셔널 RF 첫 경험용 미니 · BB글로우와 같은 날 가능 — 맥슈어 먼저 → 진정 → BB글로우 순서 · 활성 염증 부위는 피해서 조사',en:'A mini first taste of fractional RF · same-day with BB Glow — MacSure first, calm, then BB Glow · avoids actively inflamed spots',th:'มินิสำหรับลองแฟรกชันแนล RF ครั้งแรก · ทำวันเดียวกับ BB Glow ได้ — MacSure ก่อน → ปลอบผิว → BB Glow · เลี่ยงจุดอักเสบ',ja:'フラクショナルRF初体験ミニ · BBグロウ同日可 — マックシュア→鎮静→BBグロウの順 · 炎症部位は避けて照射',zh:'点阵RF初体验迷你版·可与BB焕肤同日—先MacSure→镇静→BB焕肤·避开发炎部位'}},
+       {name:{ko:'+ 맥슈어 모공 포커스 · 200샷',en:'+ MacSure Pore Focus · 200 shots',th:'+ MacSure โฟกัสรูขุมขน · 200 ช็อต',ja:'+ マックシュア 毛穴フォーカス·200',zh:'+ MacSure毛孔聚焦·200发'},dev:'MacSure',price:'+1,190',addon:1,m:10,meta:{ko:'코+앞뺨 또는 여드름 자국·모공 부위 선택 · 샷당가는 풀페이스(1,990)가 최저 · 풀페이스로 갈수록 이득',en:'nose + inner cheeks, or acne-mark and pore areas · per-shot price drops as you go up · the 400-shot full face (1,990) is the best value',th:'จมูก+แก้มด้านใน หรือจุดรอยสิว·รูขุมขน · ยิ่งช็อตเยอะยิ่งคุ้ม · ฟูลเฟซ 400 ช็อต (1,990) คุ้มที่สุด',ja:'鼻+頬内側 or ニキビ跡·毛穴部位 · ショット単価は上に行くほどお得 · フルフェイス400(1,990)が最安',zh:'鼻+内颊或痘印·毛孔部位·发数越多越划算·全脸400发(1,990)最超值'},
+        x:{ko:'모공·여드름 자국 결 개선 집중 — 톤은 BB글로우가, 모공은 맥슈어가 · 활성 여드름(염증)엔 조사하지 않습니다',en:'Focused texture work on pores and acne marks — BB Glow does tone, MacSure does pores · never applied on active inflamed acne',th:'โฟกัสรูขุมขน·รอยสิว — โทนให้ BB Glow ส่วนรูขุมขนให้ MacSure · ไม่ยิงบนสิวอักเสบ',ja:'毛穴·ニキビ跡の肌質集中 — トーンはBBグロウ、毛穴はマックシュア · 炎症ニキビには照射しません',zh:'集中改善毛孔·痘印肤质—肤色靠BB焕肤·毛孔靠MacSure·不打在发炎痘痘上'}},
+       {name:{ko:'💧 건조·당김엔 → + LDM 물방울 수분충전',en:'💧 Dry & tight → + Waterdrop Hydration',th:'💧 ผิวแห้งตึง → + เติมน้ำหยดน้ำ',ja:'💧 乾燥·つっぱりに → + 水滴保湿',zh:'💧 干燥紧绷 → + 水滴补水'},dev:{ko:'LDM 수분 모드',en:'LDM hydration mode',th:'LDM โหมดเติมน้ำ',ja:'LDM保湿モード',zh:'LDM补水模式'},price:'390',addon:1,m:11,meta:{ko:'11분 · 속수분 · 어느 시술에나',en:'11 min · deep hydration · with anything',th:'11 นาที · น้ำชั้นลึก · เสริมได้ทุกเมนู',ja:'11分 · 深部保湿 · 何にでも',zh:'11分·深层补水·任意护理可加'}},
+       {feature:1,star:'★ HIFU 후 BEST',name:{ko:'🔥 열감·붉은기엔 → + LDM 물방울 진정·홍조',en:'🔥 Heat & redness → + Waterdrop Calming',th:'🔥 ร้อน·แดง → + หยดน้ำปลอบผิว',ja:'🔥 熱感·赤みに → + 水滴鎮静',zh:'🔥 发热泛红 → + 水滴镇静'},dev:{ko:'LDM 홍조 모드 70%',en:'LDM redness mode 70%',th:'LDM โหมดลดแดง 70%',ja:'LDM赤みモード70%',zh:'LDM退红模式70%'},price:'390',addon:1,m:12,meta:{ko:'12분 저출력 · HIFU·필링 직후 최적',en:'12 min low-power · ideal right after HIFU or a peel',th:'12 นาที กำลังต่ำ · เหมาะหลัง HIFU·พีลทันที',ja:'12分低出力 · HIFU·ピール直後に最適',zh:'12分低功率·HIFU·焕肤后最适'}},
+       {name:{ko:'🌋 트러블·여드름엔 → + LDM 물방울 트러블 케어',en:'🌋 Breakouts → + Waterdrop Trouble Care',th:'🌋 สิว·ผิวแพ้ง่าย → + หยดน้ำดูแลสิว',ja:'🌋 ニキビ·トラブルに → + 水滴トラブルケア',zh:'🌋 痘痘敏感 → + 水滴祛痘护理'},dev:{ko:'LDM 여드름 모드 70%',en:'LDM acne mode 70%',th:'LDM โหมดสิว 70%',ja:'LDMニキビモード70%',zh:'LDM痘痘模式70%'},price:'490',addon:1,m:12,meta:{ko:'12분 · 면포성·화농성 · 구진 부위 집중',en:'12 min · comedonal & pustular · focus on active spots',th:'12 นาที · สิวอุดตัน·อักเสบ · เน้นจุดที่เป็น',ja:'12分 · 面皰·化膿性 · 患部集中',zh:'12分·闭口·脓包型·重点部位加强'}},
+       {name:{ko:'✨ 칙칙함엔 → + LDM 물방울 브라이트닝',en:'✨ Dullness → + Waterdrop Brightening',th:'✨ ผิวหมอง → + หยดน้ำกระจ่างใส',ja:'✨ くすみに → + 水滴ブライトニング',zh:'✨ 暗沉 → + 水滴亮肤'},dev:{ko:'LDM 미백 모드 80%',en:'LDM whitening mode 80%',th:'LDM โหมดไวท์เทนนิ่ง 80%',ja:'LDM美白モード80%',zh:'LDM美白模式80%'},price:'490',addon:1,m:18,meta:{ko:'18분 · 톤업 · 비타민C 침투와 최고 궁합',en:'18 min · tone-up · pairs best with Vitamin C boost',th:'18 นาที · โทนอัพ · เข้าคู่กับวิตซีที่สุด',ja:'18分 · トーンアップ · ビタミンC導入と好相性',zh:'18分·提亮·与维C导入最搭'}},
+       {feature:1,star:'BEST',name:{ko:'📉 늘어짐·잔주름엔 → + 고주파 탄력',en:'📉 Laxity & fine lines → + RF Firming',th:'📉 หย่อน·ริ้วรอย → + RF กระชับ',ja:'📉 たるみ·小じわに → + 高周波ハリ',zh:'📉 松弛细纹 → + 射频紧致'},dev:{ko:'고주파 6MHz · 3~4단',en:'RF 6 MHz · level 3–4',th:'RF 6 MHz · ระดับ 3–4',ja:'高周波6MHz·3〜4段',zh:'射频6MHz·3~4档'},price:'590',addon:1,m:15,meta:{ko:'15분 · 깊은층 HIFU + 표면 RF가 최강 궁합',en:'15 min · HIFU deep + RF surface is the strongest pairing',th:'15 นาที · HIFU ลึก + RF ผิวบน คู่ที่แรงสุด',ja:'15分 · 深層HIFU+表面RFが最強の組み合わせ',zh:'15分·深层HIFU+表面RF最强组合'}},
+       {name:{ko:'🎈 붓기엔 → + 고주파 드레이닝',en:'🎈 Puffiness → + RF Draining',th:'🎈 หน้าบวม → + RF ระบายบวม',ja:'🎈 むくみに → + 高周波ドレナージュ',zh:'🎈 浮肿 → + 射频引流'},dev:{ko:'고주파 부종 모드 · 2~3단',en:'RF edema mode · level 2–3',th:'โหมดลดบวม RF · ระดับ 2–3',ja:'高周波むくみモード·2〜3段',zh:'射频消肿模式·2~3档'},price:'490',addon:1,m:14,meta:{ko:'14분 저출력 · 아침 부종·시술 후 붓기',en:'14 min low-power · morning or post-treatment puffiness',th:'14 นาที กำลังต่ำ · บวมตอนเช้า·หลังทำ',ja:'14分低出力 · 朝のむくみ·施術後の腫れ',zh:'14分低功率·晨起浮肿·术后肿胀'}},
+       {name:{ko:'❄️ + 크라이오 진정',en:'❄️ + Cryo calming',th:'❄️ + ไครโอ ปลอบผิว',ja:'❄️ + クライオ鎮静',zh:'❄️ + 冷疗镇静'},dev:'',price:'390',addon:1,meta:{ko:'열감 즉시 다운 · 붉은기 진정',en:'brings heat down fast · calms redness',th:'ลดร้อนทันที · ลดแดง',ja:'熱感を素早く·赤み鎮静',zh:'即刻降热·舒缓泛红'}},
+       {name:{ko:'🤲 + 리프팅 림프마사지 20분',en:'🤲 + Lifting Lymph massage 20 min',th:'🤲 + นวดน้ำเหลืองยกกระชับ 20 นาที',ja:'🤲 + リフティングリンパ20分',zh:'🤲 + 提拉淋巴按摩20分'},dev:'',price:'490',addon:1,meta:{ko:'붓기·열감 드레이닝 · 턱선 정리 · 10분 290',en:'drains puffiness & heat · sharper jawline · 10 min ฿290',th:'ระบายบวม·ร้อน · เก็บกรอบหน้า · 10 นาที ฿290',ja:'むくみ·熱感ドレナージュ · フェイスライン · 10分฿290',zh:'引流浮肿·热感·收下颌线·10分฿290'}},
+     ]},
+   ],
+   noteHtml:{ko:'<b>HIFU는 샷 총량이 아니라 면적당 밀도가 결과를 만듭니다</b> · 모든 메뉴를 국제 표준 프로토콜과 같은 밀도(1.4mm 간격)로 시술합니다 · <b>체험(399→699→990→1,290)은 4.5mm 한 층을 좁은 면적에 정품 밀도로</b> — 200샷에서 시작해 400·600·800샷으로 · <b>총액은 200샷(399)이 최저, 샷당가는 800샷(1,290)이 최저</b> · 장비를 확인하는 회차입니다 · <b>효과(2,900~)부터 여러 심도가 들어가고, 찐(13,900~)은 1.5·3·4.5mm 전 층 풀커버입니다</b> · <b>층 애드온</b>으로 어떤 시술에나 층을 더할 수 있어요 (1.5mm 1,690 · 3mm 1,990 · 4.5mm 1,990 · 9mm 이중턱 1,990) — 층을 섞을수록 오래갑니다 · <b>마무리는 오늘 피부 증상으로 고르세요</b> — 건조·홍조·트러블·칙칙함·늘어짐·붓기별 물방울 초음파/고주파 애드온 (+390~590) · 결과는 1–2개월에 걸쳐 올라와 2–3개월에 자리잡습니다 · <b>체험 후 7일 내 정규 시술 예약 시 체험비 전액 차감</b>',en:'<b>HIFU results come from density per area, not total shot count</b> · every menu is delivered at the same density as the international standard protocol (1.4 mm spacing) · <b>the trials (฿399→699→990→1,290) are one 4.5 mm depth at full density on a small area</b> — 200 → 400 → 600 → 800 shots · <b>lowest total = 200 (฿399), lowest per-shot = 800 (฿1,290)</b> · <b>Results tier (฿2,900+) adds multiple depths, and The Real Thing (฿13,900+) covers all of 1.5 / 3 / 4.5 mm</b> · <b>depth add-ons</b> let you add a layer to any treatment (1.5 mm ฿1,690 · 3 mm ฿1,990 · 4.5 mm ฿1,990 · 9 mm double-chin ฿1,990) — more layers, longer-lasting · <b>pick your finisher by skin symptom today</b> — dryness, redness, breakouts, dullness, laxity or puffiness, each mapping to a waterdrop-ultrasound/RF add-on (+฿390–590) · results build over 1–2 months, settle at 2–3 · <b>trial fee fully credited when you book a regular treatment within 7 days</b>',th:'<b>ผลลัพธ์ HIFU มาจากความหนาแน่นต่อพื้นที่ ไม่ใช่จำนวนช็อตรวม</b> · ทุกเมนูยิงที่ความหนาแน่นเดียวกับโปรโตคอลมาตรฐานสากล (ระยะ 1.4 มม.) · <b>ทดลอง (399–999) ความหนาแน่นเท่ากัน แต่พื้นที่เล็กและมีระดับเดียว</b> เป็นการทดลองเครื่อง ไม่ใช่ยกทั้งใบหน้า · <b>ระดับเห็นผล (2,900+) เริ่มมีหลายระดับ และตัวจริง (13,900+) ครบทั้ง 1.5/3/4.5 มม.</b> · ผลลัพธ์ค่อยขึ้นใน 1–2 เดือน และคงที่ที่ 2–3 เดือน · <b>รายการเสริม</b> — LDM·ไครโอ·ไอออน นิยมปิดท้าย',ja:'<b>HIFUはショット総数ではなく面積あたりの密度が結果を決めます</b> · 全メニューを国際標準プロトコルと同じ密度(1.4mm間隔)で施術 · <b>体験(399〜999)は密度は同じで面積が小さく、深度も一つだけ</b> — 機器を確かめる回で、顔全体のリフトではありません · <b>効果(2,900〜)から複数深度、本気(13,900〜)は1.5·3·4.5mm全層フルカバー</b> · 結果は1〜2ヶ月かけて上がり2〜3ヶ月で定着 · <b>アドオン</b> — LDM·クライオ·イオントは鎮静仕上げに人気',zh:'<b>HIFU的效果来自单位面积密度·而非总发数</b>·所有菜单均按国际标准方案同等密度(间距1.4mm)施打·<b>体验(399~999)密度相同但面积小·且只有单一深度</b>·是体验仪器的场次·不是全脸提拉·<b>见效档(2,900起)开始多层深度·真章档(13,900起)1.5/3/4.5mm全层覆盖</b>·效果在1–2个月内累积·2–3个月稳定·<b>可加项</b>—LDM·冷疗·离子适合镇静收尾'}},
+
+  /* ── 03 페이스 콤보 ── */
+  {no:'03',title:'Face Combos',
+   sub:{ko:'페이스 콤보',en:'Face Combos',th:'คอมโบใบหน้า',ja:'フェイスコンボ',zh:'面部套组'},
+   desc:{ko:'장비를 조합해 효과 극대화 · 3회권가는 −10% (프리미엄은 −15%)',en:'Devices combined for maximum results · 3-pack −10% (premium −15%)',th:'รวมเครื่องมือเพื่อผลลัพธ์สูงสุด · แพ็ก 3 −10% (พรีเมียม −15%)',ja:'デバイスを組み合わせ効果最大 · 3回券−10%(プレミアム−15%)',zh:'仪器组合·效果最大化·3次卡−10%(高端−15%)'},
+   groups:[
+     {label:{ko:'🔥 타깃 프로모 세트 · 고민별 조합 (동시 시술 · 단품 합산가)',en:'🔥 Targeted Promo Sets · by concern (same visit · sum of singles)',th:'🔥 เซ็ตโปรโมตามปัญหาผิว (ทำครั้งเดียว · ราคารวมเมนูเดี่ยว)',ja:'🔥 悩み別プロモセット (同日 · 単品合算)',zh:'🔥 按困扰促销套组(同日·单品合计价)'},items:[
+       {feature:1,star:'PORE & MARKS',name:{ko:'BB글로우 + 맥슈어 100샷 맛보기 세트',en:'BB Glow + MacSure 100-Shot Taster Set',th:'เซ็ต BB Glow + MacSure 100 ช็อต',ja:'BBグロウ+マックシュア100ショット',zh:'BB焕肤+MacSure100发尝鲜套组'},dev:'BB Glow + MacSure',price:'1,680',m:70,meta:{ko:'여드름 자국·모공 피부용 · 맥슈어 코존 100샷 → 진정 → BB글로우 → LED · 990+690 합산',en:'for acne-marked and pore-prone skin · MacSure nose zone 100 shots → calm → BB Glow → LED · 990+690',th:'สำหรับผิวมีรอยสิว·รูขุมขน · MacSure โซนจมูก 100 ช็อต → ปลอบผิว → BB Glow → LED · 990+690',ja:'ニキビ跡·毛穴肌に · マックシュア100→鎮静→BBグロウ→LED · 合算990+690',zh:'针对痘印·毛孔肌·MacSure100发→镇静→BB焕肤→LED·990+690合计'},
+        x:{ko:'톤은 BB글로우가, 모공은 맥슈어가 — 한 번에 · 활성 염증 여드름 부위는 조사하지 않습니다 · 개인차',en:'BB Glow does tone, MacSure does pores — in one visit · never applied on active inflamed acne · results vary',th:'โทนให้ BB Glow รูขุมขนให้ MacSure — ในครั้งเดียว · ไม่ยิงบนสิวอักเสบ · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'トーンはBB、毛穴はマックシュア — 一度に · 炎症ニキビには照射しません · 個人差',zh:'肤色靠BB·毛孔靠MacSure—一次完成·不打在发炎痘痘上·因人而异'}},
+       {name:{ko:'BB글로우 + 맥슈어 200샷 모공집중 세트',en:'BB Glow + MacSure 200-Shot Pore Focus Set',th:'เซ็ต BB Glow + MacSure 200 ช็อต',ja:'BBグロウ+マックシュア200ショット',zh:'BB焕肤+MacSure200发毛孔聚焦'},dev:'BB Glow + MacSure',price:'2,180',m:75,meta:{ko:'코+앞뺨 또는 여드름 자국 2부위 200샷 → 진정 → BB글로우 → LED · 990+1,190 합산 · 풀페이스 맥슈어는 단독 1,990',en:'nose + inner cheeks or 2 acne-mark zones, 200 shots → calm → BB Glow → LED · 990+1,190 · full-face MacSure standalone 1,990',th:'จมูก+แก้ม หรือ 2 จุดรอยสิว 200 ช็อต → ปลอบผิว → BB Glow → LED · 990+1,190',ja:'鼻+頬 or ニキビ跡2部位200→鎮静→BBグロウ→LED · 合算990+1,190',zh:'鼻+颊或2处痘印200发→镇静→BB焕肤→LED·990+1,190合计'},
+        x:{ko:'모공·자국 결을 집중으로 다듬고 톤까지 — 다음 단계는 맥슈어 풀페이스(1,990) 코스 · 개인차',en:'Focused texture work plus tone — next step is the full-face MacSure course (1,990) · results vary',th:'เก็บผิวรูขุมขน·รอยสิวพร้อมโทน — ขั้นต่อไปคือ MacSure ฟูลเฟซ (1,990) · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'毛穴·跡の肌質集中+トーン — 次はフルフェイス(1,990)へ · 個人差',zh:'集中修饰毛孔·痘印肤质+提亮—下一步全脸MacSure(1,990)·因人而异'}},
+       {feature:1,star:'DOUBLE CHIN',name:{ko:'BB글로우 + 하이푸 이중턱 세트',en:'BB Glow + HIFU Double-Chin Set',th:'เซ็ต BB Glow + HIFU ใต้คาง',ja:'BBグロウ+HIFU二重あごセット',zh:'BB焕肤+HIFU双下巴套组'},dev:'BB Glow + ULFINE 4.5mm',price:'1,389',m:75,meta:{ko:'이중턱 고민용 · 하이푸 4.5mm 200샷(이중턱) → BB글로우 → LED · 990+399 합산 · 광고 인기 세트',en:'for double-chin concerns · HIFU 4.5mm 200 shots (chin) → BB Glow → LED · 990+399 · our popular ad set',th:'สำหรับกังวลใต้คาง · HIFU 4.5มม. 200 ช็อต (ใต้คาง) → BB Glow → LED · 990+399',ja:'二重あごに · HIFU200(あご下)→BBグロウ→LED · 合算990+399',zh:'针对双下巴·HIFU200发(下巴)→BB焕肤→LED·990+399合计'},
+        x:{ko:'턱선은 하이푸가, 톤은 BB글로우가 · 살집 있는 턱은 테라노바 퀵 +490을 얹거나 이중턱 효과 티어(2,900)로 · 개인차',en:'HIFU works the chin line, BB Glow the tone · for a fuller chin add THERANOVA Quick +490 or upgrade to the dual-depth tier (2,900) · results vary',th:'กรอบหน้าให้ HIFU โทนให้ BB Glow · ใต้คางมีวอลุ่ม เสริม THERANOVA ด่วน +490 หรืออัปเป็น 2 ชั้น (2,900) · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'ラインはHIFU、トーンはBB · ボリュームにはテラノバ+490か効果ティア(2,900) · 個人差',zh:'线条靠HIFU·肤色靠BB·饱满下巴加THERANOVA+490或升双层档(2,900)·因人而异'}},
+       {name:{ko:'BB글로우 + 하이푸 + 테라노바 턱 퀵 세트',en:'BB Glow + HIFU + THERANOVA Chin Quick Set',th:'เซ็ต BB Glow + HIFU + THERANOVA ใต้คางด่วน',ja:'BBグロウ+HIFU+テラノバ クイックセット',zh:'BB焕肤+HIFU+THERANOVA下巴快捷套组'},dev:'ULFINE 4.5mm + THERANOVA + BB Glow',price:'1,879',m:85,meta:{ko:'하이푸 200샷 → 테라노바 턱 퀵 10분 → BB글로우 → LED · 990+399+490 합산 · 풀버전 세트는 2,379(테라노바 25분)',en:'HIFU 200 shots → THERANOVA chin quick 10 min → BB Glow → LED · 990+399+490 · full version 2,379 (25-min THERANOVA)',th:'HIFU 200 ช็อต → THERANOVA ใต้คางด่วน 10 นาที → BB Glow → LED · 990+399+490',ja:'HIFU200→テラノバ10分→BBグロウ→LED · 合算990+399+490 · フル版2,379',zh:'HIFU200发→THERANOVA快捷10分→BB焕肤→LED·990+399+490合计·完整版2,379'},
+        x:{ko:'조이고(하이푸) 흘려보내고(테라노바) 빛낸다(BB) — 이중턱+톤 원데이 · 개인차',en:'Tighten (HIFU), drain (THERANOVA), glow (BB) — chin and tone in one day · results vary',th:'กระชับ (HIFU) ระบาย (THERANOVA) เปล่งประกาย (BB) — จบวันเดียว · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'締めて(HIFU)流して(テラノバ)輝かせる(BB) — 1日で · 個人差',zh:'收紧(HIFU)·引流(THERANOVA)·焕亮(BB)—一天完成·因人而异'}},
+     ]},
+     {label:'Glow & Clean',items:[
+       {feature:1,star:'BEST',name:'Glow Combo',price:'2,290',m:75,p3:'2,060',meta:{ko:'아쿠아필 → BB글로우 → 물광 마무리',en:'Aqua peel → BB Glow → glow finish',th:'อะควาพีล → BB Glow → ปิดท้ายฉ่ำวาว',ja:'アクア→BBグロウ→ツヤ仕上げ',zh:'水飞梭→BB Glow→水光收尾'},
+        x:{ko:'속부터 채운 촉촉 물광 · 톤·광채 한 번에',en:'Deep hydration + tone & radiance in one',th:'เติมน้ำชั้นลึก + โทน·ออร่า',ja:'深部保湿＋トーン·ツヤ',zh:'深层补水＋提亮·光泽'}},
+       {name:'Bright Combo',price:'2,090',m:75,p3:'1,880',meta:{ko:'아쿠아필 → BB글로우 → 비타민C 침투',en:'Aqua peel → BB Glow → Vit C boost',th:'อะควาพีล → BB Glow → วิตซี',ja:'アクア→BBグロウ→ビタC',zh:'水飞梭→BB Glow→维C'},
+        x:{ko:'칙칙함·색소 정돈 · 화사한 톤업',en:'Clears dullness & pigment · bright tone-up',th:'ลดหมองคล้ำ·จุดด่างดำ · กระจ่างขึ้น',ja:'くすみ·色素を整えトーンアップ',zh:'改善暗沉·色素·提亮'}},
+       {name:'Deep Cleanse Combo',price:'1,790',m:60,p3:'1,610',meta:{ko:'아쿠아필 → 진정 → 크라이오',en:'Aqua peel → soothing → cryo',th:'อะควาพีล → ปลอบผิว → ไครโอ',ja:'アクア→鎮静→クライオ',zh:'水飞梭→舒缓→冷疗'},
+        x:{ko:'모공 청소 · 세범(피지) 컨트롤 (지성·습한 기후 추천)',en:'Pore cleansing · sebum control (oily skin / humid climate)',th:'ล้างรูขุมขน · ควบคุมความมัน (ผิวมัน·อากาศชื้น)',ja:'毛穴クレンジング · 皮脂コントロール (脂性·多湿に)',zh:'深层清洁毛孔·控油(油性肌·潮湿气候)'}},
+     ]},
+     {label:{ko:'Lifting · 장비 조합',en:'Lifting · device combos',th:'ยกกระชับ · ชุดเครื่องมือ',ja:'リフト · デバイス',zh:'提拉·仪器组合'},items:[
+       {feature:1,star:'BEST',name:'Lifting Combo (2 devices)',price:'2,690',m:50,p3:'2,420',meta:{ko:'HIFU 딥 리프팅 + RF 타이트닝',en:'HIFU deep lift + RF tightening',th:'HIFU ยกลึก + RF กระชับ',ja:'HIFU深部リフト＋RFタイト',zh:'HIFU深提+RF紧致'},
+        x:{ko:'깊은 층은 HIFU로 당기고 표면은 RF로 조여 · 리프팅 시너지 최강 조합',en:'HIFU lifts the deep layer, RF tightens the surface · best-synergy lifting duo',th:'HIFU ยกชั้นลึก + RF กระชับผิวบน · คู่ยกกระชับที่เข้ากันสุด',ja:'深層はHIFU·表面はRF · 相乗リフトの最強コンビ',zh:'HIFU提深层·RF紧表层·提拉最强协同'}},
+       {name:'Deep Lifting Combo (3 devices)',price:'2,790',m:70,p3:'2,510',meta:{ko:'HIFU + RF + 모공·콜라겐 재생',en:'HIFU + RF + pore·collagen renewal',th:'HIFU + RF + ฟื้นฟูรูขุมขน·คอลลาเจน',ja:'HIFU + RF + 毛穴·コラーゲン再生',zh:'HIFU + RF + 毛孔·胶原再生'},
+        x:{ko:'리프팅에 결·모공 재생까지 · 처짐 + 피부결을 한 번에',en:'Lifting plus texture & pore renewal · sagging + skin quality together',th:'ยกกระชับ + ฟื้นผิวเนียน·รูขุมขน · หย่อน+ผิวในครั้งเดียว',ja:'リフト＋キメ·毛穴再生 · たるみと質感を同時',zh:'提拉＋肤质·毛孔再生·松弛+肤质一次'}},
+     ]},
+     {label:'Signature Premium · −15%',items:[
+       {name:{ko:'시그니처 글로우 리프팅',en:'Signature Glow Lifting',th:'ซิกเนเจอร์ กลอว์ลิฟติ้ง',ja:'シグネチャーグロウリフト',zh:'招牌水光提拉'},price:'3,790',m:85,p3:'3,220',meta:{ko:'HIFU + RF + 물광 + 메조글레이즈 앰플',en:'HIFU + RF + glow + MesoGlaze ampoule',th:'HIFU + RF + กลอว์ + เมโสเกลซ',ja:'HIFU + RF + ツヤ + メソグレーズ',zh:'HIFU + RF + 水光 + 美塑安瓶'},
+        x:{ko:'리프팅 + 물광 + 앰플 영양까지 · 당겨지고 광나는 시그니처 케어',en:'Lift + glow + ampoule nutrition · tightened and luminous',th:'ยก + ฉ่ำวาว + บำรุงแอมพูล · กระชับและเปล่งประกาย',ja:'リフト＋ツヤ＋アンプル栄養 · 引き締めと輝き',zh:'提拉+水光+安瓶营养·紧致又发光'}},
+       {feature:1,star:'PREMIUM',name:{ko:'풀페이스 안티에이징',en:'Full Face Anti-Aging',th:'ฟูลเฟซแอนตี้เอจ',ja:'フルフェイスエイジング',zh:'全脸抗衰'},price:'4,590',m:100,p3:'3,900',meta:{ko:'HIFU + RF + 모공·콜라겐 재생 + PDRN 앰플 + 물광 마무리',en:'HIFU + RF + collagen renewal + PDRN ampoule + glow finish',th:'HIFU + RF + ฟื้นคอลลาเจน + PDRN + ปิดท้ายฉ่ำวาว',ja:'HIFU + RF + コラーゲン再生 + PDRN + ツヤ仕上げ',zh:'HIFU + RF + 胶原再生 + PDRN + 水光收尾'},
+        x:{ko:'우리 장비로 만드는 최상급 안티에이징 · 깊은 리프팅·표면 타이트닝·세포 재생·수분을 한 코스에',en:'Our top anti-aging protocol · deep lift, surface tightening, cell renewal & hydration in one',th:'โปรโตคอลแอนตี้เอจสูงสุด · ยกลึก·กระชับผิว·ฟื้นเซลล์·เติมน้ำ ครบในคอร์สเดียว',ja:'当院最上級のエイジングケア · 深部リフト·表面タイト·細胞再生·保湿を一度に',zh:'顶级抗衰协议·深层提拉·表面紧致·细胞再生·补水一次完成'}},
+     ]},
+   ],
+   noteHtml:{ko:'<b>장비를 조합할수록 효과·시간·가격이 올라가요</b> · 리프팅은 HIFU(깊은 층)+RF(표면)가 핵심 · 3회권 −10% (시그니처 −15%)',en:'<b>More devices = more result, time & price</b> · lifting core = HIFU (deep) + RF (surface) · 3-pack −10% (signature −15%)',th:'<b>ยิ่งรวมเครื่องมือ ยิ่งเห็นผล·เวลา·ราคาเพิ่ม</b> · หัวใจการยก = HIFU(ลึก)+RF(ผิวบน) · แพ็ก 3 −10% (ซิกเนเจอร์ −15%)',ja:'<b>デバイスを重ねるほど効果·時間·価格UP</b> · リフトの核=HIFU(深層)+RF(表面) · 3回券−10%(シグネチャー−15%)',zh:'<b>仪器越多·效果·时间·价格越高</b>·提拉核心=HIFU(深层)+RF(表面)·3次卡−10%(招牌−15%)'}},
+
+  /* ── 04 케어 프로그램 (4개 분리) ── */
+  {no:'04',title:'Care Programs',
+   sub:{ko:'결과 중심 프로그램',en:'Result-Driven Programs',th:'โปรแกรมเน้นผลลัพธ์',ja:'結果重視プログラム',zh:'结果导向疗程'},
+   desc:{ko:'측정 → 시술 → 결과까지 책임지는 기간별 코스 · 완주 시 맞춤 홈케어 풀세트 무료 · 3회권과 별개',en:'Analysis → treatment → results, over weeks · complete & get a free custom home-care set',th:'วัดผิว → ทรีตเมนต์ → ผลลัพธ์ เป็นคอร์ส · จบคอร์สรับโฮมแคร์ฟูลเซตฟรี',ja:'測定→施術→結果までの期間コース · 修了でホームケアフルセット無料',zh:'测肤→护理→结果的疗程课程·完成赠定制居家全套'},
+   programs:[
+     {ico:'✦',title:{ko:'안티에이징 프로그램',en:'Anti-Aging Program',th:'โปรแกรมแอนตี้เอจิ้ง',ja:'アンチエイジングプログラム',zh:'抗衰老疗程'},
+      sub:{ko:'리프팅·탄력 집중 코스',en:'Lifting & firmness course',th:'คอร์สยกกระชับ·เฟิร์ม',ja:'リフト·ハリ集中コース',zh:'提拉·紧致课程'},
+      items:[
+        {name:'Anti-Aging · 4 Weeks · Basic',price:'5,900',meta:{ko:'4주 · MTS 2회 + PDRN/펩타이드 + 홈케어 5ml',en:'4 wks · MTS ×2 + PDRN/peptide + 5ml',th:'4 สัปดาห์ · MTS 2 + PDRN/เปปไทด์ + 5ml',ja:'4週 · MTS2回＋PDRN/ペプチド＋5ml',zh:'4周·微针2次＋PDRN/胜肽＋5ml'},
+         x:{ko:'탄력·잔주름 입문 (MTS 중심)',en:'Firmness & fine-line starter',th:'กระชับ·ริ้วรอยเริ่มต้น',ja:'ハリ·小じわ入門',zh:'紧致·细纹入门'}},
+        {feature:1,star:'PLUS',name:'Anti-Aging · 4 Weeks · Plus',price:'8,900',meta:{ko:'4주 코스 · 리프팅+탄력 집중 + PDRN 재생 + 홈케어 30ml',en:'4-wk course · lifting+firmness + PDRN + 30ml home care',th:'คอร์ส 4 สัปดาห์ · ยกกระชับ+เฟิร์ม + PDRN + โฮมแคร์ 30ml',ja:'4週コース · リフト+ハリ + PDRN + ホームケア30ml',zh:'4周课程·提拉+紧致+PDRN+居家30ml'},
+         x:{ko:'처진 얼굴선을 끌어올리고 탄력을 채우는 프리미엄 코스',en:'Lifts sagging contours & restores firmness',th:'ยกกระชับใบหน้าที่หย่อนคล้อย·เติมความเฟิร์ม',ja:'たるんだ輪郭を引き上げハリを補う',zh:'提拉松弛轮廓·补充紧致'}},
+      ]},
+     {ico:'☀',title:{ko:'브라이트닝 프로그램',en:'Brightening Program',th:'โปรแกรมไวท์เทนนิ่ง',ja:'ブライトニングプログラム',zh:'焕白疗程'},
+      sub:{ko:'미백·기미·잡티 · 단기~장기 코스',en:'Brightening · dark spots · short to long course',th:'ไวท์เทนนิ่ง·ฝ้า·จุดด่างดำ · สั้น–ยาว',ja:'美白·シミ · 短期〜長期',zh:'美白·斑点·短至长期'},
+      items:[
+        {feature:1,star:'BEST',name:'Brightening · 2 Weeks',price:'2,900',meta:{ko:'2주 · MTS 1회 + 비타민C + 홈케어 5ml',en:'2 wks · MTS ×1 + Vit C + 5ml home care',th:'2 สัปดาห์ · MTS 1 + วิตซี + โฮมแคร์ 5ml',ja:'2週 · MTS1回＋ビタミンC＋5ml',zh:'2周·微针1次＋维C＋5ml'},
+         x:{ko:'단기 집중 광채·톤업 입문',en:'Short intensive glow starter',th:'เริ่มต้นเร่งผิวกระจ่างใน 2 สัปดาห์',ja:'短期集中トーンアップ入門',zh:'短期集中提亮入门'}},
+        {name:'Melanin · 4 Weeks',price:'4,900',meta:{ko:'4주 · MTS 2회 + 미백앰플 + 홈케어 5ml',en:'4 wks · MTS ×2 + ampoule + 5ml',th:'4 สัปดาห์ · MTS 2 + แอมพูล + 5ml',ja:'4週 · MTS2回＋アンプル＋5ml',zh:'4周·微针2次＋安瓶＋5ml'},
+         x:{ko:'기미·잡티 입문 (MTS 중심)',en:'Dark-spot starter (MTS)',th:'ดูแลฝ้าเริ่มต้น',ja:'シミ入門',zh:'淡斑入门'}},
+        {name:'Melanin · 4 Weeks · Plus',price:'6,900',meta:{ko:'4주 · MTS 2회 + 이온토·LDM + 앰플 + 홈케어 30ml',en:'4 wks · MTS ×2 + Ionto·LDM + ampoule + 30ml',th:'4 สัปดาห์ · MTS 2 + ไอออน·LDM + แอมพูล + 30ml',ja:'4週 · MTS2回＋イオン·LDM＋アンプル＋30ml',zh:'4周·微针2次＋离子·LDM＋安瓶＋30ml'},
+         x:{ko:'장비 추가 · 흡수·미백 강화',en:'Device add · deeper brightening',th:'เพิ่มเครื่องมือ · กระจ่างเข้มขึ้น',ja:'デバイス追加 · 浸透·美白強化',zh:'加仪器·吸收·美白加强'}},
+        {name:'Melanin · 8 Weeks · Plus',price:'12,900',meta:{ko:'8주 · MTS 4회 + 이온토·LDM + 앰플 + 홈케어 30ml×2',en:'8 wks · MTS ×4 + Ionto·LDM + ampoule + 30ml ×2',th:'8 สัปดาห์ · MTS 4 + ไอออน·LDM + แอมพูล + 30ml ×2',ja:'8週 · MTS4回＋イオン·LDM＋アンプル＋30ml×2',zh:'8周·微针4次＋离子·LDM＋安瓶＋30ml×2'},
+         x:{ko:'장기 미백 완성 (가장 강력)',en:'Long-term brightening (most powerful)',th:'ผิวกระจ่างระยะยาว (เข้มข้นสุด)',ja:'長期美白完成(最強)',zh:'长期美白(最强)'}},
+      ]},
+     {ico:'✿',title:{ko:'아크네 프로그램',en:'Acne Program',th:'โปรแกรมรักษาสิว',ja:'アクネプログラム',zh:'祛痘疗程'},
+      sub:{ko:'여드름·트러블 진정 · 흉터·모공까지',en:'Calms acne · improves scars & pores',th:'ปลอบสิว·ผิวมีปัญหา · รอยแผล·รูขุมขน',ja:'ニキビ鎮静 · 跡·毛穴まで',zh:'舒缓痘痘·改善痘印·毛孔'},
+      items:[
+        {name:'Acne Care · 1 Session',price:'1,290',m:50,meta:{ko:'딥클렌징 + 압출 + 진정 + 앰플',en:'Deep cleanse + extraction + soothing + ampoule',th:'ทำความสะอาดล้ำลึก + กดสิว + ปลอบผิว + แอมพูล',ja:'ディープ洗浄＋圧出＋鎮静＋アンプル',zh:'深层清洁＋清痘＋舒缓＋安瓶'},
+         x:{ko:'트러블 진정 · 자극 없이 깨끗하게',en:'Calms breakouts · gentle clean',th:'ปลอบสิว · สะอาดอย่างอ่อนโยน',ja:'トラブル鎮静 · やさしく清潔',zh:'舒缓痘痘·温和净肤'}},
+        {feature:1,star:'BEST',name:'Acne Care · 4 Weeks',price:'4,900',meta:{ko:'4주 · 주 1회 4회 + 진정 MTS + 홈케어 5ml',en:'4 wks · weekly ×4 + soothing MTS + 5ml',th:'4 สัปดาห์ · สัปดาห์ละ 1 × 4 + MTS + 5ml',ja:'4週 · 週1回×4＋鎮静MTS＋5ml',zh:'4周·每周1次×4＋舒缓微针＋5ml'},
+         x:{ko:'활동성 여드름 집중 (주 1회 빠른 컨트롤)',en:'Active acne focus (weekly control)',th:'โฟกัสสิวอักเสบ (สัปดาห์ละครั้ง)',ja:'活動性ニキビ集中(週1)',zh:'活动痘集中(每周)'}},
+        {name:'Acne Scar & Pore · 4 Weeks',price:'6,900',meta:{ko:'4주 · 흉터·모공 재생 2회 + 재생앰플 + 홈케어 30ml',en:'4 wks · scar & pore renewal ×2 + repair ampoule + 30ml',th:'4 สัปดาห์ · ฟื้นฟูรอย·รูขุมขน 2 + แอมพูล + 30ml',ja:'4週 · 跡·毛穴再生2回＋再生アンプル＋30ml',zh:'4周·痘印·毛孔再生2次＋修复安瓶＋30ml'},
+         x:{ko:'여드름 흉터·모공·결 개선 (표피 재생 = MacSure 강점)',en:'Acne scars, pores & texture (MacSure epidermal renewal)',th:'รอยแผลเป็น·รูขุมขน·ผิวเนียน (MacSure ฟื้นฟูผิว)',ja:'ニキビ跡·毛穴·キメ改善(MacSureの表皮再生)',zh:'痘印·毛孔·肤质改善(MacSure表皮再生)'}},
+      ]},
+     {ico:'❋',title:{ko:'스칼프 탈모 프로그램',en:'Scalp & Hair Program',th:'โปรแกรมหนังศีรษะ·ผมร่วง',ja:'スカルプ·薄毛プログラム',zh:'头皮·防脱疗程'},
+      sub:{ko:'탈모 케어(키우기) · 두피 MTS + 앰플 · 두피페인팅과 시너지',en:'Hair-loss care (grow) · scalp MTS + ampoule · pairs with painting',th:'ดูแลผมร่วง(บำรุง) · MTS หนังศีรษะ + แอมพูล',ja:'薄毛ケア(育てる) · 頭皮MTS＋アンプル',zh:'防脱养发·头皮微针+安瓶'},
+      items:[
+        {feature:1,star:'TOTAL',name:'Hair Care · 12 Weeks',price:'12,900',meta:{ko:'12주 · 두피 MTS 6회 (2주 1회) + 두피앰플 + 홈케어 30ml×2~3 + 측정',en:'12 wks · 6 scalp MTS + ampoule + 30ml ×2–3 + analysis',th:'12 สัปดาห์ · MTS หนังศีรษะ 6 + แอมพูล + 30ml ×2–3',ja:'12週 · 頭皮MTS6回＋アンプル＋30ml×2〜3＋測定',zh:'12周·头皮微针6次＋安瓶＋30ml×2-3＋测肤'},
+         x:{ko:'탈모 케어(키우기) · 두피페인팅(가리기)과 함께하면 시너지',en:'Grow-focused care · syncs with scalp painting (cover)',th:'บำรุงผม · เสริมกับการเติมสีหนังศีรษะ',ja:'育毛ケア · スカルプペイントと相乗',zh:'养发护理·搭配头皮补色协同'}},
+      ]},
+   ],
+   noteHtml:{ko:'<b>결과를 파는 프로그램</b> · 코스 완주 시 <b>맞춤 홈케어 풀세트 무료</b> · 단품 고객은 홈케어 −15%',en:'<b>We sell results</b> · complete a course → <b>free custom home-care set</b> · −15% home care for treatment guests',th:'<b>เราขายผลลัพธ์</b> · จบคอร์ส → <b>โฮมแคร์ฟูลเซตฟรี</b> · ลูกค้าทำทรีตเมนต์ ซื้อโฮมแคร์ −15%',ja:'<b>結果を売る</b> · コース修了で<b>ホームケアフルセット無料</b> · 施術ゲストはホームケア−15%',zh:'<b>售卖结果</b> · 完成疗程→<b>赠定制居家全套</b> · 做护理者购居家−15%'}},
+
+  /* ── 05 손 관리 · 30 / 60 / 90분 (하나하얀 계승) ── */
+  {no:'05',title:'Hands-on Care',
+   sub:{ko:'손 관리 · 30 / 60분',en:'Hands-on Care · 30 / 60 min',th:'ทรีตเมนต์ด้วยมือ · 30 / 60 นาที',ja:'ハンドケア · 30 / 60分',zh:'手做护理 · 30 / 60分钟'},
+   desc:{ko:'기계 없이 테라피스트의 손으로만 · <b>시간을 고르세요</b> — 30분(얼굴) / 60분(+목·데콜테) · 3회권 −10% · 리프팅 림프마사지는 <b>10·20분 애드온</b>으로 다른 시술에 붙일 수도 있어요',en:'No machines — therapist hands only · <b>choose your time</b>: 30 min (face) / 60 min (+neck & décolleté) · 3-pack −10% · Lifting Lymph Massage also comes as a <b>10 / 20 min add-on</b>',th:'ไม่ใช้เครื่อง ใช้มือเทอราปิสต์ล้วน · <b>เลือกเวลาได้</b> 30 นาที (หน้า) / 60 นาที (+คอ·อก) · แพ็ก 3 −10% · นวดน้ำเหลืองยกกระชับ ยังเสริมได้แบบ <b>10 / 20 นาที</b>',ja:'機器なし・セラピストの手技のみ · <b>時間を選べます</b> 30分(顔)/60分(+首·デコルテ) · 3回券−10% · リフティングリンパは<b>10·20分アドオン</b>でも',zh:'不用仪器·纯手技 · <b>可选时长</b> 30分(面部)/60分(+颈·前胸)·3次卡−10%·提拉淋巴按摩另有<b>10/20分钟加项</b>'},
+   groups:[
+     {label:{ko:'시그니처 손 관리 · 정규 메뉴',en:'Signature Hands-on · Full Menu',th:'ซิกเนเจอร์ด้วยมือ · เมนูปกติ',ja:'シグネチャー手技 · 通常メニュー',zh:'招牌手做·正规菜单'},items:[
+       {feature:1,star:'SIGNATURE',
+        name:{ko:'리프팅 림프마사지',en:'Lifting Lymph Massage',th:'นวดน้ำเหลืองยกกระชับ',ja:'リフティング リンパマッサージ',zh:'提拉淋巴按摩'},
+        dev:{ko:'리프팅 크림 + 근막·림프 핸드테크닉',en:'Lifting cream + fascia & lymph hand technique',th:'ครีมลิฟติ้ง + เทคนิคมือ พังผืด·น้ำเหลือง',ja:'リフティングクリーム＋筋膜·リンパ手技',zh:'提拉霜＋筋膜·淋巴手技'},
+        meta:{ko:'클렌징 → 리프팅 크림 → 림프 드레이닝 → 근막 리프팅 핸드테크닉 → 팩 → 마무리',en:'Cleanse → lifting cream → lymph drainage → fascia lifting technique → mask → finish',th:'ทำความสะอาด → ครีมลิฟติ้ง → ระบายน้ำเหลือง → เทคนิคยกกระชับ → มาส์ก → ปิดท้าย',ja:'クレンジング→リフティングクリーム→リンパドレナージュ→筋膜リフト手技→パック→仕上げ',zh:'清洁→提拉霜→淋巴引流→筋膜提拉手技→敷膜→收尾'},
+        x:{ko:'리프팅 크림을 얹고 림프를 흘려보낸 뒤 근막 라인을 따라 끌어올리는 핸드 리프팅 · 붓기 빼고 처진 라인 정리 · 시술 직후 턱선이 또렷해집니다',en:'Lifting cream, lymph drained, then lifted along the fascia lines by hand · de-puffs and redefines a soft jawline right away',th:'ลงครีมลิฟติ้ง ระบายน้ำเหลือง แล้วยกตามแนวพังผืดด้วยมือ · ลดบวม เห็นกรอบหน้าชัดขึ้นทันทีหลังทำ',ja:'リフティングクリームでリンパを流し、筋膜ラインに沿って手技で引き上げ · むくみ·たるみを整え、直後からフェイスラインくっきり',zh:'涂提拉霜引流淋巴后沿筋膜走向徒手提拉·消浮肿·术后即刻下颌线清晰'},
+        dur:[{m:30,price:'890',p3:'800',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,490',p3:'1,340',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+       {name:{ko:'고마쥬 디톡스',en:'Gommage Detox',th:'กอมมาจ ดีท็อกซ์',ja:'ゴマージュ デトックス',zh:'去角质排毒'},
+        dev:{ko:'고마쥬 각질 롤링 + 림프 드레이닝',en:'Gommage exfoliation + lymph drainage',th:'ผลัดเซลล์กอมมาจ + ระบายน้ำเหลือง',ja:'ゴマージュ角質＋リンパドレナージュ',zh:'去角质＋淋巴引流'},
+        meta:{ko:'클렌징 → 고마쥬 롤링 → 림프 드레이닝 → 진정 팩 → 마무리',en:'Cleanse → gommage rolling → lymph drainage → calming mask → finish',th:'ทำความสะอาด → กอมมาจ → ระบายน้ำเหลือง → มาส์กปลอบผิว → ปิดท้าย',ja:'クレンジング→ゴマージュ→リンパドレナージュ→鎮静パック→仕上げ',zh:'清洁→去角质→淋巴引流→镇静敷膜→收尾'},
+        x:{ko:'묵은 각질을 굴려 걷어내고 림프를 흘려보내는 디톡스 · 답답한 피부결·칙칙함·붓기에 · 산(酸) 없이 순해서 민감성도 OK',en:'Rolls away dead cells and drains lymph · for congested texture, dullness & puffiness · acid-free, sensitive-safe',th:'ขจัดเซลล์ผิวเก่าและระบายน้ำเหลือง · เหมาะกับผิวหมอง·อุดตัน·บวม · ไม่มีกรด อ่อนโยน ผิวแพ้ง่ายก็ได้',ja:'古い角質を絡め取りリンパを流すデトックス · ごわつき·くすみ·むくみに · 酸不使用で敏感肌もOK',zh:'搓走老废角质并引流淋巴·改善粗糙·暗沉·浮肿·无酸温和·敏感肌适用'},
+        dur:[{m:30,price:'790',p3:'710',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,290',p3:'1,160',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+     ]},
+     {label:{ko:'리프팅 림프마사지 애드온 · 다른 시술에 붙이기 (동시 시술가)',en:'Lifting Lymph Add-on · attach to any treatment (same-visit price)',th:'นวดน้ำเหลืองยกกระชับ แบบเสริม · ทำต่อจากทรีตเมนต์อื่น (ราคาทำพร้อมกัน)',ja:'リフティングリンパ アドオン · 他の施術に追加(同時価格)',zh:'提拉淋巴按摩加项·可加在任何护理后(同做价)'},items:[
+       {feature:1,star:'★ BEST ADD-ON',
+        name:{ko:'+ 리프팅 림프마사지 20분',en:'+ Lifting Lymph Massage · 20 min',th:'+ นวดน้ำเหลืองยกกระชับ 20 นาที',ja:'+ リフティングリンパ 20分',zh:'+ 提拉淋巴按摩 20分钟'},
+        dev:{ko:'얼굴 + 목 · 풀 드레이닝',en:'face + neck · full drainage',th:'หน้า + คอ · ระบายเต็ม',ja:'顔+首 · フルドレナージュ',zh:'面部+颈·完整引流'},price:'+490',was:'฿890',
+        meta:{ko:'어느 시술에나 · 30분 단품 ฿890 → 애드온 ฿490',en:'with any treatment · ฿890 as a 30-min standalone → ฿490 as add-on',th:'ทำต่อจากทรีตเมนต์ใดก็ได้ · เดี่ยว 30 นาที ฿890 → เสริม ฿490',ja:'どの施術にも · 30分単品฿890 → アドオン฿490',zh:'任意护理均可加·30分单做฿890→加项฿490'},
+        x:{ko:'HIFU·BB글로우·필링 끝나고 붙이는 20분 · 시술로 올라온 붓기와 열감을 림프로 흘려보내고 턱선까지 정리해서 내보냅니다 · 애드온 중 만족도 1위',en:'20 minutes after HIFU, BB Glow or a peel · drains the puffiness and heat the treatment stirred up, and walks you out with a sharper jawline · our best-rated add-on',th:'ทำต่อ 20 นาที หลัง HIFU·BB Glow·พีลลิ่ง · ระบายอาการบวม·ร้อนจากทรีตเมนต์ และเก็บกรอบหน้าให้ชัดก่อนกลับ · แอดออนที่ลูกค้าพอใจที่สุด',ja:'HIFU·BBグロウ·ピール後の20分 · 施術で出たむくみ·熱感をリンパで流し、フェイスラインまで整えて仕上げ · 満足度No.1のアドオン',zh:'HIFU·BB焕肤·焕肤后加做20分钟·把护理引起的浮肿与热感引流走·连下颌线一起收干净·加项中满意度第一'}},
+       {name:{ko:'+ 리프팅 림프마사지 10분',en:'+ Lifting Lymph Massage · 10 min',th:'+ นวดน้ำเหลืองยกกระชับ 10 นาที',ja:'+ リフティングリンパ 10分',zh:'+ 提拉淋巴按摩 10分钟'},
+        dev:{ko:'얼굴 · 퀵 드레이닝',en:'face · quick drainage',th:'ใบหน้า · ระบายด่วน',ja:'顔 · クイックドレナージュ',zh:'面部·快速引流'},price:'+290',
+        meta:{ko:'짧게 마무리만 · 시간 없는 날에',en:'a quick finish · for days with no time',th:'ปิดท้ายสั้นๆ · วันที่เวลาน้อย',ja:'短く仕上げだけ · 時間がない日に',zh:'简短收尾·赶时间的日子'},
+        x:{ko:'얼굴만 빠르게 흘려보내는 10분 마무리 · 붓기만 정리하고 바로 나가고 싶을 때',en:'A 10-minute face-only drain · when you just want the puffiness gone and out the door',th:'ระบายเฉพาะใบหน้า 10 นาที · แค่ยุบบวมแล้วไปต่อได้เลย',ja:'顔だけ素早く流す10分仕上げ · むくみだけ取ってすぐ出たい時に',zh:'仅面部快速引流10分钟·只想消个浮肿就走时'}},
+     ]},
+     {label:{ko:'베이직 손 관리 4종',en:'Basic Hands-on · 4 types',th:'ทรีตเมนต์ด้วยมือพื้นฐาน 4 แบบ',ja:'ベーシック手技 4種',zh:'基础手做护理·4款'},items:[
+       {name:'Moisture Care',
+        meta:{ko:'클렌징 → 각질 → 수분 앰플 → 마사지 → 수분 팩',en:'Cleanse → exfoliate → hydrating ampoule → massage → mask',th:'ทำความสะอาด → ผลัดเซลล์ → แอมพูลเติมน้ำ → นวด → มาส์ก',ja:'クレンジング→角質→保湿アンプル→マッサージ→パック',zh:'清洁→去角质→补水安瓶→按摩→敷膜'},
+        x:{ko:'수분 집중 · 건조·당김 완화 · 가장 부담 없는 입문 관리',en:'Deep hydration · dryness & tightness relief · the easiest place to start',th:'เติมน้ำเข้มข้น · ลดผิวแห้งตึง · เริ่มต้นง่ายที่สุด',ja:'水分集中 · 乾燥·つっぱり緩和 · 一番始めやすいケア',zh:'补水集中·缓解干燥紧绷·最易入门'},
+        dur:[{m:30,price:'690',p3:'620',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,190',p3:'1,070',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+       {name:'Whitening Care',
+        meta:{ko:'클렌징 → 각질 → 브라이트닝 앰플 → 마사지 → 톤업 팩',en:'Cleanse → exfoliate → brightening ampoule → massage → tone-up mask',th:'ทำความสะอาด → ผลัดเซลล์ → แอมพูลไวท์เทนนิ่ง → นวด → มาส์ก',ja:'クレンジング→角質→ブライトニング→マッサージ→トーンUPパック',zh:'清洁→去角质→美白安瓶→按摩→提亮敷膜'},
+        x:{ko:'미백·톤업 · 칙칙함 개선 · BB Glow 전 피부 컨디션 만들기에도 좋아요',en:'Brightening & tone-up · dullness care · great prep before BB Glow',th:'ไวท์เทนนิ่ง·โทนอัพ · ลดผิวหมองคล้ำ · เตรียมผิวก่อนทำ BB Glow ก็ดี',ja:'美白·トーンUP · くすみ改善 · BBグロウ前の肌づくりにも',zh:'美白·提亮·改善暗沉·也适合BB焕肤前打底'},
+        dur:[{m:30,price:'890',p3:'800',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,590',p3:'1,430',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+       {name:'Anti-Aging Care',
+        meta:{ko:'클렌징 → 각질 → 펩타이드 앰플 → 리프팅 마사지 → 탄력 팩',en:'Cleanse → exfoliate → peptide ampoule → lifting massage → firming mask',th:'ทำความสะอาด → ผลัดเซลล์ → แอมพูลเปปไทด์ → นวดยกกระชับ → มาส์ก',ja:'クレンジング→角質→ペプチド→リフトマッサージ→ハリパック',zh:'清洁→去角质→胜肽安瓶→提拉按摩→紧致敷膜'},
+        x:{ko:'주름·탄력 집중 손 관리 · 열·바늘 없이 은은한 리프팅',en:'Hands-on wrinkle & firmness focus · gentle lift, no heat or needles',th:'ดูแลริ้วรอย·กระชับด้วยมือ · ยกกระชับนุ่มนวล ไม่ใช้ความร้อน·เข็ม',ja:'シワ·ハリ集中の手技 · 熱·針なしの穏やかなリフト',zh:'皱纹·紧致手做集中·无热无针的温和提拉'},
+        dur:[{m:30,price:'990',p3:'890',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,890',p3:'1,700',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+       {name:'Trouble Care',
+        meta:{ko:'클렌징 → 진정 앰플 → 압출 없는 저자극 마사지 → 진정 팩 · 활성 염증기엔 Aqua Peel 먼저',en:'Cleanse → calming ampoule → gentle no-extraction massage → soothing mask · Aqua Peel first if actively inflamed',th:'ทำความสะอาด → แอมพูลปลอบผิว → นวดอ่อนโยนไม่กด → มาส์ก · ถ้าสิวอักเสบ ทำ Aqua Peel ก่อน',ja:'クレンジング→鎮静アンプル→圧出なしの低刺激マッサージ→鎮静パック · 炎症期はAqua Peel優先',zh:'清洁→镇静安瓶→无挤压温和按摩→镇静敷膜·爆痘期先做Aqua Peel'},
+        x:{ko:'트러블·여드름 진정 관리 · 자극 없이 붉은기와 열감을 가라앉힘',en:'Calming care for breakouts · settles redness & heat without irritation',th:'ดูแลปลอบผิวเป็นสิว · ลดแดง·ร้อน โดยไม่ระคายเคือง',ja:'トラブル·ニキビ鎮静ケア · 刺激なく赤み·熱感を鎮める',zh:'痘痘·问题肌镇静护理·无刺激退红降热'},
+        dur:[{m:30,price:'990',p3:'890',x:{ko:'얼굴',en:'face only',th:'เฉพาะใบหน้า',ja:'顔のみ',zh:'仅面部'}},
+            {m:60,price:'1,890',p3:'1,700',best:1,x:{ko:'얼굴 + 목·데콜테',en:'face + neck & décolleté',th:'หน้า + คอ·อก',ja:'顔+首·デコルテ',zh:'面部+颈·前胸'}}]},
+     ]},
+   ],
+   noteHtml:{ko:'<b>시간이 곧 범위입니다</b> — 30분은 얼굴만, 60분은 목·데콜테까지 · <b>+500~600이면 30분이 더 붙습니다</b> · 손 관리는 <b>3회권 −10%</b> · <b>리프팅 림프마사지는 애드온으로도</b> — HIFU·BB글로우·필링 뒤에 10분 ฿290 / 20분 ฿490로 붙일 수 있어요',en:'<b>Time = coverage</b> — 30 min is face only, 60 min adds neck & décolleté · <b>+฿500–600 buys another 30 minutes</b> · hands-on menus are <b>−10% on a 3-pack</b> · <b>Lifting Lymph also works as an add-on</b> — ฿290 for 10 min / ฿490 for 20 min after HIFU, BB Glow or a peel',th:'<b>เวลา = ขอบเขต</b> — 30 นาที เฉพาะหน้า, 60 นาที เพิ่มคอ·อก · <b>+฿500–600 ได้เพิ่มอีก 30 นาที</b> · เมนูนวดมือ <b>แพ็ก 3 ลด 10%</b> · <b>นวดน้ำเหลืองยกกระชับเสริมได้</b> — 10 นาที ฿290 / 20 นาที ฿490 ต่อจาก HIFU·BB Glow·พีลลิ่ง',ja:'<b>時間＝範囲</b> — 30分は顔のみ、60分は首·デコルテまで · <b>+฿500〜600で30分追加</b> · 手技メニューは<b>3回券−10%</b> · <b>リフティングリンパはアドオンでも</b> — HIFU·BBグロウ·ピール後に10分฿290 / 20分฿490',zh:'<b>时长即范围</b> — 30分仅面部,60分加颈·前胸 · <b>+฿500~600多做30分钟</b> · 手做菜单<b>3次卡−10%</b> · <b>提拉淋巴也可作加项</b> — HIFU·BB焕肤·焕肤后加10分฿290 / 20分฿490'}},
+
+  /* ── 06 기능 장비 케어 ── */
+  {no:'06',title:'Signature Device Care',
+   sub:{ko:'시그니처 장비 케어',en:'Signature Device Care',th:'ทรีตเมนต์เครื่องมือซิกเนเจอร์',ja:'シグネチャー機器ケア',zh:'招牌仪器护理'},
+   desc:{ko:'효과별 프리미엄 장비 관리 · 3회권 −10% (콤보 −15%)',en:'Premium device care by result · 3-pack −10% (combos −15%)',th:'ดูแลด้วยเครื่องมือพรีเมียมตามผลลัพธ์ · แพ็ก 3 −10% (คอมโบ −15%)',ja:'効果別プレミアム機器ケア · 3回券−10%(コンボ−15%)',zh:'按效果的高端仪器护理·3次卡−10%(套组−15%)'},
+   groups:[
+     {label:{ko:'Skin Renewal · 재생',en:'Skin Renewal',th:'ฟื้นฟูผิว',ja:'肌再生',zh:'肌肤再生'},items:[
+       {feature:1,star:'🔥 PROMO',name:{ko:'맥슈어 코+코옆 모공 체험 · 100샷',en:'MacSure Nose & Side-Nose Pore Trial · 100 shots',th:'MacSure ทดลองรูขุมขนจมูก+ข้างจมูก · 100 ช็อต',ja:'マックシュア 鼻+小鼻 毛穴体験·100ショット',zh:'MacSure鼻+鼻翼毛孔体验·100发'},dev:'MacSure',price:'690',was:'฿1,290',m:25,meta:{ko:'클렌징 → 맥슈어 100샷 (코+코옆 모공존) → 진정 마무리 · 단독 프로모 = 동시 시술가와 동일',en:'cleanse → MacSure 100 shots on the nose & side-nose pore zone → calming finish · standalone promo, same as the add-on rate',th:'ทำความสะอาด → MacSure 100 ช็อต โซนจมูก+ข้างจมูก → ปลอบผิวปิดท้าย · โปรเดี่ยว ราคาเดียวกับแอดออน',ja:'クレンジング→マックシュア100(鼻+小鼻)→鎮静仕上げ · 単独プロモ=同時施術価と同額',zh:'清洁→MacSure100发(鼻+鼻翼)→镇静收尾·单做促销=同场加做价'},
+        x:{ko:'프락셔널 RF 첫 경험용 미니 · 다음 단계는 200샷 1,190 → 풀페이스 400샷 1,990 · 활성 염증 부위 조사 안 함 · 개인차',en:'A mini first taste of fractional RF · next step 200 shots 1,190 → full face 400 shots 1,990 · never on active inflamed acne · results vary',th:'มินิสำหรับลองแฟรกชันแนล RF ครั้งแรก · ขั้นต่อไป 200 ช็อต 1,190 → ฟูลเฟซ 1,990 · ไม่ยิงบนสิวอักเสบ · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'フラクショナルRF初体験ミニ · 次は200ショット1,190→フルフェイス1,990 · 炎症部位は照射しません · 個人差',zh:'点阵RF初体验迷你·下一步200发1,190→全脸1,990·不打在发炎部位·因人而异'}},
+       {name:{ko:'맥슈어 코+코옆 모공 체험 · 200샷',en:'MacSure Nose & Side-Nose Pore Trial · 200 shots',th:'MacSure ทดลองรูขุมขนจมูก+ข้างจมูก · 200 ช็อต',ja:'マックシュア 鼻+小鼻 毛穴体験·200ショット',zh:'MacSure鼻+鼻翼毛孔体验·200发'},dev:'MacSure',price:'1,190',was:'฿1,990',m:30,meta:{ko:'클렌징 → 맥슈어 200샷 (코+코옆/앞뺨 or 여드름 자국 부위) → 진정 마무리',en:'cleanse → MacSure 200 shots (nose + side-nose / inner cheeks or acne-mark zones) → calming finish',th:'ทำความสะอาด → MacSure 200 ช็อต (จมูก+ข้างจมูก/แก้มด้านใน หรือจุดรอยสิว) → ปลอบผิว',ja:'クレンジング→200ショット(鼻+小鼻/頬 or ニキビ跡)→鎮静',zh:'清洁→200发(鼻+鼻翼/内颊或痘印区)→镇静'},
+        x:{ko:'모공·여드름 자국 결 집중 · 샷당가는 풀페이스 400샷(1,990)이 최저 — 풀로 갈수록 이득 · 개인차',en:'Focused texture work on pores and acne marks · best per-shot value is the 400-shot full face (1,990) · results vary',th:'โฟกัสรูขุมขน·รอยสิว · คุ้มต่อช็อตที่สุดคือฟูลเฟซ 400 ช็อต (1,990) · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'毛穴·跡の肌質集中 · ショット単価はフルフェイス400(1,990)が最安 · 個人差',zh:'集中改善毛孔·痘印·按发数最划算是全脸400发(1,990)·因人而异'}},
+       {feature:1,star:'SIGNATURE',name:{ko:'모공·콜라겐 재생 관리',en:'Pore & Collagen Renewal',th:'ฟื้นฟูรูขุมขน·คอลลาเจน',ja:'毛穴·コラーゲン再生',zh:'毛孔·胶原再生'},dev:'MacSure',price:'1,990',was:'฿2,490',m:50,p3:'2,240',meta:{ko:'+100샷 ฿500',en:'+100 shots ฿500',th:'+100 ช็อต ฿500',ja:'+100ショット฿500',zh:'+100发฿500'},
+        x:{ko:'모공·여드름 흉터·피부결 재생 · 콜라겐 리모델링',en:'Pores, acne scars & texture · collagen remodeling',th:'รูขุมขน·รอยสิว·ผิวเนียน · กระตุ้นคอลลาเจน',ja:'毛穴·ニキビ跡·キメ再生 · コラーゲン再構築',zh:'毛孔·痘印·肤质·胶原重塑'}},
+     ]},
+     {label:{ko:'Brightening · 톤·색소 케어 (자극 없는 조합)',en:'Brightening · tone & pigment (no-heat combos)',th:'ไบรท์เทนนิ่ง · โทน·จุดด่างดำ (ไม่ใช้ความร้อน)',ja:'ブライトニング · トーン·色素(熱を使わない)',zh:'焕亮·匀肤·色素(无热能组合)'},items:[
+       {feature:1,star:'BEST',name:{ko:'딥 브라이트닝 케어 (얼굴)',en:'Deep Brightening Care (Face)',th:'ดีปไบรท์เทนนิ่ง (ใบหน้า)',ja:'ディープブライトニング(顔)',zh:'深层焕亮护理(面部)'},dev:{ko:'각질 정돈 · 이온토 · LED',en:'Prep · Ionto · LED',th:'เตรียมผิว · ไอออนโต · LED',ja:'表皮ケア · イオント · LED',zh:'表皮护理 · 离子 · LED'},price:'1,790',m:55,p3:'1,610',meta:{ko:'① 각질 정돈 → ② 비타민C 이온토 → ③ LED 진정 · 무자극',en:'① exfoliate prep → ② Vit C ionto → ③ LED calm · zero-irritation',th:'① เตรียมผิว → ② วิตซี ไอออนโต → ③ LED · ไม่ระคาย',ja:'① 表皮ケア → ② ビタCイオント → ③ LED · 無刺激',zh:'① 表皮护理 → ② 维C离子 → ③ LED镇静·无刺激'},
+        x:{ko:'열자극 없이 색소·칙칙함을 다루는 정석 미백 · 각질을 정돈해 미백 성분 침투를 높이고 LED로 멜라닌을 안정 · 태국 피부·민감 부위에 안전',en:'Textbook brightening with no heat — prep lifts absorption, ionto drives vitamin C, LED settles melanin · safe for Thai skin & sensitive zones',th:'ไวท์เทนนิ่งไม่ใช้ความร้อน — เตรียมผิวเพิ่มการดูดซึม·วิตซีซึมลึก·LED ปรับเมลานิน · ปลอดภัยกับผิวไทย',ja:'熱を使わない美白 — 表皮ケアで吸収を高めイオントでビタC·LEDでメラニン安定 · タイの肌·敏感部位に安全',zh:'无热能焕白·表皮护理提升吸收·离子导入维C·LED稳定黑色素·适合泰式肌肤·敏感部位安全'}},
+       {name:{ko:'브라이트닝 라이트 (얼굴)',en:'Brightening Light (Face)',th:'ไบรท์ไลท์ (ใบหน้า)',ja:'ブライトライト(顔)',zh:'焕亮轻度(面部)'},dev:{ko:'이온토 · LED',en:'Ionto · LED',th:'ไอออนโต · LED',ja:'イオント · LED',zh:'离子 · LED'},price:'1,290',m:40,p3:'1,160',meta:{ko:'비타민C 이온토 + LED · 가벼운 톤업',en:'Vit C ionto + LED · light tone-up',th:'วิตซี ไอออนโต + LED · โทนอัพเบาๆ',ja:'ビタCイオント + LED · 軽いトーンアップ',zh:'维C离子 + LED · 轻度提亮'},
+        x:{ko:'표피성 칙칙함·가벼운 색소에 · 저자극 입문',en:'For surface dullness & light pigment · gentle starter',th:'ผิวหมองผิวบน·จุดด่างจาง · เริ่มต้นอ่อนโยน',ja:'表皮のくすみ·軽い色素に · 低刺激入門',zh:'表皮暗沉·轻度色素·温和入门'}},
+       {name:{ko:'겨드랑이 브라이트닝 (양쪽)',en:'Underarm Brightening (both)',th:'รักแร้ ลดคล้ำ (สองข้าง)',ja:'ワキ美白(両側)',zh:'腋下焕亮(双侧)'},dev:{ko:'각질 정돈 · 이온토 · LED',en:'Prep · Ionto · LED',th:'เตรียมผิว · ไอออนโต · LED',ja:'表皮ケア · イオント · LED',zh:'表皮护理 · 离子 · LED'},price:'990',was:'฿1,990',limited:1,m:25,p3:'890',meta:{ko:'왁싱·마찰 착색을 근본에서 · BB글로우와 묶으면 콤보 ฿1,990',en:'targets waxing/friction darkening · pair with BB Glow → combo ฿1,990',th:'ลดคล้ำจากแว็กซ์·เสียดสี · จับคู่ BB Glow ฿1,990',ja:'脱毛·摩擦の着色を根本 · BBグロウで฿1,990',zh:'针对脱毛·摩擦色沉·搭配BB焕肤฿1,990'},
+        x:{ko:'열 없이 각질·색소를 정돈 — 민감한 겨드랑이에 안전',en:'no heat — safe for delicate underarms',th:'ไม่ใช้ความร้อน — ปลอดภัยกับรักแร้',ja:'熱なし — デリケートなワキに安全',zh:'无热能·腋下安全'}},
+       {name:{ko:'사타구니·비키니 브라이트닝 (여성 전용)',en:'Bikini & Groin Brightening (Women Only)',th:'บิกินี่·ขาหนีบ ลดคล้ำ (เฉพาะผู้หญิง)',ja:'ビキニ·そけい美白(女性専用)',zh:'比基尼·腹股沟焕亮(仅限女性)'},dev:{ko:'각질 정돈 · 이온토 · LED',en:'Prep · Ionto · LED',th:'เตรียมผิว · ไอออนโต · LED',ja:'表皮ケア · イオント · LED',zh:'表皮护理 · 离子 · LED'},price:'1,290',was:'฿2,590',limited:1,m:35,p3:'1,160',meta:{ko:'프라이빗 룸 · 여성 스태프',en:'private room · female staff',th:'ห้องส่วนตัว · พนักงานหญิง',ja:'個室·女性スタッフ',zh:'独立房间·女性技师'},
+        x:{ko:'왁싱·마찰 착색을 저자극으로 개선 · 민감 부위 안전',en:'gently improves waxing/friction darkening · safe on sensitive areas',th:'ลดคล้ำจากแว็กซ์·เสียดสีอย่างอ่อนโยน · ปลอดภัย',ja:'脱毛·摩擦の着色を低刺激で · 敏感部位に安全',zh:'温和改善脱毛·摩擦色沉·敏感部位安全'}},
+       {name:{ko:'넥 브라이트닝 (목)',en:'Neck Brightening',th:'ลำคอ ลดคล้ำ',ja:'ネック美白',zh:'颈部焕亮'},dev:{ko:'이온토 · LED',en:'Ionto · LED',th:'ไอออนโต · LED',ja:'イオント · LED',zh:'离子 · LED'},price:'990',was:'฿1,990',limited:1,m:25,p3:'890',meta:{ko:'얼굴과 목 톤 매칭 · 페이셜 후 마무리',en:'matches face & neck tone · finish after a facial',th:'ปรับโทนคอให้เข้ากับหน้า · ปิดท้ายหลังทำหน้า',ja:'顔と首のトーン合わせ · フェイシャル後に',zh:'面颈同色·面部护理后收尾'},
+        x:{ko:'페이셜 후 목까지 톤 맞추는 마무리 터치',en:'the finishing touch that evens neck to face',th:'ปิดท้ายให้คอเข้ากับหน้า',ja:'首まで整える仕上げ',zh:'让颈部与面部同色的收尾'}},
+       {name:{ko:'등 브라이트닝 (등드름 자국)',en:'Back Brightening · Post-Acne Marks',th:'แผ่นหลัง ลดรอยสิว',ja:'背中美白(ニキビ跡)',zh:'背部焕亮(痘印)'},dev:{ko:'각질 정돈 · 이온토 · LED',en:'Prep · Ionto · LED',th:'เตรียมผิว · ไอออนโต · LED',ja:'表皮ケア · イオント · LED',zh:'表皮护理 · 离子 · LED'},price:'1,490',was:'฿2,990',limited:1,m:35,p3:'1,340',meta:{ko:'붉은·갈색 자국 톤 정리 · 활성 여드름은 등드름 케어 먼저',en:'evens red/brown marks · treat active acne first',th:'ปรับรอยแดง·น้ำตาล · สิวอักเสบทำก่อน',ja:'赤·茶跡を整える · 活動性は先にケア',zh:'均匀红褐痘印·活动痘先护理'},
+        x:{ko:'등 BB글로우와 묶으면 개선+커버 완성',en:'pair with Back BB Glow for lighten + cover',th:'จับคู่ BB Glow หลัง = ลดคล้ำ+ปกปิด',ja:'背中BBと合わせて改善+カバー',zh:'搭配背部BB=淡化+遮盖'}},
+     ]},
+     {label:'Combo · −15%',items:[
+       {name:{ko:'모공 재생 + 딥 브라이트닝 콤보',en:'Pore Renewal + Deep Brightening',th:'ฟื้นรูขุมขน + ดีปไบรท์',ja:'毛穴再生+ブライトニング',zh:'毛孔再生+深层焕亮'},dev:{ko:'MacSure + 이온토·LED',en:'MacSure + Ionto·LED',th:'MacSure + ไอออนโต·LED',ja:'MacSure + イオント·LED',zh:'MacSure + 离子·LED'},price:'2,590',was:'฿3,090',m:80,p3:'2,630',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+        x:{ko:'모공·결·흉터 재생(MacSure) + 톤·색소 정리(이온토·LED) 동시',en:'pore/texture/scar renewal (MacSure) + tone & pigment (ionto·LED) together',th:'ฟื้นรูขุมขน·รอยสิว (MacSure) + ปรับโทน (ไอออนโต·LED)',ja:'毛穴·キメ·跡再生(MacSure)＋トーン·色素(イオント·LED)',zh:'毛孔·肤质·痘印再生(MacSure)＋匀肤·色素(离子·LED)'}},
+       {name:{ko:'스페셜 풀케어 (재생+브라이트닝+물광)',en:'Special Full Care (Renewal+Brightening+Glow)',th:'สเปเชียลฟูลแคร์ (ฟื้น+ไบรท์+กลอว์)',ja:'スペシャルフルケア',zh:'特别全护理'},dev:{ko:'MacSure · 이온토 · LED · LDM',en:'MacSure · Ionto · LED · LDM',th:'MacSure · ไอออนโต · LED · LDM',ja:'MacSure · イオント · LED · LDM',zh:'MacSure · 离子 · LED · LDM'},price:'5,890',m:110,p3:'5,010',meta:{ko:'최상급 풀코스',en:'top full course',th:'ครบคอร์สสูงสุด',ja:'最上級フルコース',zh:'顶级全套'},
+        x:{ko:'재생 + 톤·색소 정리 + LDM 물광 진정 · 원데이 토탈',en:'renewal + tone/pigment + LDM glow-calm · one-day total',th:'ฟื้นฟู + ปรับโทน + LDM ปลอบผิว · จบวันเดียว',ja:'再生＋トーン·色素＋LDM鎮静 · ワンデイ',zh:'再生＋匀肤·色素＋LDM镇静·一站式'}},
+     ]},
+   ],
+   noteHtml:{ko:'<b>기계 이름보다 효과로 고르세요</b> · 모공·흉터·재생 = MacSure(프랙셔널 RF) · 톤·색소·미백 = 이온토·LED·표피 정돈(열자극 없음) · 상담 시 피부에 맞게 추천',en:'<b>Choose by result, not device name</b> · pores/scars/renewal = MacSure (fractional RF) · tone/pigment/brightening = Ionto·LED·prep (no heat)',th:'<b>เลือกจากผลลัพธ์ ไม่ใช่ชื่อเครื่อง</b> · รูขุมขน/รอยสิว/ฟื้นฟู = MacSure · โทน/จุดด่างดำ/ไวท์ = ไอออนโต·LED (ไม่ใช้ความร้อน)',ja:'<b>機器名でなく効果で選ぶ</b> · 毛穴/跡/再生=MacSure · トーン/色素/美白=イオント·LED(熱なし)',zh:'<b>按效果选·而非仪器名</b>·毛孔/痘印/再生=MacSure·匀肤/色素/美白=离子·LED(无热能)'}},
+
+  /* ── 07 바디 컨투어링 (메디컬 스파) ── */
+  {no:'07',title:'Body Contouring',
+   sub:{ko:'셀룰라이트·착색·바디 케어 · 메디컬 스파',en:'Cellulite, Pigment & Body Care · Medical Spa',th:'เซลลูไลท์·ผิวคล้ำ·ดูแลบอดี้ · เมดิคัลสปา',ja:'セルライト·色素·ボディ · メディカルスパ',zh:'橘皮·着色·身体护理·医美SPA'},
+   desc:{ko:'THERANOVA 온열·감압·에너지로 혈행·림프 순환을 끌어올리고, 부위별 베이스에 HIFU·RF·메소를 애드온하는 코리안 메디컬 스파 프로토콜 · 3회권 −10%',en:'THERANOVA thermal·decompression·energy boosts circulation & lymph, then add HIFU·RF·meso by area · Korean medical-spa protocol · 3-pack −10%',th:'THERANOVA ความร้อน·แรงดัน·พลังงาน กระตุ้นเลือด·น้ำเหลือง แล้วเสริม HIFU·RF·เมโส ตามบริเวณ · แพ็ก 3 −10%',ja:'THERANOVAの温熱·減圧·エネルギーで血行·リンパを促進、部位別にHIFU·RF·メソをアドオン · 3回券−10%',zh:'THERANOVA 温热·负压·能量促进血液·淋巴循环，按部位加HIFU·RF·美塑·3次卡−10%'},
+   groups:[
+     {label:{ko:'STEP 1 · 부위별 셀룰라이트 베이스',en:'STEP 1 · Cellulite base by area',th:'STEP 1 · เบสเซลลูไลท์ตามจุด',ja:'STEP 1 · 部位別ベース',zh:'STEP 1·分部位橘皮基础'},items:[
+       {feature:1,star:'BEST',name:{ko:'복부 셀룰라이트 케어 · THERANOVA (하이푸 미포함)',en:'Abdomen Cellulite Care · THERANOVA (no HIFU)',th:'ดูแลเซลลูไลท์หน้าท้อง · THERANOVA (ไม่มี HIFU)',ja:'腹部セルライト · THERANOVA(HIFUなし)',zh:'腹部橘皮护理·THERANOVA(不含HIFU)'},dev:'THERANOVA',price:'1,890',m:50,meta:{ko:'온열 + 감압 순환 케어 · 샷 개념 없음 · HIFU 9mm 애드온 +990 인기 · 2회 ฿3,400',en:'heat + decompression circulation care · no shot count · HIFU 9 mm add-on +฿990 popular · 2-session ฿3,400',th:'ความร้อน + สุญญากาศ ไหลเวียน · ไม่มีการนับช็อต · นิยมเสริม HIFU 9mm +฿990 · 2 ครั้ง ฿3,400',ja:'温熱＋減圧の巡りケア · ショット概念なし · HIFU 9mmアドオン+฿990人気 · 2回฿3,400',zh:'温热+负压循环护理·无发数概念·HIFU 9mm加项+฿990热门·2次฿3,400'},
+        x:{ko:'복부 순환·부종·셀룰라이트 · 온열 → 감압 순환 케어로 매끈하게 · <b>하이푸는 들어가지 않습니다</b> — 같은 1,890으로 하이푸를 원하시면 「바디 DPL 복부 8,000샷」을, 둘 다 원하시면 여기에 DPL 순환 애드온을 붙이세요',en:'Abdomen circulation, puffiness & cellulite · heat → decompression circulation care for smoother skin · <b>no HIFU in this menu</b> — for HIFU at the same ฿1,890 see Body DPL Abdomen (8,000 shots); or add a DPL circulation booster',th:'หน้าท้อง ไหลเวียน·บวม·เซลลูไลท์ · ผิวดูเรียบเนียนขึ้น · <b>เมนูนี้ไม่มี HIFU</b> — ถ้าอยากได้ HIFU ราคา 1,890 เท่ากัน ดู Body DPL หน้าท้อง (8,000 ช็อต)',ja:'腹部の巡り·むくみ·セルライト · なめらかに · <b>HIFUは入りません</b> — 同じ฿1,890でHIFUなら「ボディDPL腹部8,000ショット」を',zh:'腹部循环·浮肿·橘皮·更平滑 · <b>本菜单不含HIFU</b> — 同样฿1,890想要HIFU请见「身体DPL腹部(8,000发)」'}},
+       {name:{ko:'앞벅지 셀룰라이트 케어',en:'Front Thigh Cellulite',th:'เซลลูไลท์ต้นขาหน้า',ja:'前ももセルライト',zh:'大腿前橘皮'},dev:'',price:'1,690',m:45,meta:{ko:' · 2회 ฿3,040',en:' · 2-session ฿3,040',th:' · 2 ครั้ง ฿3,040',ja:' · 2回฿3,040',zh:' · 2次฿3,040'},
+        x:{ko:'앞벅지 셀룰라이트·라인 정리',en:'Front-thigh cellulite & shape',th:'ต้นขาหน้า เซลลูไลท์·กระชับ',ja:'前もものセルライト·ライン',zh:'大腿前橘皮·线条'}},
+       {name:{ko:'뒤벅지·힙 셀룰라이트 케어',en:'Back Thigh & Hip Cellulite',th:'เซลลูไลท์ต้นขาหลัง·สะโพก',ja:'裏もも·ヒップ',zh:'大腿后·臀橘皮'},dev:'',price:'1,690',m:45,meta:{ko:'힙업 라인 · 2회 ฿3,040',en:'hip-up · 2-session ฿3,040',th:'ยกสะโพก · 2 ครั้ง ฿3,040',ja:'ヒップアップ · 2回฿3,040',zh:'提臀 · 2次฿3,040'},
+        x:{ko:'뒤벅지·힙 셀룰라이트·처짐 · 힙업 라인',en:'Back-thigh & hip cellulite, sag · hip-up line',th:'ต้นขาหลัง·สะโพก เซลลูไลท์·ยกกระชับ',ja:'裏もも·ヒップのセルライト·たるみ',zh:'大腿后·臀部橘皮·松弛·提臀'}},
+       {name:{ko:'팔뚝 셀룰라이트 케어',en:'Arm Cellulite Care',th:'ดูแลเซลลูไลท์ต้นแขน',ja:'二の腕セルライト',zh:'手臂橘皮'},dev:'',price:'1,290',m:40,meta:{ko:' · 2회 ฿2,320',en:' · 2-session ฿2,320',th:' · 2 ครั้ง ฿2,320',ja:' · 2回฿2,320',zh:' · 2次฿2,320'},
+        x:{ko:'팔뚝 처짐·셀룰라이트 · 탄력 라인',en:'Upper-arm sag & cellulite · firm line',th:'ต้นแขนหย่อน·เซลลูไลท์',ja:'二の腕のたるみ·セルライト',zh:'手臂松弛·橘皮·紧致'}},
+       {name:{ko:'종아리 셀룰라이트 케어',en:'Calf Cellulite Care',th:'ดูแลเซลลูไลท์น่อง',ja:'ふくらはぎセルライト',zh:'小腿橘皮'},dev:'',price:'1,290',m:40,meta:{ko:'부종 케어 · 2회 ฿2,320',en:'puffiness · 2-session ฿2,320',th:'ลดบวม · 2 ครั้ง ฿2,320',ja:'むくみ · 2回฿2,320',zh:'浮肿 · 2次฿2,320'},
+        x:{ko:'종아리 부종·셀룰라이트 · 라인 슬리밍',en:'Calf puffiness & cellulite · slim line',th:'น่องบวม·เซลลูไลท์ · เรียวขา',ja:'ふくらはぎのむくみ·セルライト',zh:'小腿浮肿·橘皮·纤细'}},
+       {name:{ko:'옆구리·러브핸들 케어',en:'Flank & Love-handle Care',th:'ดูแลสีข้าง·เลิฟแฮนเดิล',ja:'脇腹·ラブハンドル',zh:'侧腰·爱的把手'},dev:'',price:'1,490',m:40,p3:'1,340',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+        x:{ko:'옆구리 군살·러브핸들 라인 정리',en:'Flank / love-handle line',th:'สีข้าง·เลิฟแฮนเดิล',ja:'脇腹·ラブハンドル',zh:'侧腰·爱的把手'}},
+       {name:{ko:'등·브라라인 케어',en:'Back & Bra-line Care',th:'ดูแลหลัง·ไลน์เสื้อใน',ja:'背中·ブラライン',zh:'背部·内衣线'},dev:'',price:'1,690',m:45,p3:'1,520',meta:{ko:'',en:'',th:'',ja:'',zh:''},
+        x:{ko:'등·브라라인 군살·라인 정리',en:'Back & bra-line contour',th:'แผ่นหลัง·ไลน์เสื้อใน',ja:'背中·ブラライン',zh:'背部·内衣线'}},
+       {name:{ko:'턱라인·이중턱 순환 케어',en:'Jawline & Chin Circulation',th:'กระชับกรอบหน้า·ใต้คาง',ja:'フェイスライン·あご下ケア',zh:'下颌线·下巴循环护理'},dev:'THERANOVA',price:'990',was:'฿1,390',m:25,meta:{ko:'오일 → 온열+감압 순환 → 탄력 마무리 · 울파인 4.5mm 체험 +399/+699 동시 가능 · 2회 ฿1,780',en:'oil → heat & vacuum circulation → firming finish · pair with ULFINE 4.5mm trial +399/+699 · 2-session ฿1,780',th:'ลงออยล์ → ความร้อน+สุญญากาศ → ปิดท้ายกระชับ · ทำคู่ ULFINE 4.5มม. +399/+699 ได้ · 2 ครั้ง ฿1,780',ja:'オイル→温熱+減圧→引き締め仕上げ · ULFINE4.5mm体験+399/+699併用可 · 2回฿1,780',zh:'精油→温热+负压→紧致收尾·可加ULFINE4.5mm体验+399/+699·2次฿1,780'},
+        x:{ko:'턱라인·이중턱 붓기와 순환을 정리해 라인을 또렷하게 · 얼굴 하이푸 전후 순환 케어로도 인기 · 테라노바 엔트리 990',en:'De-puffs and boosts circulation along the jawline and chin for a cleaner line · popular before/after face HIFU · THERANOVA entry at 990',th:'ลดบวม·กระตุ้นไหลเวียนกรอบหน้า·ใต้คาง ให้กรอบหน้าชัดขึ้น · นิยมทำคู่ HIFU หน้า · เริ่มต้น THERANOVA 990',ja:'フェイスライン·あご下のむくみと巡りを整えラインすっきり · 顔HIFU前後のケアにも人気',zh:'梳理下颌线·下巴浮肿与循环·线条更清晰·脸部HIFU前后护理也热门'}},
+       {name:{ko:'승모근·어깨 케어',en:'Shoulder & Trapezius Care',th:'ดูแลบ่า·ไหล่',ja:'僧帽筋·肩ケア',zh:'斜方肌·肩部护理'},dev:'THERANOVA',price:'1,190',was:'฿1,690',m:30,meta:{ko:'뭉친 승모근·어깨 온열+감압 순환 · 2회 ฿2,140',en:'heat & vacuum circulation for tight shoulders and traps · 2-session ฿2,140',th:'ความร้อน+สุญญากาศ บ่า·ไหล่ที่ตึง · 2 ครั้ง ฿2,140',ja:'凝った僧帽筋·肩に温熱+減圧 · 2回฿2,140',zh:'温热+负压舒缓紧绷斜方肌·肩部·2次฿2,140'},
+        x:{ko:'뭉침을 풀고 어깨 라인을 정리 · 데스크워커 인기 · 9mm 애드온과 조합 가능',en:'Eases tightness and refines the shoulder line · desk-worker favorite · pairs with the 9mm add-on',th:'คลายตึง·เก็บไลน์ไหล่ · คนทำงานออฟฟิศชอบ · เสริม 9mm ได้',ja:'こりをほぐし肩ラインすっきり · デスクワーカー人気 · 9mmアドオン可',zh:'缓解僵硬·修饰肩线·办公族最爱·可加9mm'}},
+     ]},
+     {label:{ko:'이중턱 스페셜 세트 · 살집 있는 턱선 집중 (동시 시술 · 단품 합산가)',en:'Double-Chin Special Sets · for fuller chin lines (same visit · sum of singles)',th:'เซ็ตพิเศษใต้คาง · สำหรับใต้คางที่มีวอลุ่ม (ทำครั้งเดียว · ราคารวมเมนูเดี่ยว)',ja:'二重あごスペシャルセット · ボリュームのあるあご下に (同日 · 単品合算)',zh:'双下巴特惠套组·针对饱满下颌线(同日·单品合计价)'},items:[
+       {feature:1,star:'🔥 SET',name:{ko:'테라노바 + 하이푸 이중턱 세트',en:'THERANOVA + HIFU Double-Chin Set',th:'เซ็ต THERANOVA + HIFU ใต้คาง',ja:'テラノバ+HIFU 二重あごセット',zh:'THERANOVA+HIFU双下巴套组'},dev:'ULFINE 4.5mm + THERANOVA',price:'1,389',m:40,meta:{ko:'하이푸 4.5mm 200샷 → 테라노바 온열+감압 순환 · 990+399 합산 · BB+HIFU 1,389와 같은 세트가',en:'HIFU 4.5mm 200 shots → THERANOVA heat & vacuum circulation · 990+399 · same set price as BB+HIFU 1,389',th:'HIFU 4.5มม. 200 ช็อต → THERANOVA ความร้อน+สุญญากาศ · 990+399 · ราคาเซ็ตเดียวกับ BB+HIFU 1,389',ja:'HIFU4.5mm200→テラノバ温熱+減圧 · 990+399合算',zh:'HIFU4.5mm200发→THERANOVA温热+负压·990+399合计'},
+        x:{ko:'볼륨감 있는 이중턱 집중 — 하이푸로 SMAS를 조이고, 테라노바로 붓기·순환을 정리해 당일 라인 변화를 체감 · 더 확실한 결과는 이중턱 효과 티어(4.5+9mm) 2,900으로 업그레이드 · 개인차',en:'For a fuller double chin — HIFU tightens the SMAS, THERANOVA clears puffiness and circulation for a same-day line change · for stronger results upgrade to the dual-depth Double Chin tier (2,900) · results vary',th:'สำหรับใต้คางที่มีวอลุ่ม — HIFU กระชับชั้น SMAS แล้ว THERANOVA ระบายบวม·ไหลเวียน เห็นกรอบหน้าเปลี่ยนในวันเดียว · อยากได้ผลชัดกว่า อัปเกรดเป็นใต้คาง 2 ชั้น (2,900) · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'ボリュームのある二重あごに — HIFUでSMASを締め、テラノバでむくみ·巡りを整え当日ライン変化 · より確実には二重あご効果ティア(2,900)へ · 個人差',zh:'针对饱满双下巴—HIFU收紧SMAS·THERANOVA消肿理循环·当天见线条变化·更强效果升级双层双下巴档(2,900)·因人而异'}},
+       {name:{ko:'테라노바 + 하이푸 + BB글로우 풀세트',en:'THERANOVA + HIFU + BB Glow Full Set',th:'ฟูลเซ็ต THERANOVA + HIFU + BB Glow',ja:'テラノバ+HIFU+BBグロウ フルセット',zh:'THERANOVA+HIFU+BB焕肤全套'},dev:'ULFINE 4.5mm + THERANOVA + BB Glow',price:'2,379',m:100,meta:{ko:'순서: 하이푸 200샷 → 테라노바 턱 순환 → BB글로우(클렌징 포함) → LED · 990+399+990 합산',en:'order: HIFU 200 shots → THERANOVA chin circulation → BB Glow (incl. cleanse) → LED · 990+399+990',th:'ลำดับ: HIFU 200 ช็อต → THERANOVA ใต้คาง → BB Glow (รวมคลีนซิ่ง) → LED · 990+399+990',ja:'順序: HIFU200→テラノバ→BBグロウ(クレンジング込)→LED · 合算990+399+990',zh:'顺序:HIFU200发→THERANOVA→BB焕肤(含清洁)→LED·990+399+990合计'},
+        x:{ko:'라인은 하이푸+테라노바가, 톤·광은 BB글로우가 — 턱선과 얼굴톤을 하루에 · 개인차',en:'Line work from HIFU + THERANOVA, tone and glow from BB Glow — jawline and skin tone in one visit · results vary',th:'กรอบหน้าให้ HIFU+THERANOVA โทน·ออร่าให้ BB Glow — จบในวันเดียว · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'ラインはHIFU+テラノバ、トーンはBBグロウ — 一日で · 個人差',zh:'线条靠HIFU+THERANOVA·肤色靠BB焕肤—一天完成·因人而异'}},
+     ]},
+     {label:{ko:'STEP 2 · 심도 애드온 — 어느 바디 메뉴에나 층 추가 (3mm 진피 · 4.5mm 근막 · 9mm 지방층)',en:'STEP 2 · Depth Add-ons — stack layers onto any body menu (3 mm dermis · 4.5 mm fascia · 9 mm fat)',th:'STEP 2 · เสริมความลึก — เพิ่มชั้นให้เมนูบอดี้ตัวไหนก็ได้ (3 มม. หนังแท้ · 4.5 มม. พังผืด · 9 มม. ไขมัน)',ja:'STEP 2 · 深度アドオン — どのボディメニューにも層を追加 (3mm真皮·4.5mm筋膜·9mm脂肪層)',zh:'STEP 2·深度加项—任意身体菜单可叠层(3mm真皮·4.5mm筋膜·9mm脂肪)'},items:[
+       {feature:1,star:'★ BEST PAIR',name:{ko:'+ THERANOVA · 온열+감압 순환 (20분)',en:'+ THERANOVA · heat & vacuum circulation (20 min)',th:'+ THERANOVA · ความร้อน+สุญญากาศ (20 นาที)',ja:'+ THERANOVA·温熱+減圧(20分)',zh:'+ THERANOVA·温热+负压循环(20分钟)'},dev:'THERANOVA',price:'990',was:'฿1,890',addon:1,m:20,
+        meta:{ko:'하이푸 직후 순환·드레이닝 마무리 · 단독 1,890 → 애드온 990',en:'circulation & drainage right after HIFU · ฿1,890 alone → ฿990 as add-on',th:'ไหลเวียน·ระบายหลัง HIFU ทันที · เดี่ยว 1,890 → เสริม 990',ja:'HIFU直後の巡り·ドレナージュ仕上げ · 単独1,890→アドオン990',zh:'HIFU后即刻循环引流·单做1,890→加项990'},
+        x:{ko:'하이푸가 조인 부위를 온열+감압으로 흘려보내는 마무리 — 붓기·둔중감을 빼고 매끈하게 · <b>하이푸(깊은 층) + 테라노바(순환)이 바디 최강 조합</b> · 복부·허벅지에 특히 인기',en:'Heat and vacuum flush the area HIFU just worked — clears puffiness and heaviness, leaves it smooth · <b>HIFU (deep layers) + THERANOVA (circulation) is our strongest body pairing</b> · most popular on abdomen & thighs',th:'ความร้อน+สุญญากาศ ระบายบริเวณที่ HIFU เพิ่งกระชับ — ลดบวม·หนักตึง ผิวเรียบเนียน · <b>HIFU (ชั้นลึก) + THERANOVA (ไหลเวียน) คือคู่ที่แรงที่สุดของบอดี้</b> · นิยมที่หน้าท้อง·ต้นขา',ja:'HIFUが締めた部位を温熱+減圧で流す仕上げ — むくみ·重さを抜いてなめらかに · <b>HIFU(深層)+THERANOVA(巡り)がボディ最強の組み合わせ</b> · 腹部·太ももで特に人気',zh:'温热+负压引流HIFU刚收紧的部位·消浮肿·去沉重感·<b>HIFU(深层)+THERANOVA(循环)是身体最强组合</b>·腹部·大腿最热门'}},
+       {name:{ko:'+ DPL 진피 부스터 (3,000샷)',en:'+ DPL dermal booster (3,000 shots)',th:'+ DPL บูสเตอร์หนังแท้ (3,000 ช็อต)',ja:'+ DPL真皮ブースター(3,000)',zh:'+ DPL真皮加强(3,000发)'},dev:'DPL',price:'690',addon:1,meta:{ko:'진피층 · 피부결·잔탄력 · 어느 베이스에나',en:'dermal layer · texture & fine firmness · with any base',th:'ชั้นหนังแท้ · ผิวเนียน·แน่น · เสริมกับเบสไหนก็ได้',ja:'真皮層 · キメ·ハリ · どのベースにも',zh:'真皮层·肤质细致紧实·任意基础可加'},
+        x:{ko:'피부 표면의 결·잔탄력 담당 — 셀룰라이트성 요철·오렌지필 피부에 · 팔뚝·종아리 추천',en:'Handles surface texture and fine firmness — for cellulite-type unevenness & orange-peel skin · arms/calves',th:'ดูแลผิวเรียบ·แน่นชั้นบน — เหมาะกับผิวเปลือกส้ม·ไม่เรียบ · แขน/น่อง',ja:'表面のキメ·ハリ担当 — セルライト状の凹凸·オレンジピール肌に · 腕/ふくらはぎ',zh:'负责表面肤质与细致紧实·适合橘皮样凹凸·手臂/小腿'}},
+       {name:{ko:'+ DPL 탄력 부스터 (4,000샷)',en:'+ DPL firming booster (4,000 shots)',th:'+ DPL บูสเตอร์กระชับ (4,000 ช็อต)',ja:'+ DPL引き締めブースター(4,000)',zh:'+ DPL紧致加强(4,000发)'},dev:'DPL',price:'790',addon:1,meta:{ko:'근막층 · 조이고 끌어올림 · 어느 베이스에나',en:'fascia layer · tightens & lifts · with any base',th:'ชั้นพังผืด · กระชับ·ยกขึ้น · เสริมกับเบสไหนก็ได้',ja:'筋膜層 · 引き締め·リフト · どのベースにも',zh:'筋膜层·收紧上提·任意基础可加'},
+        x:{ko:'늘어진 라인을 조이는 층 — 9mm(지방층) 베이스 위에 얹으면 두 층이 같이 잡혀요 · 팔 전체·허벅지 추천',en:'The layer that tightens a loose line — stack it on a 9 mm base and both layers work together · full arms/thighs',th:'ชั้นที่เก็บแนวหย่อน — ซ้อนบนเบส 9 มม. ได้สองชั้นพร้อมกัน · แขนทั้งหมด/ต้นขา',ja:'たるんだラインを締める層 — 9mmベースに重ねると二層同時に · 両腕全体/太もも',zh:'收紧松弛线条的层·叠在9mm基础上双层同效·全臂/大腿'}},
+       {feature:1,star:'POPULAR',name:{ko:'+ DPL 심층 부스터 (4,000샷)',en:'+ DPL deep booster (4,000 shots)',th:'+ DPL บูสเตอร์ชั้นลึก (4,000 ช็อต)',ja:'+ DPL深層ブースター(4,000)',zh:'+ DPL深层加强(4,000发)'},dev:'DPL',price:'990',addon:1,meta:{ko:'가장 깊은 층 집중 · 가장 인기 애드온',en:'deepest-layer focus · top add-on',th:'เน้นชั้นลึกสุด · เสริมยอดนิยม',ja:'最深層に集中 · 人気No.1',zh:'聚焦最深层·最热加项'},
+        x:{ko:'지방층(가장 깊은 층)을 잡는 애드온 · THERANOVA·RF 등 베이스에 DPL 탄력을 더할 때 가장 인기 · 복부·허벅지 추천',en:'Targets the fat layer (the deepest) · the most popular way to add DPL firming to a base like THERANOVA or RF · abdomen/thighs',th:'จับชั้นไขมัน (ลึกสุด) · นิยมที่สุดเวลาเสริม DPL ให้เบส THERANOVA·RF · หน้าท้อง/ต้นขา',ja:'脂肪層(最深層)を狙うアドオン · THERANOVA·RFなどベースにDPLを足す定番 · 腹部/太もも',zh:'针对脂肪层(最深)·给THERANOVA·RF等基础加DPL紧致的首选·腹部/大腿'}},
+       {name:{ko:'+ RF 타이트닝',en:'+ RF tightening',th:'+ RF กระชับ',ja:'+ RFタイト',zh:'+ RF紧致'},dev:'',price:'590',addon:1,meta:{ko:'늘어진 피부 탄력 강화',en:'firms loose skin',th:'กระชับผิวหย่อนคล้อย',ja:'たるみ肌を引き締め',zh:'紧致松弛肌肤'},
+        x:{ko:'슬리밍 후 처짐 방지 · 탄력 마무리',en:'Prevents sag after slimming',th:'ป้องกันผิวหย่อนหลังลดสัดส่วน',ja:'スリム後のたるみ防止',zh:'塑形后防松弛'}},
+       {name:{ko:'+ 바디 컨투어 메소',en:'+ Body contour meso',th:'+ เมโสบอดี้คอนทัวร์',ja:'+ ボディコントゥアメソ',zh:'+ 身体塑形美塑'},dev:'',price:'690',addon:1,meta:{ko:'컨투어 앰플 침투 부스터',en:'contour ampoule booster',th:'บูสเตอร์แอมพูลคอนทัวร์',ja:'コントゥアアンプル導入',zh:'塑形安瓶导入'},
+        x:{ko:'메소 앰플로 라인 케어를 부스팅',en:'Meso ampoule boosts contour care',th:'เมโสเสริมการดูแลรูปร่าง',ja:'メソでラインケアをブースト',zh:'美塑加速线条护理'}},
+       {name:{ko:'+ 림프 디톡스 부스터',en:'+ Lymph detox boost',th:'+ ลิมฟ์ดีท็อกซ์',ja:'+ リンパデトックス',zh:'+ 淋巴排毒'},dev:'',price:'490',addon:1,meta:{ko:'전신 순환·노폐물 배출 강화',en:'whole-body drainage boost',th:'เร่งระบายน้ำเหลืองทั้งตัว',ja:'全身の巡り·排出強化',zh:'全身循环·排毒加强'},
+        x:{ko:'감압 드레이닝 추가 · 붓기·순환 집중',en:'Extra decompression drainage',th:'เพิ่มการระบายด้วยแรงดัน',ja:'減圧ドレナージュ追加',zh:'追加负压引流'}},
+       {name:{ko:'+ LDM 진정 마무리',en:'+ LDM calming finish',th:'+ LDM ปลอบผิวปิดท้าย',ja:'+ LDM鎮静仕上げ',zh:'+ LDM镇静收尾'},dev:'',price:'390',addon:1,meta:{ko:'시술 후 진정·수분 마무리',en:'calming & hydration finish',th:'ปลอบผิว·เติมน้ำปิดท้าย',ja:'鎮静·保湿仕上げ',zh:'镇静·补水收尾'},
+        x:{ko:'붉은기 진정 + 매끈 마무리',en:'Soothes redness + smooth finish',th:'ลดแดง + จบเนียน',ja:'赤み鎮静＋なめらか',zh:'退红+平滑收尾'}},
+       {name:{ko:'+ 울파인 9mm · S부위 (1,500샷)',en:'+ ULFINE 9mm · S area (1,500 shots)',th:'+ ULFINE 9mm · จุดเล็ก (1,500 ช็อต)',ja:'+ ULFINE 9mm·S部位(1,500)',zh:'+ ULFINE 9mm·S部位(1,500发)'},dev:'ULFINE NEOSKIN · 9mm',price:'+1,290',addon:1,m:15,meta:{ko:'승모근·팔·종아리 · 고출력 3.5~3.9J 심부층',en:'traps · arms · calves · high-power 3.5–3.9 J deep layer',th:'บ่า·แขน·น่อง · 3.5–3.9J ชั้นลึก',ja:'肩·腕·ふくらはぎ · 高出力深層',zh:'肩·臂·小腿·高功率深层'},
+        x:{ko:'테라노바 베이스에 깊이를 더하는 애드온 · DPL 대비 샷당 6~7배 출력 · 1회로 실감',en:'Adds real depth to a THERANOVA base · 6–7x stronger per shot than DPL · felt in one visit',th:'เพิ่มชั้นลึกจริงให้เบส THERANOVA · แรงกว่า DPL 6–7 เท่าต่อช็อต',ja:'THERANOVAベースに本物の深さを · DPL比6〜7倍',zh:'为THERANOVA基础加真深层·每发比DPL强6~7倍'}},
+       {name:{ko:'+ 울파인 9mm · M부위 (2,000샷)',en:'+ ULFINE 9mm · M area (2,000 shots)',th:'+ ULFINE 9mm · จุดกลาง (2,000 ช็อต)',ja:'+ ULFINE 9mm·M部位(2,000)',zh:'+ ULFINE 9mm·M部位(2,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'+1,590',addon:1,m:20,meta:{ko:'옆구리·앞벅지·뒤벅지·등 · 고출력 심부층',en:'flanks · front/back thigh · back · high-power deep layer',th:'สีข้าง·ต้นขาหน้า/หลัง·แผ่นหลัง · ชั้นลึก',ja:'脇腹·前後もも·背中 · 深層',zh:'侧腰·大腿前后·背部·深层'},
+        x:{ko:'중면적 부위용 · 테라노바+9mm = 순환+깊이 원스톱',en:'For medium areas · THERANOVA + 9mm = circulation plus depth in one visit',th:'สำหรับจุดขนาดกลาง · THERANOVA+9mm ครบในครั้งเดียว',ja:'中面積部位用 · 巡り+深さを一度に',zh:'中等面积部位·循环+深层一次到位'}},
+       {name:{ko:'+ 울파인 9mm · L부위 (2,500샷)',en:'+ ULFINE 9mm · L area (2,500 shots)',th:'+ ULFINE 9mm · จุดใหญ่ (2,500 ช็อต)',ja:'+ ULFINE 9mm·L部位(2,500)',zh:'+ ULFINE 9mm·L部位(2,500发)'},dev:'ULFINE NEOSKIN · 9mm',price:'+1,990',addon:1,m:25,meta:{ko:'복부 · 고출력 심부층 · 테라노바 복부와 베스트 페어',en:'abdomen · high-power deep layer · best pair with THERANOVA abdomen',th:'หน้าท้อง · ชั้นลึก · คู่ที่ดีที่สุดกับ THERANOVA หน้าท้อง',ja:'腹部 · 深層 · THERANOVA腹部と最強ペア',zh:'腹部·深层·与THERANOVA腹部最佳搭配'},
+        x:{ko:'복부 전면 커버 · 단독 프리미엄(9,900) 전에 가볍게 경험하는 사다리',en:'Covers the front abdomen · a step before the standalone Premium (9,900)',th:'ครอบคลุมหน้าท้อง · ขั้นก่อนพรีเมียมเดี่ยว (9,900)',ja:'腹部前面カバー · 単独プレミアム(9,900)前の一段',zh:'覆盖腹部前侧·单独高端(9,900)前的阶梯'}},
+       {name:{ko:'+ 테라노바 턱 퀵 · 10분',en:'+ THERANOVA Chin Quick · 10 min',th:'+ THERANOVA ใต้คางด่วน · 10 นาที',ja:'+ テラノバ あご下クイック·10分',zh:'+ THERANOVA下巴快捷·10分钟'},dev:'THERANOVA',price:'+490',addon:1,m:10,meta:{ko:'턱라인·이중턱만 짧게 온열+감압 · 단독 25분 990 → 퀵 10분 +490 · 풀버전은 +990(20분)',en:'jawline & chin only, a short heat & vacuum pass · standalone 25 min 990 → quick 10 min +490 · full version +990 (20 min)',th:'เฉพาะกรอบหน้า·ใต้คาง สั้นๆ · เดี่ยว 25 นาที 990 → ด่วน 10 นาที +490 · แบบเต็ม +990 (20 นาที)',ja:'あご下だけ短く温熱+減圧 · 単独25分990→クイック10分+490',zh:'仅下颌线·下巴短时温热+负压·单做25分990→快捷10分+490'},
+        x:{ko:'하이푸·BB글로우 뒤에 턱 붓기만 빠르게 흘려보내는 마무리 · 이중턱 세트의 핵심 조각',en:'A quick chin de-puff finish after HIFU or BB Glow · the key piece of the double-chin sets',th:'ปิดท้ายยุบบวมใต้คางเร็วๆ หลัง HIFU·BB Glow',ja:'HIFU·BBグロウ後にあご下のむくみだけ素早く流す仕上げ',zh:'HIFU·BB焕肤后快速消下巴浮肿的收尾'}},
+     ]},
+     {label:{ko:'STEP 3 · 시그니처 바디 프로토콜',en:'STEP 3 · Signature body protocol',th:'STEP 3 · โปรโตคอลบอดี้',ja:'STEP 3 · シグネチャー',zh:'STEP 3·招牌身体方案'},items:[
+       {feature:1,star:'SIGNATURE',name:{ko:'Ab Sculpt 복부 집중 프로토콜',en:'Ab Sculpt Protocol (Abdomen)',th:'โปรโตคอลหน้าท้อง Ab Sculpt',ja:'腹部プロトコル',zh:'腹部塑形方案'},dev:'THERANOVA · DPL · RF',price:'2,990',m:75,meta:{ko:'DPL 4,000샷 포함 · 복부 탄력+매끈 원스톱 · 2회 ฿5,380',en:'DPL 4,000 shots incl. · abdomen firm & smooth one-stop · 2-session ฿5,380',th:'รวม DPL 4,000 ช็อต · หน้าท้องกระชับ·เรียบเนียน · 2 ครั้ง ฿5,380',ja:'DPL 4,000ショット込 · 腹部ハリ＋なめらか · 2回฿5,380',zh:'含DPL 4,000发·腹部紧致+平滑 · 2次฿5,380'},
+        x:{ko:'순환 → 심부 퍼밍 → 타이트닝 3단계 복부 케어',en:'Circulation → deep firming → tightening, 3-step ab care',th:'ไหลเวียน → กระชับชั้นลึก → เฟิร์มผิว 3 ขั้น',ja:'巡り→深部ファーミング→引き締めの3段階',zh:'循环→深层紧致→紧肤 三步'}},
+       {name:{ko:'Thigh & Hip Lift 하체 프로토콜',en:'Thigh & Hip Lift Protocol',th:'โปรโตคอลต้นขา·สะโพก',ja:'太もも·ヒッププロトコル',zh:'大腿臀方案'},dev:'THERANOVA · DPL',price:'3,290',m:80,meta:{ko:'허벅지+힙 셀룰라이트 (DPL 8,000샷 포함) · 2회 ฿5,920',en:'thigh + hip cellulite (DPL 8,000 shots incl.) · 2-session ฿5,920',th:'ต้นขา+สะโพก (รวม DPL 8,000 ช็อต) · 2 ครั้ง ฿5,920',ja:'太もも＋ヒップ (DPL 8,000ショット込) · 2回฿5,920',zh:'大腿+臀(含DPL 8,000发) · 2次฿5,920'},
+        x:{ko:'허벅지·힙 셀룰라이트 케어 + 힙업 라인',en:'Thigh & hip cellulite care + hip-up line',th:'ดูแลเซลลูไลท์ต้นขา·สะโพก + ยกกระชับ',ja:'太もも·ヒップのセルライトケア＋ヒップアップ',zh:'大腿·臀橘皮护理+提臀'}},
+       {name:{ko:'힙 리프팅 케어 (마사지 포함)',en:'Hip Lifting Care (with Massage)',th:'ฮิปลิฟติ้งแคร์ (รวมนวด)',ja:'ヒップリフトケア(マッサージ込)',zh:'臀部提拉护理(含按摩)'},dev:'THERANOVA · RF · DPL',price:'2,490',was:'฿3,990',limited:1,m:70,meta:{ko:'오일 마사지 → THERANOVA 순환 → RF 타이트닝 → DPL 포인트 · 2회 ฿4,480 · DPL 2,000샷 포함',en:'oil massage → THERANOVA drainage → RF tightening → DPL points · 2-session ฿4,480 · incl. DPL 2,000 shots',th:'นวดออยล์ → THERANOVA → RF กระชับ → DPL · 2 ครั้ง ฿4,480 · รวม DPL 2,000 ช็อต',ja:'オイルマッサージ→THERANOVA→RF→DPL · 2回฿4,480 · DPL2,000込',zh:'精油按摩→THERANOVA→RF紧致→DPL · 2次฿4,480 · 含DPL2,000发'},
+        x:{ko:'수기 마사지로 시작하는 힙 라인 리프팅·탄력 집중 케어 · 엉덩이 BB글로우와 세트 추천',en:'Massage-first hip line lifting & firming care · pairs with Hip BB Glow',th:'เริ่มด้วยนวด ยกกระชับ·เฟิร์มสะโพก · แนะนำคู่กับบีบีโกลว์สะโพก',ja:'マッサージから始まるヒップライン·ハリ集中ケア · ヒップBBグロウとセット推奨',zh:'按摩开启的臀线提拉紧致护理·推荐搭配臀部BB焕肤'}},
+       {name:{ko:'Total Detox & Slim 전신 프로토콜',en:'Total Detox & Slim Protocol',th:'โปรโตคอลดีท็อกซ์ทั้งตัว',ja:'全身デトックス',zh:'全身排毒方案'},dev:'',price:'3,490',m:90,p3:'3,140',meta:{ko:'전신 순환·디톡스',en:'whole-body detox',th:'ดีท็อกซ์ทั้งตัว',ja:'全身デトックス',zh:'全身排毒'},
+        x:{ko:'전신 림프 순환·붓기·노폐물 배출 · 메디컬 스파 디톡스',en:'Whole-body lymph, puffiness & drainage · medical-spa detox',th:'ทั้งตัว น้ำเหลือง·บวม·ระบาย · เมดิคัลสปา',ja:'全身リンパ·むくみ·排出 · メディカルスパ',zh:'全身淋巴·浮肿·排毒·医美SPA'}},
+     ]},
+     {label:{ko:'바디 DPL · 엔트리 🔥 통증 적은 도트형 · 1회 (4주·8주 코스 −할인)',en:'Body DPL · Entry 🔥 low-pain dot-type · single (4/8-week course −off)',th:'บอดี้ DPL · เริ่มต้น 🔥 แบบดอทเจ็บน้อย · ครั้งเดียว (คอร์ส 4/8 สัปดาห์ −ลด)',ja:'ボディDPL · エントリー 🔥 低刺激ドット式 · 1回 (4/8週コース−割)',zh:'身体DPL·入门 🔥 低痛点阵式·单次(4/8周疗程−折)'},items:[
+       {name:{ko:'팔뚝 (양팔 · 5,000샷)',en:'Upper Arms (both · 5,000 shots)',th:'ท้องแขน (สองแขน · 5,000 ช็อต)',ja:'二の腕(両腕·5,000)',zh:'蝴蝶臂(双臂·5,000发)'},dev:'DPL',price:'1,290',m:30,meta:{ko:'양팔 각 2,500샷 · 4주(4회) ฿4,390 · 8주(8회) ฿7,900',en:'2,500 each arm · 4-wk (×4) ฿4,390 · 8-wk (×8) ฿7,900',th:'แขนละ 2,500 · 4 สัปดาห์ (×4) ฿4,390 · 8 สัปดาห์ (×8) ฿7,900',ja:'各腕2,500 · 4週(×4)฿4,390 · 8週(×8)฿7,900',zh:'每臂2,500·4周(×4)฿4,390·8周(×8)฿7,900'},
+        x:{ko:'배트윙 라인 매끈·탄력 입문 · <b>1회는 가볍게, 진짜 결과는 8주 코스 완주부터</b> — 주 1회 누적으로 콜라겐이 쌓입니다 · 매끈함은 즉시, 탄력은 코스로 · 개인차',en:'Firm-and-smooth entry for the batwing line · <b>one session is light; real results come from the 8-week course</b> — weekly sessions build collagen · smoothness now, firmness over the course · results vary',th:'เริ่มต้นกระชับ·เรียบเนียนท้องแขน · <b>ครั้งเดียวเบา ๆ ผลจริงมาจากคอร์ส 8 สัปดาห์</b> — ทำสัปดาห์ละครั้งสะสมคอลลาเจน · เนียนทันที กระชับต้องคอร์ส · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'二の腕の引き締め入門 · <b>1回は軽く、本当の結果は8週コースから</b> — 週1回でコラーゲン蓄積 · なめらかさは即·ハリはコースで · 個人差',zh:'蝴蝶臂紧致平滑入门·<b>单次轻度·真正结果来自8周疗程</b>·每周一次累积胶原·平滑即时·紧致靠疗程·因人而异'}},
+       {feature:1,star:'POPULAR',name:{ko:'복부 (8,000샷)',en:'Abdomen (8,000 shots)',th:'หน้าท้อง (8,000 ช็อต)',ja:'腹部(8,000)',zh:'腹部(8,000发)'},dev:'DPL',price:'1,890',m:40,meta:{ko:'복부 전면 · 4주(4회) ฿6,490 · 8주(8회) ฿12,900',en:'front abdomen · 4-wk (×4) ฿6,490 · 8-wk (×8) ฿12,900',th:'หน้าท้อง · 4 สัปดาห์ (×4) ฿6,490 · 8 สัปดาห์ (×8) ฿12,900',ja:'腹部前面 · 4週(×4)฿6,490 · 8週(×8)฿12,900',zh:'腹部前侧·4周(×4)฿6,490·8周(×8)฿12,900'},
+        x:{ko:'복부 탄력·매끈 입문 · <b>8주 완주 시 ~1년 유지</b> (원 프로토콜) · 운동 병행 시 지속 유지 · 관리 시간이 병원보다 길어지는 대신 통증이 적고 저렴 · 개인차',en:'Abdomen firm-and-smooth entry · <b>~1 year after completing 8 weeks</b> (original protocol) · lasts longer with exercise · takes more sessions than a clinic but low-pain and affordable · results vary',th:'เริ่มต้นหน้าท้องกระชับ·เรียบเนียน · <b>จบ 8 สัปดาห์อยู่ ~1 ปี</b> (โปรโตคอลเดิม) · ออกกำลังกายควบคู่ยิ่งอยู่นาน · ใช้เวลามากกว่าคลินิกแต่เจ็บน้อยและถูก · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'腹部の引き締め入門 · <b>8週完了で~1年持続</b>(元プロトコル) · 運動併用で長持ち · 回数は要るが低刺激で手頃 · 個人差',zh:'腹部紧致平滑入门·<b>完成8周维持~1年</b>(原方案)·配合运动更持久·比诊所需更多次但低痛实惠·因人而异'}},
+       {name:{ko:'종아리 (양쪽 · 10,000샷)',en:'Calves (both · 10,000 shots)',th:'น่อง (สองข้าง · 10,000 ช็อต)',ja:'ふくらはぎ(両·10,000)',zh:'小腿(双侧·10,000发)'},dev:'DPL',price:'2,190',m:45,meta:{ko:'양쪽 후면·내측 · 4주(4회) ฿7,900 · 8주(8회) ฿15,900',en:'both, back & inner · 4-wk (×4) ฿7,900 · 8-wk (×8) ฿15,900',th:'สองข้าง หลัง·ด้านใน · 4 สัปดาห์ ฿7,900 · 8 สัปดาห์ ฿15,900',ja:'両側 後面·内側 · 4週฿7,900 · 8週฿15,900',zh:'双侧后·内侧·4周฿7,900·8周฿15,900'},
+        x:{ko:'종아리 탄력·부기 정리 · 코스 누적형 · 개인차',en:'Calf firmness & de-puff · course-based · results vary',th:'น่องกระชับ·ลดบวม · แบบคอร์ส · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'ふくらはぎのハリ·むくみ · コース型 · 個人差',zh:'小腿紧致·消肿·疗程型·因人而异'}},
+       {feature:1,star:'BEST',name:{ko:'허벅지 뒤 셀룰라이트 (양쪽 · 12,000샷)',en:'Back-Thigh Cellulite (both · 12,000 shots)',th:'เซลลูไลท์ต้นขาหลัง (สองข้าง · 12,000 ช็อต)',ja:'太もも裏セルライト(両·12,000)',zh:'大腿后橘皮(双侧·12,000发)'},dev:'DPL',price:'2,690',m:50,meta:{ko:'힙라인 아래 폴드 포함 · 4주(4회) ฿9,490 · 8주(8회) ฿18,900',en:'incl. under-buttock fold · 4-wk (×4) ฿9,490 · 8-wk (×8) ฿18,900',th:'รวมใต้ก้น · 4 สัปดาห์ ฿9,490 · 8 สัปดาห์ ฿18,900',ja:'お尻下のフォールド含 · 4週฿9,490 · 8週฿18,900',zh:'含臀下褶皱·4周฿9,490·8周฿18,900'},
+        x:{ko:'뒤벅지·힙 아래 셀룰라이트·매끈 · 넓은 면적을 도트형으로 아프지 않게 · <b>가장 인기 바디 부위</b> · 코스로 누적 · 개인차',en:'Back-thigh & under-hip cellulite & smoothing · large area, pain-free dot-type · <b>our most popular body area</b> · builds over the course · results vary',th:'เซลลูไลท์ต้นขาหลัง·ใต้สะโพก · พื้นที่กว้างแบบดอทไม่เจ็บ · <b>จุดบอดี้ยอดนิยม</b> · สะสมด้วยคอร์ส · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'太もも裏·ヒップ下のセルライト · 広範囲をドット式で無痛 · <b>ボディ人気No.1</b> · コースで蓄積 · 個人差',zh:'大腿后·臀下橘皮·平滑·大面积点阵无痛·<b>身体最热门部位</b>·疗程累积·因人而异'}},
+       {name:{ko:'허벅지 360° (양쪽 · 36,000샷)',en:'Thigh 360° (both · 36,000 shots)',th:'ต้นขา 360° (สองข้าง · 36,000 ช็อต)',ja:'太もも360°(両·36,000)',zh:'大腿360°(双侧·36,000发)'},dev:'DPL',price:'7,900',m:90,meta:{ko:'앞+뒤+내외측 전체 랩 · 2회 프로그램 −10% ฿14,220',en:'front+back+inner/outer full wrap · 2-session −10% ฿14,220',th:'หน้า+หลัง+ด้านใน/นอก ครบรอบ · 2 ครั้ง −10% ฿14,220',ja:'前+後+内外側フルラップ · 2回−10%฿14,220',zh:'前+后+内外侧全环·2次−10%฿14,220'},
+        x:{ko:'허벅지 전체를 한 바퀴 · 도트형 대면적의 강점 · <b>"복부 8,000샷"급을 4.5배 면적으로</b> · 개인차',en:'The whole thigh, all the way around · where large-area dot-type shines · <b>4.5× the area of the 8,000-shot abdomen</b> · results vary',th:'ต้นขาครบรอบ · จุดเด่นของดอทพื้นที่กว้าง · <b>พื้นที่ 4.5 เท่าของหน้าท้อง 8,000 ช็อต</b> · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'太もも一周 · 大面積ドットの強み · <b>腹部8,000ショットの4.5倍面積</b> · 個人差',zh:'大腿环绕一圈·大面积点阵优势·<b>腹部8,000发的4.5倍面积</b>·因人而异'}},
+     ]},
+     {label:{ko:'바디 DPL · 데콜테·가슴라인 (도트형 · 얇은 부위 전용)',en:'Body DPL · Décolleté & Chest-line (dot-type · for delicate areas)',th:'บอดี้ DPL · เนินอก·แนวอก (ดอท · ผิวบอบบาง)',ja:'ボディDPL · デコルテ·バストライン(繊細部位)',zh:'身体DPL·颈胸·胸线(点阵·娇嫩部位)'},items:[
+       {name:{ko:'데콜테 (4,000샷)',en:'Décolleté (4,000 shots)',th:'เนินอก (4,000 ช็อต)',ja:'デコルテ(4,000)',zh:'颈胸(4,000发)'},dev:'DPL',price:'1,190',was:'฿1,690',m:30,meta:{ko:'클렌징 → DPL 도트 4,000샷 → 진정 마무리',en:'cleanse → DPL dot 4,000 shots → calming finish',th:'ทำความสะอาด → DPL ดอท 4,000 ช็อต → ปลอบผิวปิดท้าย',ja:'クレンジング→DPLドット4,000→鎮静仕上げ',zh:'清洁→DPL点阵4,000发→镇静收尾'},
+        x:{ko:'목~쇄골 아래 데콜테를 탄탄하고 매끈하게 · 얇은 부위라 9mm 대신 도트형이 맞습니다 · 개인차',en:'Firms and smooths the neck-to-collarbone zone · dot-type suits this delicate area better than 9mm · results vary',th:'กระชับ·เรียบเนียนช่วงคอถึงไหปลาร้า · ผิวบางเหมาะกับดอทมากกว่า 9mm · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'首〜鎖骨下をハリ·なめらかに · 薄い部位はドット式が適 · 個人差',zh:'紧致平滑颈至锁骨区·娇嫩部位点阵更合适·因人而异'}},
+       {name:{ko:'가슴라인 (6,000샷)',en:'Chest-line (6,000 shots)',th:'แนวอก (6,000 ช็อต)',ja:'バストライン(6,000)',zh:'胸线(6,000发)'},dev:'DPL',price:'1,590',was:'฿2,290',m:40,meta:{ko:'클렌징 → DPL 도트 6,000샷 → 진정 마무리 · 탄력·매끈',en:'cleanse → DPL dot 6,000 shots → calming finish · firm and smooth',th:'ทำความสะอาด → DPL ดอท 6,000 ช็อต → ปลอบผิวปิดท้าย · กระชับ·เรียบเนียน',ja:'クレンジング→DPLドット6,000→鎮静仕上げ',zh:'清洁→DPL点阵6,000发→镇静收尾·紧致平滑'},
+        x:{ko:'가슴라인 피부를 탄탄하고 매끈하게 정돈 · 개인차',en:'Firms and smooths the chest-line skin · results vary',th:'ปรับผิวแนวอกให้กระชับ·เรียบเนียน · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'バストラインの肌をハリ·なめらかに · 個人差',zh:'紧致平滑胸线肌肤·因人而异'}},
+       {name:{ko:'데콜테 + 가슴라인 (8,000샷)',en:'Décolleté + Chest-line (8,000 shots)',th:'เนินอก + แนวอก (8,000 ช็อต)',ja:'デコルテ+バストライン(8,000)',zh:'颈胸+胸线(8,000发)'},dev:'DPL',price:'1,990',was:'฿2,790',m:50,meta:{ko:'두 부위 연결 시술 · 클렌징 → DPL 8,000샷 → 진정 마무리',en:'both zones in one session · cleanse → DPL 8,000 shots → calming finish',th:'สองจุดต่อเนื่อง · ทำความสะอาด → DPL 8,000 ช็อต → ปลอบผิว',ja:'2部位連続 · クレンジング→DPL8,000→鎮静',zh:'两区连做·清洁→DPL8,000发→镇静'},
+        x:{ko:'데콜테부터 가슴라인까지 경계 없이 매끈하게 · 개인차',en:'Seamlessly smooth from décolleté to chest-line · results vary',th:'เรียบเนียนไร้รอยต่อจากเนินอกถึงแนวอก · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'デコルテからバストラインまで境目なく · 個人差',zh:'从颈胸到胸线无缝平滑·因人而异'}},
+     ]},
+     {label:{ko:'바디 울파인 9mm · 프리미엄 ⭐⭐⭐ 고출력 3.9J · 1회 완결 (관광객·원데이 추천)',en:'Body ULFINE 9mm · Premium ⭐⭐⭐ high-power 3.9J · one visit (great for travelers)',th:'บอดี้ ULFINE 9mm · พรีเมียม ⭐⭐⭐ พลังงานสูง 3.9J · จบครั้งเดียว (เหมาะนักท่องเที่ยว)',ja:'ボディULFINE 9mm · プレミアム ⭐⭐⭐ 高出力3.9J · 1回完結 (旅行者向け)',zh:'身体ULFINE 9mm·高端 ⭐⭐⭐ 高功率3.9J·单次完结(适合游客)'},items:[
+       {name:{ko:'팔뚝 프리미엄 (양팔 · 5,000샷)',en:'Upper Arms Premium (both · 5,000 shots)',th:'ท้องแขนพรีเมียม (สองแขน · 5,000 ช็อต)',ja:'二の腕プレミアム(5,000)',zh:'蝴蝶臂高端(5,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'5,900',m:45,meta:{ko:'9mm 3.5~3.9J 고출력 · 1회 완결 · DPL 8주 코스급을 한 번에',en:'9 mm at 3.5–3.9 J · one visit · matches an 8-week DPL course in a single session',th:'9 มม. 3.5–3.9J พลังงานสูง · จบครั้งเดียว · เทียบคอร์ส DPL 8 สัปดาห์',ja:'9mm 3.5〜3.9J高出力 · 1回完結 · DPL8週コース級を一度に',zh:'9mm 3.5–3.9J高功率·单次完结·相当于DPL 8周疗程'},
+        x:{ko:'DPL보다 샷 하나가 6~7배 강한 고출력 · <b>주 1회 8번 못 오시는 분·관광객에게 최적</b> · 진피~지방층 강한 열응고로 진짜 탄력 · 개인차',en:'Each shot is 6–7× stronger than DPL · <b>ideal for travelers or those who can\u2019t come weekly ×8</b> · strong deep coagulation for real firmness · results vary',th:'แต่ละช็อตแรงกว่า DPL 6–7 เท่า · <b>เหมาะนักท่องเที่ยว·คนที่มาสัปดาห์ละครั้ง ×8 ไม่ได้</b> · ความร้อนลึกจริงเพื่อความกระชับ · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'DPLより1ショット6〜7倍強力 · <b>週1×8回来られない方·旅行者に最適</b> · 深部の強い熱凝固で本物のハリ · 個人差',zh:'每发比DPL强6~7倍·<b>适合游客·无法每周来8次者</b>·深层强热凝固·真正紧致·因人而异'}},
+       {feature:1,star:'★ ONE-DAY',name:{ko:'복부 프리미엄 (8,000샷)',en:'Abdomen Premium (8,000 shots)',th:'หน้าท้องพรีเมียม (8,000 ช็อต)',ja:'腹部プレミアム(8,000)',zh:'腹部高端(8,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'9,900',m:60,meta:{ko:'9mm 3.9J 8,000샷 · 1회 완결 · DPL 8주 복부 ฿12,900을 한 번에',en:'9 mm 3.9 J 8,000 shots · one visit · vs 8-week DPL abdomen ฿12,900',th:'9 มม. 3.9J 8,000 ช็อต · จบครั้งเดียว · เทียบ DPL 8 สัปดาห์ ฿12,900',ja:'9mm 3.9J 8,000 · 1回完結 · DPL8週腹部฿12,900を一度に',zh:'9mm 3.9J 8,000发·单次完结·对比DPL 8周腹部฿12,900'},
+        x:{ko:'<b>8번 오실래요, 한 번에 끝내실래요?</b> — DPL 8주 코스와 같은 결과를 원데이로 · 방콕 여행 중 한 번에 제대로 · +THERANOVA 순환 마무리 ฿990 인기 · 개인차',en:'<b>Eight visits, or done in one?</b> — the 8-week DPL result in a single day · proper results during a Bangkok trip · +THERANOVA circulation finish ฿990 popular · results vary',th:'<b>มา 8 ครั้ง หรือจบครั้งเดียว?</b> — ผลเท่าคอร์ส DPL 8 สัปดาห์ในวันเดียว · เที่ยวกรุงเทพจบได้เลย · +THERANOVA ฿990 นิยม · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'<b>8回来る?一度で終わる?</b> — DPL8週の結果をワンデーで · バンコク旅行中にしっかり · +THERANOVA ฿990人気 · 個人差',zh:'<b>来8次·还是一次搞定?</b>·DPL 8周的结果一天完成·曼谷旅行中一次到位·+THERANOVA ฿990热门·因人而异'}},
+       {name:{ko:'종아리 프리미엄 (양쪽 · 10,000샷)',en:'Calves Premium (both · 10,000 shots)',th:'น่องพรีเมียม (สองข้าง · 10,000 ช็อต)',ja:'ふくらはぎプレミアム(10,000)',zh:'小腿高端(10,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'12,900',m:75,meta:{ko:'9mm 3.9J · 1회 완결',en:'9 mm 3.9 J · one visit',th:'9 มม. 3.9J · จบครั้งเดียว',ja:'9mm 3.9J · 1回完結',zh:'9mm 3.9J·单次完结'},
+        x:{ko:'종아리 강한 탄력 · 고출력 1회 · 개인차',en:'Strong calf firmness · high-power single visit · results vary',th:'น่องกระชับแรง · พลังงานสูงครั้งเดียว · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'ふくらはぎの強いハリ · 高出力1回 · 個人差',zh:'小腿强紧致·高功率单次·因人而异'}},
+       {name:{ko:'허벅지 뒤 프리미엄 (양쪽 · 12,000샷)',en:'Back-Thigh Premium (both · 12,000 shots)',th:'ต้นขาหลังพรีเมียม (สองข้าง · 12,000 ช็อต)',ja:'太もも裏プレミアム(12,000)',zh:'大腿后高端(12,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'14,900',m:85,meta:{ko:'9mm 3.9J · 1회 완결 · 셀룰라이트·탄력',en:'9 mm 3.9 J · one visit · cellulite & firmness',th:'9 มม. 3.9J · จบครั้งเดียว · เซลลูไลท์·กระชับ',ja:'9mm 3.9J · 1回完結 · セルライト·ハリ',zh:'9mm 3.9J·单次完结·橘皮·紧致'},
+        x:{ko:'뒤벅지 셀룰라이트 고출력 1회 · DPL 8주 ฿18,900을 한 번에 · 개인차',en:'Back-thigh cellulite, high-power single visit · vs 8-week DPL ฿18,900 · results vary',th:'เซลลูไลท์ต้นขาหลัง ครั้งเดียวแรง · เทียบ DPL 8 สัปดาห์ ฿18,900 · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'太もも裏セルライト高出力1回 · DPL8週฿18,900を一度に · 個人差',zh:'大腿后橘皮·高功率单次·对比DPL 8周฿18,900·因人而异'}},
+       {feature:1,star:'MAX',name:{ko:'허벅지 360° 프리미엄 (양쪽 · 24,000샷)',en:'Thigh 360° Premium (both · 24,000 shots)',th:'ต้นขา 360° พรีเมียม (สองข้าง · 24,000 ช็อต)',ja:'太もも360°プレミアム(24,000)',zh:'大腿360°高端(24,000发)'},dev:'ULFINE NEOSKIN · 9mm',price:'29,900',m:120,meta:{ko:'9mm 3.9J 전체 랩 · 우리가 제공하는 바디 최대 용량 · 3–6개월 후 재평가',en:'9 mm 3.9 J full wrap · the largest body dose we offer · reassess after 3–6 months',th:'9 มม. 3.9J ครบรอบ · โดสบอดี้มากที่สุดของเรา · ประเมินซ้ำใน 3–6 เดือน',ja:'9mm 3.9J フルラップ · 当院ボディ最大量 · 3–6ヶ月後に再評価',zh:'9mm 3.9J全环·本店身体最大剂量·3–6个月复评'},
+        x:{ko:'허벅지 전체를 고출력 한 바퀴 · 프리미엄 원데이 최대 구성 · 개인차',en:'The whole thigh at high power, all around · the maximum one-day premium · results vary',th:'ต้นขาครบรอบพลังงานสูง · พรีเมียมวันเดียวสูงสุด · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'太もも一周を高出力で · プレミアムワンデー最大 · 個人差',zh:'整个大腿高功率环绕·高端一日最大配置·因人而异'}},
+     ]},
+     {label:{ko:'바디 착색·여드름·모공 케어 (부위별)',en:'Body Pigment·Acne·Pore Care (by area)',th:'ดูแลผิวคล้ำ·สิว·รูขุมขน (ตามจุด)',ja:'ボディ色素·ニキビ·毛穴',zh:'身体着色·痘·毛孔'},items:[
+       {name:{ko:'바디 착색·미백 케어',en:'Body Pigment & Whitening',th:'ดูแลผิวคล้ำ·ไวท์ตามตัว',ja:'ボディ色素·美白',zh:'身体着色·美白'},dev:{ko:'미백 필 · 이온토',en:'Whitening peel · Ionto',th:'พีลไวท์ · ไอออนโต',ja:'美白ピール·イオント',zh:'美白焕肤·离子导入'},price:'1,290',m:40,p3:'1,160',meta:{ko:'부위당 · 겨드랑이·팔꿈치·무릎·사타구니·엉덩이밑',en:'per area · armpit·elbow·knee·groin·under-buttock',th:'ต่อจุด · รักแร้·ข้อศอก·เข่า·ขาหนีบ·ใต้ก้น',ja:'部位ごと · 脇·肘·膝·鼠径·お尻の下',zh:'每部位·腋下·手肘·膝盖·腹股沟·臀下'},
+        x:{ko:'접히는 부위 착색·칙칙함 미백 · 톤 균일',en:'Brightens dark folds & pigment · even tone',th:'ไวท์เทนนิ่งจุดคล้ำตามข้อพับ · โทนสม่ำเสมอ',ja:'折り目の黒ずみ·色素を美白 · トーン均一',zh:'关节褶皱着色·暗沉美白·匀肤'}},
+       {name:{ko:'등드름·바디 여드름 케어',en:'Back & Body Acne Care',th:'ดูแลสิวที่หลัง·ตามตัว',ja:'背中·ボディニキビ',zh:'背·身体祛痘'},dev:{ko:'딥클렌징 · 크라이오',en:'Deep cleanse · Cryo',th:'ทำความสะอาดล้ำลึก · ไครโอ',ja:'ディープ洗浄·クライオ',zh:'深层清洁·冷疗'},price:'1,190',m:40,p3:'1,070',meta:{ko:'부위당 · 등·가슴·엉덩이',en:'per area · back·chest·buttocks',th:'ต่อจุด · หลัง·อก·ก้น',ja:'部位ごと · 背中·胸·お尻',zh:'每部位·背·胸·臀'},
+        x:{ko:'등·가슴 여드름 딥클렌징·진정·살균',en:'Deep-cleanse, calm & clear back/chest acne',th:'ทำความสะอาด·ปลอบ·ลดสิวที่หลัง·อก',ja:'背中·胸のニキビを洗浄·鎮静·殺菌',zh:'背·胸痘痘深层清洁·舒缓·杀菌'}},
+       {name:{ko:'바디 모공·각질 케어',en:'Body Pore & Texture Care',th:'ดูแลรูขุมขน·ผิวหยาบตามตัว',ja:'ボディ毛穴·角質',zh:'身体毛孔·角质'},dev:{ko:'아쿠아필 · 필링',en:'Aqua peel · peeling',th:'อะควาพีล · พีลลิ่ง',ja:'アクアピール·ピーリング',zh:'水飞梭·焕肤'},price:'990',m:35,p3:'890',meta:{ko:'부위당 · 종아리·팔뚝·닭살',en:'per area · calf·arm·keratosis',th:'ต่อจุด · น่อง·ต้นแขน·ผิวขนคุด',ja:'部位ごと · ふくらはぎ·腕·鳥肌',zh:'每部位·小腿·手臂·鸡皮'},
+        x:{ko:'모공·각질·닭살(모공각화) 매끈 정돈',en:'Smooths pores, rough texture & keratosis pilaris',th:'ผลัดเซลล์ รูขุมขน·ผิวหยาบ·ขนคุด',ja:'毛穴·角質·鳥肌をなめらかに',zh:'毛孔·角质·鸡皮平滑'}},
+     ]},
+     {label:{ko:'안티에이징 순환 테라피',en:'Anti-Aging Circulation Therapy',th:'เซอร์คูเลชั่นแอนตี้เอจ',ja:'循環セラピー',zh:'抗衰循环疗程'},items:[
+       {name:{ko:'안티에이징 순환 테라피 · 페이스',en:'Anti-Aging Circulation · Face',th:'เซอร์คูเลชั่นแอนตี้เอจ · ใบหน้า',ja:'循環セラピー·顔',zh:'抗衰循环·面部'},dev:'',price:'2,690',m:60,p3:'2,420',meta:{ko:'얼굴 림프·순환 + 탄력',en:'facial lymph·circulation + firmness',th:'น้ำเหลือง·ไหลเวียนใบหน้า + กระชับ',ja:'顔リンパ·巡り + ハリ',zh:'面部淋巴·循环+紧致'},
+        x:{ko:'얼굴 림프 순환·부종·리프팅 이완',en:'Facial lymph, puffiness & lifting relax',th:'น้ำเหลืองใบหน้า·บวม·ยกกระชับ',ja:'顔のリンパ·むくみ·リフト',zh:'面部淋巴·浮肿·提拉放松'}},
+       {name:{ko:'안티에이징 순환 테라피 · 상체',en:'Anti-Aging Circulation · Upper',th:'เซอร์คูเลชั่นแอนตี้เอจ · ช่วงบน',ja:'循環セラピー·上半身',zh:'抗衰循环·上身'},dev:'',price:'2,290',m:45,p3:'2,060',meta:{ko:'목·어깨·등·팔 · 순환·이완',en:'neck·shoulder·back·arm · circulation',th:'คอ·ไหล่·หลัง·แขน · ไหลเวียน',ja:'首·肩·背·腕 · 巡り',zh:'颈·肩·背·臂·循环'},
+        x:{ko:'목·어깨·등 뭉침 이완 + 순환',en:'Relieves neck/shoulder/back tension + circulation',th:'คลายคอ·ไหล่·หลัง + ไหลเวียน',ja:'首·肩·背のこり緩和＋巡り',zh:'颈·肩·背舒缓+循环'}},
+       {name:{ko:'안티에이징 순환 테라피 · 하체',en:'Anti-Aging Circulation · Lower',th:'เซอร์คูเลชั่นแอนตี้เอจ · ช่วงล่าง',ja:'循環セラピー·下半身',zh:'抗衰循环·下身'},dev:'',price:'2,290',m:45,p3:'2,060',meta:{ko:'힙·허벅지·종아리 · 순환·부종',en:'hip·thigh·calf · circulation·de-puff',th:'สะโพก·ต้นขา·น่อง · ไหลเวียน·ลดบวม',ja:'ヒップ·太もも·ふくらはぎ · 巡り',zh:'臀·大腿·小腿·循环·消肿'},
+        x:{ko:'하체 부종·셀룰라이트·순환 이완',en:'Lower-body puffiness, cellulite & circulation',th:'ช่วงล่าง บวม·เซลลูไลท์·ไหลเวียน',ja:'下半身のむくみ·セルライト·巡り',zh:'下身浮肿·橘皮·循环'}},
+     ]},
+   ],
+   noteHtml:{ko:'<b>바디는 두 트랙입니다</b> — <b>DPL(엔트리)</b>은 통증 적은 도트형, 주 1회 코스로 누적 (8주 완주 시 ~1년) · <b>울파인 9mm(프리미엄)</b>은 고출력 3.9J 1회 완결, 관광객·원데이에 최적 · 같은 부위라도 DPL은 여러 번, 울파인은 한 번 · <b>+THERANOVA 순환 마무리 ฿990</b>은 양쪽 다 붙일 수 있는 베스트 페어 · 결과는 개인차가 있습니다',en:'<b>Two body tracks</b> — <b>DPL (Entry)</b> is low-pain dot-type, built over a weekly course (~1 year after 8 weeks) · <b>ULFINE 9mm (Premium)</b> is high-power 3.9 J done in one visit, ideal for travelers/one-day · same area, DPL over several visits vs ULFINE in one · <b>+THERANOVA circulation finish ฿990</b> pairs with either · results vary',th:'<b>บอดี้เลือกได้ 3 ระดับ</b> — ทดลอง (เบา) → เห็นผล (โดสเต็มต่อจุด) → ตัวจริง (3 ชั้นเต็มโปรโตคอล) · ทุกระดับ <b>โปรแกรม 2 ครั้ง −10%</b> (ห่าง 2–3 สัปดาห์) · <b>เสริมความลึก</b>: 3 มม. 690 · 4.5 มม. 790 · 9 มม. 990 · <b>THERANOVA +990</b> ปิดท้ายหลัง HIFU นิยมที่สุด · ผลลัพธ์ขึ้นกับแต่ละบุคคล',ja:'<b>ボディは3段階から</b> — 体験(軽く)→効果(部位別実用量)→本気(3層フルプロトコル) · 全ティア<b>2回プログラム−10%</b>(2–3週間隔) · <b>深度アドオン</b>: 3mm 690·4.5mm 790·9mm 990 · <b>THERANOVA循環+990</b>はHIFU後の仕上げで一番人気 · 個人差あり',zh:'<b>身体分三档选择</b>—体验(轻度)→见效(部位足量)→真章(三层完整方案)·所有档位<b>2次方案−10%</b>(间隔2–3周)·<b>深度加项</b>:3mm 690·4.5mm 790·9mm 990·<b>THERANOVA循环+990</b>是HIFU后最热门收尾·因人而异'}},
+
+  /* ── 08 두피 페인팅 ── */
+  {no:'08',title:'Scalp Painting',
+   sub:{ko:'두피 페인팅',en:'Scalp Painting',th:'เติมสีหนังศีรษะ',ja:'スカルプペイント',zh:'头皮补色'},
+   desc:{ko:'한국식 두피 페인팅 · 넓어진 가르마·정수리·빈 곳을 자연스럽게 커버 · 무통, 당일 완성 · 두피 스케일링 포함',en:'Korean scalp painting · natural cover for parting, crown & thin spots · painless, same-day · scalp scaling incl.',th:'เติมสีหนังศีรษะสไตล์เกาหลี · เติมแนวแสก·กลางหัว·จุดบางธรรมชาติ · ไม่เจ็บ เสร็จวันเดียว · รวมสเกลลิ่ง',ja:'韓国式スカルプペイント · 分け目·頭頂·薄い部分を自然にカバー · 無痛·当日 · スケーリング込み',zh:'韩式头皮补色·自然覆盖发缝·头顶·稀疏处·无痛·当天完成·含头皮清理'},
+   items:[
+   ],
+   groups:[
+     {label:{ko:'가르마 (여성) · Parting',en:'Parting (Women)',th:'แนวแสก (หญิง)',ja:'分け目(女性)',zh:'发缝(女性)'},items:[
+       {feature:1,star:'POPULAR',name:{ko:'가르마 × 3',en:'Parting ×3',th:'แนวแสก ×3',ja:'分け目×3',zh:'发缝×3'},was:'฿14,900',mem:'11,900',price:'8,900',m:60,meta:{ko:'가르마 3회 · 회당 ฿2,967 · 스케일링 포함',en:'parting ×3 · ฿2,967 each · scaling incl.',th:'แนวแสก 3 ครั้ง · ฿2,967/ครั้ง · รวมสเกลลิ่ง',ja:'分け目3回 · ฿2,967/回 · スケーリング込',zh:'发缝3次·每次฿2,967·含清理'},
+        x:{ko:'넓어진 가르마를 자연스럽게 채움 · 여성 1순위 · 3회로 색·밀도 안정',en:'Fills widening parting naturally · #1 for women · 3 sessions stabilize color & density',th:'เติมแนวแสกที่กว้างขึ้น · ยอดนิยมหญิง · 3 ครั้งให้สีคงที่',ja:'広がった分け目を自然に · 女性人気No.1 · 3回で安定',zh:'自然填补变宽发缝·女性首选·3次稳定'}},
+       {name:{ko:'가르마 라인 · 1회',en:'Parting Line · 1',th:'แนวแสก · 1 ครั้ง',ja:'分け目·1回',zh:'发缝·1次'},was:'฿6,900',mem:'5,900',price:'3,900',m:60,meta:{ko:'스케일링 포함 · 2~3회 권장',en:'scaling incl. · 2–3 recommended',th:'รวมสเกลลิ่ง · แนะนำ 2–3',ja:'スケーリング込 · 2〜3回推奨',zh:'含清理·建议2-3次'},
+        x:{ko:'가장 부담 없이 시작하는 여성 진입 케어',en:'The easiest entry for women',th:'เริ่มต้นง่ายที่สุดสำหรับผู้หญิง',ja:'一番始めやすい女性入門',zh:'女性最易入门'}},
+       {name:{ko:'헤어라인 × 3',en:'Hairline ×3',th:'ไรผม ×3',ja:'生え際×3',zh:'发际线×3'},was:'฿16,900',mem:'13,900',price:'9,900',m:70,meta:{ko:'이마 라인 잔머리 · 회당 ฿3,300',en:'forehead hairline · ฿3,300 each',th:'ไรผมหน้าผาก · ฿3,300/ครั้ง',ja:'額の生え際 · ฿3,300/回',zh:'额部发际·每次฿3,300'},
+        x:{ko:'이마 라인을 자연스럽게 · 얼굴 인상 보정',en:'Softens the forehead line naturally',th:'ปรับไรผมหน้าผากให้เป็นธรรมชาติ',ja:'額の生え際を自然に',zh:'自然修饰额部发际'}},
+       {name:{ko:'헤어라인 · 1회',en:'Hairline · 1',th:'ไรผม · 1 ครั้ง',ja:'生え際·1回',zh:'发际线·1次'},was:'฿7,900',mem:'6,500',price:'4,900',m:70,meta:{ko:'이마 라인 잔머리 · 스케일링 포함',en:'forehead hairline · scaling incl.',th:'ไรผมหน้าผาก · รวมสเกลลิ่ง',ja:'額の生え際 · スケーリング込',zh:'额部发际·含清理'},
+        x:{ko:'헤어라인만 가볍게 · 1회 체험',en:'Hairline only · single-visit try',th:'เฉพาะไรผม · ลองครั้งเดียว',ja:'生え際のみ · 1回お試し',zh:'仅发际线·单次体验'}},
+       {name:{ko:'가르마 + 헤어라인 · 1회',en:'Parting + Hairline · 1',th:'แนวแสก + ไรผม · 1 ครั้ง',ja:'分け目+生え際·1回',zh:'发缝+发际线·1次'},was:'฿11,900',mem:'8,900',price:'6,900',m:85,meta:{ko:'따로 하면 ฿8,800 → ฿6,900 · 스케일링 포함',en:'฿8,800 separately → ฿6,900 · scaling incl.',th:'แยกทำ ฿8,800 → ฿6,900 · รวมสเกลลิ่ง',ja:'別々฿8,800 → ฿6,900 · スケーリング込',zh:'分开฿8,800→฿6,900·含清理'},
+        x:{ko:'가르마와 이마 라인을 하루에 · 여성 인기 조합',en:'Parting and hairline in one visit · popular women combo',th:'แนวแสก+ไรผมในวันเดียว · คอมโบยอดนิยมหญิง',ja:'分け目と生え際を一日で · 女性人気コンボ',zh:'发缝+发际线一天完成·女性热门组合'}},
+       {name:{ko:'가르마 + 정수리 · 1회',en:'Parting + Crown · 1',th:'แนวแสก + กลางหัว · 1 ครั้ง',ja:'分け目+頭頂·1回',zh:'发缝+头顶·1次'},was:'฿11,900',mem:'8,900',price:'6,900',m:90,meta:{ko:'따로 하면 ฿8,800 → ฿6,900 · 스케일링 포함',en:'฿8,800 separately → ฿6,900 · scaling incl.',th:'แยกทำ ฿8,800 → ฿6,900 · รวมสเกลลิ่ง',ja:'別々฿8,800 → ฿6,900 · スケーリング込',zh:'分开฿8,800→฿6,900·含清理'},
+        x:{ko:'가르마에서 정수리까지 이어서 커버',en:'Covers from parting through the crown',th:'ครอบคลุมตั้งแต่แนวแสกถึงกลางหัว',ja:'分け目から頭頂まで続けてカバー',zh:'从发缝到头顶连续覆盖'}},
+       {name:{ko:'가르마 + 헤어라인 × 3',en:'Parting + Hairline ×3',th:'แนวแสก + ไรผม ×3',ja:'分け目+生え際×3',zh:'发缝+发际线×3'},was:'฿24,900',mem:'19,900',price:'15,900',m:90,meta:{ko:'여성 풀세트 · 스케일링 포함',en:'women full set · scaling incl.',th:'เซ็ตเต็มหญิง · รวมสเกลลิ่ง',ja:'女性フルセット · スケーリング込',zh:'女性全套·含清理'},
+        x:{ko:'가르마와 헤어라인을 함께 · 가장 자연스러운 완성',en:'Parting + hairline together for the most natural finish',th:'แนวแสก+ไรผมพร้อมกัน · เป็นธรรมชาติสุด',ja:'分け目と生え際を一緒に · 最も自然',zh:'发缝+发际线一起·最自然'}},
+     ]},
+     {label:{ko:'정수리 (남녀) · Crown',en:'Crown (Unisex)',th:'กลางหัว (ชาย·หญิง)',ja:'頭頂(男女)',zh:'头顶(男女)'},items:[
+       {feature:1,star:'POPULAR',name:{ko:'정수리 × 3',en:'Crown ×3',th:'กลางหัว ×3',ja:'頭頂×3',zh:'头顶×3'},was:'฿16,900',mem:'13,900',price:'9,900',m:75,meta:{ko:'정수리 3회 · 회당 ฿3,300 · 스케일링 포함',en:'crown ×3 · ฿3,300 each · scaling incl.',th:'กลางหัว 3 ครั้ง · ฿3,300/ครั้ง',ja:'頭頂3回 · ฿3,300/回',zh:'头顶3次·每次฿3,300'},
+        x:{ko:'정수리 빈 곳을 자연스럽게 채움 · 남녀 1순위 · 3회로 완성도·지속력 최상',en:'Fills crown thinning · #1 for men & women · 3 sessions for best finish',th:'เติมจุดบางกลางหัว · ยอดนิยม · 3 ครั้งผลลัพธ์สุด',ja:'頭頂の薄い部分を · 男女人気No.1 · 3回で最上',zh:'填补头顶稀疏·男女首选·3次最佳'}},
+       {name:{ko:'정수리 · 1회',en:'Crown · 1',th:'กลางหัว · 1 ครั้ง',ja:'頭頂·1回',zh:'头顶·1次'},was:'฿7,900',mem:'6,900',price:'4,900',m:75,meta:{ko:'스케일링 포함 · 2~3회 권장',en:'scaling incl. · 2–3 recommended',th:'รวมสเกลลิ่ง · แนะนำ 2–3',ja:'スケーリング込 · 2〜3回推奨',zh:'含清理·建议2-3次'},
+        x:{ko:'정수리 숱 없는 부분을 당일 커버',en:'Same-day cover for crown thinning',th:'ปกปิดจุดบางกลางหัวในวันเดียว',ja:'頭頂の薄毛を当日カバー',zh:'当天覆盖头顶稀疏'}},
+       {name:{ko:'정수리 + 헤어라인 · 1회',en:'Crown + Hairline · 1',th:'กลางหัว + ไรผม · 1 ครั้ง',ja:'頭頂+生え際·1回',zh:'头顶+发际线·1次'},was:'฿13,900',mem:'9,900',price:'7,900',m:100,meta:{ko:'따로 하면 ฿9,800 → ฿7,900 · 스케일링 포함',en:'฿9,800 separately → ฿7,900 · scaling incl.',th:'แยกทำ ฿9,800 → ฿7,900 · รวมสเกลลิ่ง',ja:'別々฿9,800 → ฿7,900 · スケーリング込',zh:'分开฿9,800→฿7,900·含清理'},
+        x:{ko:'정수리와 이마 라인을 하루에 · 남녀 공통 조합',en:'Crown and hairline in one visit · unisex combo',th:'กลางหัว+ไรผมในวันเดียว · ชาย·หญิง',ja:'頭頂と生え際を一日で · 男女共通',zh:'头顶+发际线一天完成·男女通用'}},
+     ]},
+     {label:{ko:'남성 풀 스칼프 · Full Scalp',en:'Men Full Scalp',th:'ฟูลสแกลป์ (ชาย)',ja:'男性フルスカルプ',zh:'男士全头'},items:[
+       {feature:1,star:'POPULAR',name:{ko:'남성 풀 스칼프 × 3',en:'Men Full Scalp ×3',th:'ฟูลสแกลป์ชาย ×3',ja:'男性フル×3',zh:'男士全头×3'},was:'฿29,900',mem:'23,900',price:'18,000',m:120,meta:{ko:'정수리+헤어라인+빈 곳 전체 · 회당 ฿6,000',en:'crown + hairline + all · ฿6,000 each',th:'ทั้งหมด · ฿6,000/ครั้ง',ja:'全体 · ฿6,000/回',zh:'全部·每次฿6,000'},
+        x:{ko:'남성 전체 두피를 한 번에 자연 커버 · 3회로 완성',en:'Covers the whole male scalp · 3 sessions to complete',th:'ครอบคลุมหนังศีรษะชายทั้งหมด · 3 ครั้ง',ja:'男性の薄毛全体を · 3回で完成',zh:'覆盖男性全头·3次完成'}},
+       {name:{ko:'남성 풀 스칼프 · 1회',en:'Men Full Scalp · 1',th:'ฟูลสแกลป์ชาย · 1 ครั้ง',ja:'男性フル·1回',zh:'男士全头·1次'},was:'฿11,900',mem:'9,900',price:'6,900',m:120,meta:{ko:'전체 빈 곳 커버 · 스케일링 포함',en:'all thin areas · scaling incl.',th:'จุดบางทั้งหมด · รวมสเกลลิ่ง',ja:'薄い部分全体 · スケーリング込',zh:'全部稀疏·含清理'},
+        x:{ko:'남성 전체 두피 빈 곳을 한 번에',en:'The whole thinning male scalp in one visit',th:'หนังศีรษะชายที่บางทั้งหมดในครั้งเดียว',ja:'男性の薄毛全体を一度に',zh:'男性全头稀疏一次'}},
+     ]},
+     {label:{ko:'리터치 · Retouch',en:'Retouch',th:'เติมสี',ja:'リタッチ',zh:'补色'},items:[
+       {name:{ko:'리터치',en:'Retouch',th:'เติมสี',ja:'リタッチ',zh:'补色'},was:'฿5,900',mem:'4,500',price:'3,500',meta:{ko:'색 빠짐 보강 (부위별 상담)',en:'color top-up (by area)',th:'เติมสีที่จางลง (ตามจุด)',ja:'色補充(部位別)',zh:'补色(按部位)'},
+        x:{ko:'주기적으로 색·밀도 자연스럽게 유지',en:'Keep color & density natural over time',th:'คงสี·ความหนาให้เป็นธรรมชาติ',ja:'色·密度を自然に維持',zh:'定期保持色·密度自然'}},
+     ]},
+   ],
+      noteHtml:{ko:'<b>두피 페인팅 = 당일 완성 자연 커버</b> · 두피 스케일링(딥클렌징) 포함 · 임시 커버로 주기적 리터치 권장',en:'<b>Same-day natural cover</b> · scalp scaling included · temporary cover, periodic retouch recommended',th:'<b>เติมสีเสร็จวันเดียว ดูธรรมชาติ</b> · รวมสเกลลิ่ง · เป็นการปกปิดชั่วคราว แนะนำเติมสีเป็นระยะ',ja:'<b>当日完成の自然カバー</b> · スケーリング込 · 一時的カバー、定期リタッチ推奨',zh:'<b>当天完成自然覆盖</b>·含头皮清理·临时覆盖·建议定期补色'}},
+
+  /* ── 09 멤버십 ── */
+  
+  /* ── 09 반영구 메이크업 ── */
+  {no:'09',title:'Semi-Permanent Makeup',
+   sub:{ko:'반영구 메이크업',en:'Semi-Permanent Makeup',th:'เมคอัพกึ่งถาวร',ja:'セミパーマネントメイク',zh:'半永久定妆'},
+   desc:{ko:'한국식 반영구 · 자연스러운 옴브레 그라데이션 · 마취크림 무료 · <b>7월 그랜드오프닝: 1개월 내 터치업 1회 무료</b> (8월부터 유료)',en:'Korean semi-permanent · natural ombre gradation · numbing cream free · <b>July grand opening: 1 FREE touch-up within 1 month</b> (paid from Aug)',th:'กึ่งถาวรสไตล์เกาหลี · ไล่เฉดออมเบร้ธรรมชาติ · ยาชาฟรี · <b>แกรนด์โอเพนนิ่ง ก.ค.: รีทัชฟรี 1 ครั้งภายใน 1 เดือน</b> (ส.ค. เป็นต้นไปมีค่าใช้จ่าย)',ja:'韓国式セミパーマネント · 自然なオンブレグラデ · 麻酔クリーム無料 · <b>7月グランドオープン:1ヶ月以内リタッチ1回無料</b>(8月から有料)',zh:'韩式半永久·自然雾感渐变·免费敷麻·<b>7月开业活动:1个月内免费补色1次</b>(8月起收费)'},
+   items:[
+     {name:{ko:'옴브레 브로우',en:'Ombre Brows',th:'คิ้วออมเบร้',ja:'オンブレ眉',zh:'雾眉'},dev:'',price:'2,490',was:'฿3,990',limited:1,m:120,meta:{ko:'파우더 그라데이션 눈썹 · 7월 이벤트: 1개월 내 터치업 무료',en:'powder-gradation brows · July event: FREE touch-up within 1 month',th:'คิ้วไล่เฉดพาวเดอร์ · โปรฯ ก.ค.: รีทัชฟรีภายใน 1 เดือน',ja:'パウダーグラデ眉 · 7月限定:1ヶ月以内リタッチ無料',zh:'粉雾渐变眉·7月活动:1个月内免费补色'},
+      x:{ko:'화장한 듯 자연스러운 음영 눈썹 · 무통 진행',en:'Soft makeup-look shading · painless with numbing',th:'คิ้วเงาธรรมชาติเหมือนแต่ง · ไม่เจ็บ',ja:'メイクしたような陰影眉 · 無痛',zh:'妆感自然阴影眉·无痛'}},
+     {name:{ko:'메디컬 소프트 립 · 중화',en:'Medical Soft Lip · Neutralizing',th:'ซอฟต์ลิป · ปรับสีปากคล้ำ',ja:'ソフトリップ·中和',zh:'医学柔唇·唇色中和'},dev:'',price:'2,990',was:'฿4,490',limited:1,m:120,meta:{ko:'어두운 입술톤 중화 전용 · 7월 이벤트: 1개월 내 터치업 무료',en:'dark-lip tone correction only · July event: FREE touch-up within 1 month',th:'แก้ปากคล้ำโดยเฉพาะ · โปรฯ ก.ค.: รีทัชฟรีภายใน 1 เดือน',ja:'ダークリップ補正専用 · 7月限定:1ヶ月以内リタッチ無料',zh:'专注改善唇色暗沉·7月活动:1个月内免费补色'},
+      x:{ko:'칙칙한 입술톤을 밝고 균일하게 · 컬러 발색 없이 톤 보정만',en:'Brightens & evens dark lip tone — correction only, no color',th:'ปรับปากคล้ำให้สว่างสม่ำเสมอ · ไม่ลงสี',ja:'くすんだ唇を明るく均一に · 発色なし補正のみ',zh:'暗沉唇色变亮变均匀·仅校色不上色'}},
+     {name:{ko:'메디컬 소프트 립 · 중화 + 컬러링',en:'Medical Soft Lip · Neutralizing + Color',th:'ซอฟต์ลิป · ปรับสีคล้ำ + ลงสี',ja:'ソフトリップ·中和＋カラー',zh:'医学柔唇·中和+染唇'},dev:'',price:'3,990',was:'฿5,990',limited:1,m:150,meta:{ko:'중화 후 원하는 컬러 발색 · 7월 이벤트: 1개월 내 터치업 무료',en:'neutralize then tint in your chosen color · July event: FREE touch-up within 1 month',th:'ปรับสีคล้ำแล้วลงสีที่เลือก · โปรฯ ก.ค.: รีทัชฟรีภายใน 1 เดือน',ja:'中和後お好みのカラー発色 · 7月限定:1ヶ月以内リタッチ無料',zh:'先中和再上心仪唇色·7月活动:1个月内免费补色'},
+      x:{ko:'톤 보정 + MLBB·코랄 등 원하는 컬러까지 한 번에',en:'Tone correction + your color (MLBB, coral…) in one course',th:'ปรับโทน + เลือกสี MLBB·คอรัล ครบในคอร์สเดียว',ja:'トーン補正＋MLBB·コーラル等を一度で',zh:'校色+MLBB·珊瑚色等一次完成'}},
+   ]},
+
+  /* ── 10 멤버십 ── */
+  {no:'10',title:'Membership',
+   sub:{ko:'선불 3회권 · 충전 멤버십',en:'3-Session Pack · Prepaid Wallet',th:'แพ็ก 3 ครั้ง · เติมเงินสมาชิก',ja:'3回券 · チャージ会員',zh:'3次卡 · 充值会员'},
+   desc:{ko:'두 가지 방식 · 자주 받는 메뉴는 3회권, 다양하게 쓰려면 충전 지갑',en:'Two ways · a 3-pack for your regular menu, a prepaid wallet for anything',th:'สองแบบ · แพ็ก 3 สำหรับเมนูประจำ, เติมเงินสำหรับใช้ได้ทุกเมนู',ja:'2種 · 定番は3回券、自由に使うならチャージ',zh:'两种方式·常做菜单用3次卡·自由使用用充值'},
+   groups:[
+     {label:{ko:'선불 3회권 · 3-Session Pack',en:'Prepaid 3-Session Pack',th:'แพ็กเติม 3 ครั้ง',ja:'3回券',zh:'3次卡'},items:[
+       {name:'3-Session Pack',byc:0,price:'−5~15%',
+        meta:{ko:'같은 메뉴 3회 묶음',en:'bundle any one menu × 3',th:'รวมเมนูเดียว × 3',ja:'同一メニュー×3',zh:'同一菜单×3'},
+        x:{ko:'각 메뉴에 3회권 회당가·총가가 표시돼요 · 자주 받는 관리를 3회로 묶으면 더 합리적',en:'Each menu shows its 3-pack per-session & total price · bundle your routine care into 3 for better value',th:'แต่ละเมนูแสดงราคาแพ็ก 3 (ต่อครั้ง·รวม) · รวมทรีตเมนต์ที่ทำประจำเป็น 3 ครั้งคุ้มกว่า',ja:'各メニューに3回券の1回あたり·合計価格を表示 · 定期ケアは3回にまとめるとお得',zh:'各菜单标示3次卡单次·总价·常做护理打包3次更划算'}},
+     ]},
+   ],
+   tiers:[
+     {name:'Silver',load:'5,000',bonus:'+10%',val:{ko:'฿5,500 사용 · 6개월',en:'฿5,500 credit · 6 months',th:'ใช้ได้ ฿5,500 · 6 เดือน',ja:'฿5,500利用 · 6ヶ月',zh:'可用฿5,500·6个月'}},
+     {name:'Gold',load:'10,000',bonus:'+15%',val:{ko:'฿11,500 사용 · 6개월',en:'฿11,500 credit · 6 months',th:'ใช้ได้ ฿11,500 · 6 เดือน',ja:'฿11,500利用 · 6ヶ月',zh:'可用฿11,500·6个月'}},
+     {name:'Platinum',load:'20,000',bonus:'+20%',val:{ko:'฿24,000 사용 · 12개월',en:'฿24,000 credit · 12 months',th:'ใช้ได้ ฿24,000 · 12 เดือน',ja:'฿24,000利用 · 12ヶ月',zh:'可用฿24,000·12个月'}},
+     {name:'VIP',load:'30,000',bonus:'+25%',val:{ko:'฿37,500 사용 · 12개월',en:'฿37,500 credit · 12 months',th:'ใช้ได้ ฿37,500 · 12 เดือน',ja:'฿37,500利用 · 12ヶ月',zh:'可用฿37,500·12个月'}},
+     {name:'Signature',best:1,load:'50,000',bonus:'+30%',val:{ko:'฿65,000 사용 · 12개월 · 최고 혜택',en:'฿65,000 credit · 12 months · best value',th:'ใช้ได้ ฿65,000 · 12 เดือน · คุ้มสุด',ja:'฿65,000利用 · 12ヶ月 · 最高特典',zh:'可用฿65,000·12个月·最超值'}},
+   ],
+   noteHtml:{ko:'<b>충전 멤버십</b> · 충전 시 보너스 크레딧 지급, 시술은 정가로 차감 · 유효기간 내 사용 · 가족·지인 사용 가능 · 양도 불가',en:'<b>Prepaid wallet</b> · bonus credit on top-up, treatments deducted at regular price · use within validity · family/friends OK · non-transferable',th:'<b>เติมเงินสมาชิก</b> · เติมแล้วรับเครดิตโบนัส หักตามราคาปกติ · ใช้ภายในระยะเวลา · ครอบครัว·เพื่อนใช้ได้ · โอนไม่ได้',ja:'<b>チャージ会員</b> · 入金でボーナス付与、施術は通常価格で消化 · 有効期限内 · 家族·友人可 · 譲渡不可',zh:'<b>充值会员</b>·充值赠奖励额度·护理按原价扣·有效期内使用·家人朋友可用·不可转让'}},
+];
+
+function n3(p){return (parseInt(String(p).replace(/,/g,''))*3).toLocaleString()}
+function pack3Html(it){
+  if(!it.p3)return '';
+  return `<div class="pack3"><span class="lab">${tx(UI.mem)}</span>${tx(UI.sess)}
+    <span class="sep">·</span>${tx(UI.per)} ฿${it.p3}
+    <span class="sep">·</span><span class="tot">${tx(UI.total)} <b>฿${n3(it.p3)}</b></span></div>`;
+}
+function durHtml(it){
+  if(!it.dur)return '';
+  return `<div class="durs">${it.dur.map(d=>`<div class="dur${d.best?' on':''}">
+      <span class="dtag">${d.best?tx(UI.popular):'&nbsp;'}</span>
+      <span class="dm">${mins(d.m)}</span>
+      <span class="dp"><span style="font-size:.62em">฿</span>${d.price}</span>
+      ${d.p3?`<span class="d3">${tx(UI.mem)} ฿${d.p3}</span>`:''}
+      ${d.x?`<span class="dx">${tx(d.x)}</span>`:''}
+    </div>`).join('')}</div>`;
+}
+function baHtml(it){
+  if(!it.ba)return '';
+  const L={before:{ko:'BEFORE',en:'BEFORE',th:'ก่อน',ja:'BEFORE',zh:'前'},after:{ko:'AFTER',en:'AFTER',th:'หลัง',ja:'AFTER',zh:'后'}};
+  return `<div class="ba">
+    <figure><img src="${it.ba.before}" loading="lazy" alt="before"><figcaption>${tx(L.before)}</figcaption></figure>
+    <figure><img src="${it.ba.after}" loading="lazy" alt="after"><figcaption>${tx(L.after)}</figcaption></figure>
+  </div>`;
+}
+function itemHtml(it){
+  const fMeta = it.meta && tx(it.meta) ? tx(it.meta) : '';
+  if(it.feature){
+    return `<div class="feature">
+      <div>
+        <span class="star">${it.star}</span>
+        <div class="f-name">${typeof it.name==='object'?tx(it.name):it.name}</div>
+        ${it.dev?`<div class="f-dev">${typeof it.dev==='object'?tx(it.dev):it.dev}</div>`:''}
+        ${it.x?`<div class="f-x">${tx(it.x)}</div>`:''}
+        ${fMeta?`<div class="f-meta">${fMeta}</div>`:(it.m?`<div class="f-meta">${mins(it.m)}</div>`:'')}
+        ${it.dur?durHtml(it):pack3Html(it)}
+        ${baHtml(it)}
+      </div>
+      <div class="f-price">
+        ${it.addon?`${it.was?`<span class="was" style="margin-right:6px">${it.was} ${tx(UI.solo)||''}</span>`:''}<span class="p">${String(it.price).replace('+','+฿')}</span><span class="addon-off">${tx(UI.addonOff)}</span>`:`<span class="p">฿${it.dur?it.dur[0].price:it.price}</span>
+        ${it.dur?`<span class="price-note">${tx(UI.from)}</span>`:''}
+        ${it.was?`<span class="was">${it.was}</span>`:''}
+        ${it.save?`<span class="save">${it.save}</span>`:''}`}
+      </div></div>`;
+  }
+  const meta = it.free ? fMeta :
+               it.byc ? tx(UI.byConsult) :
+               fMeta ? fMeta :
+               it.m ? mins(it.m) : '';
+  const priceHtml = it.free
+    ? `<span class="free-tag">${tx(UI.free)}</span>`
+    : it.addon
+    ? `${it.was?`<span class="was">${it.was}</span>`:''}<span class="price"><span class="b"></span>${String(it.price).replace('+','+฿')}</span><span class="addon-off" style="display:block;font-size:.62em;opacity:.75">${tx(UI.addonOff)}</span>`
+    : it.dur
+    ? `<span class="price"><span class="b">฿</span>${it.dur[0].price}</span><span class="price-note">${tx(UI.from)}</span>`
+    : it.mem
+    ? `<div class="tier3">
+        <span class="t-reg"><span class="t-lab">${tx(UI.regular)}</span> <s>${it.was}</s></span>
+        <span class="t-mem"><span class="t-lab">${tx(UI.member)}</span> ฿${it.mem}</span>
+        <span class="t-promo"><span class="t-badge">${tx(UI.bigPromo)}</span><span class="t-big"><span class="b">฿</span>${it.price}</span></span>
+      </div>`
+    : `${it.was?`<span class="was">${it.was}</span>`:''}<span class="price"><span class="b">฿</span>${it.price}</span>${it.note?`<span class="price-note">${it.note}</span>`:''}`;
+  return `<div class="item">
+    <div class="item-body">
+      <div class="item-name">${typeof it.name==='object'?tx(it.name):it.name}${it.free?`<span class="badge">FREE</span>`:''}</div>
+      ${it.dev?`<div class="item-dev">${typeof it.dev==='object'?tx(it.dev):it.dev}</div>`:''}
+      ${it.x?`<div class="item-x">${tx(it.x)}</div>`:''}
+      ${meta?`<div class="item-meta">${meta}</div>`:''}
+      ${it.dur?durHtml(it):pack3Html(it)}
+      ${baHtml(it)}
+    </div>
+    <div class="item-price">${priceHtml}</div>
+  </div>`;
+}
+
+let PDF_BUSY=false;
+function makePdf(){
+  if(PDF_BUSY)return;
+  const btn=document.getElementById('pdfbtn');
+  const pdfL={ko:'PDF 저장',en:'Save PDF',th:'บันทึก PDF',ja:'PDF保存',zh:'保存PDF'};
+  const busyL={ko:'생성 중…',en:'Creating…',th:'กำลังสร้าง…',ja:'作成中…',zh:'生成中…'};
+  const run=()=>{
+    PDF_BUSY=true;btn.innerHTML='⏳ '+(busyL[LANG]||'...');
+    const el=document.querySelector('.page');
+    html2pdf().set({
+      margin:[8,6,10,6],
+      filename:'HANAHAYAN_Menu_'+LANG.toUpperCase()+'.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,
+        onclone:(doc)=>{const a=doc.getElementById('langbar');if(a)a.remove();
+          const b=doc.getElementById('pdfbtn');if(b)b.remove();}},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy'],avoid:['.bn-row','.benefits','.grp-wrap','.prog','.sec-head']}
+    }).from(el).save().then(()=>{PDF_BUSY=false;btn.innerHTML='⤓ '+(pdfL[LANG]||'PDF');})
+      .catch(()=>{PDF_BUSY=false;btn.innerHTML='⤓ '+(pdfL[LANG]||'PDF');try{window.print();}catch(e){}});
+  };
+  if(window.html2pdf){run();return;}
+  btn.innerHTML='⏳';
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+  s.onload=run;
+  s.onerror=()=>{PDF_BUSY=false;btn.innerHTML='⤓ '+(pdfL[LANG]||'PDF');try{window.print();}catch(e){}};
+  document.head.appendChild(s);
+}
+function render(){
+  document.getElementById('langbar').innerHTML=LANGS.map(([code,label])=>
+    `<button class="langbtn ${code===LANG?'on':''}" onclick="setLang('${code}')">${label}</button>`).join('');
+  let h=`
+  <div class="hero">
+    <div class="brand">HANAHAYAN</div>
+    <div class="brand-sub">CLINIC & BEAUTY</div>
+    <div class="subt">${tx(UI.sub)}</div>
+    <div class="tagline">Where Korean Radiance Begins</div>
+    <div class="tagline-x">${tx(UI.tagx)}</div>
+    <div class="rule"></div>
+  </div>
+  <div class="benefits">
+    <div class="bn-head">✦ ${tx(BENEFITS.head)}</div>
+    ${BENEFITS.rows.map(r=>`<div class="bn-row">
+      <span class="bn-badge ${r.gold?'gold':''}">${r.badge}</span>
+      <div class="bn-body"><div class="bn-t">${tx(r.t)}</div><div class="bn-x">${tx(r.x)}</div></div>
+    </div>`).join('')}
+    <div class="bn-note">${tx(BENEFITS.note)}</div>
+  </div>`;
+  SECTIONS.forEach(s=>{
+    h+=`<div class="section">
+      <div class="sec-head"><div class="sec-no">${s.no}</div>
+        <div><div class="sec-title">${s.title}</div><div class="sec-sub">${tx(s.sub)}</div></div></div>
+      <div class="sec-desc">${tx(s.desc)}</div>
+      <div class="ba-gallery empty-hide" data-sec="${s.no}"></div>`;
+    if(s.items)s.items.forEach(it=>h+=itemHtml(it));
+    if(s.groups)s.groups.forEach(g=>{
+      h+=`<div class="grp">${typeof g.label==='object'?tx(g.label):g.label}</div><div class="grp-wrap">`;
+      g.items.forEach(it=>h+=itemHtml(it));
+      h+=`</div>`;
+    });
+    if(s.programs)s.programs.forEach(p=>{
+      h+=`<div class="prog"><div class="prog-head"><span class="pico">${p.ico}</span>
+        <div><div class="pt">${tx(p.title)}</div><div class="ps">${tx(p.sub)}</div></div></div>
+        <div class="prog-body">`;
+      p.items.forEach(it=>h+=itemHtml(it));
+      h+=`</div></div>`;
+    });
+    if(s.tiers){
+      h+=`<div class="tiers">`;
+      s.tiers.forEach(t=>{
+        h+=`<div class="tier ${t.best?'best':''}">
+          ${t.best?`<span class="tstar">BEST</span>`:''}
+          <div class="tname">${t.name}</div>
+          <div class="tload">฿${t.load}</div>
+          <div class="tbonus">${t.bonus} bonus</div>
+          <div class="tval">${tx(t.val)}</div>
+        </div>`;
+      });
+      h+=`</div>`;
+    }
+    if(s.noteHtml)h+=`<div class="note">${tx(s.noteHtml)}</div>`;
+    h+=`</div>`;
+  });
+  h+=`<div class="foot">
+    <div class="foot-brand">HANAHAYAN Clinic & Beauty</div>
+    <div class="foot-line">
+      <b>1st Floor, 94, Shinawatera Building</b><br>Soi Sukhumvit 23, Khlong Toei Nuea, Watthana, Bangkok 10110<br>
+      ${tx(UI.hours)}
+    </div>
+    <div class="foot-tags">
+      <span class="ftag">🇰🇷 Korean Technique</span>
+      <span class="ftag">Face · Body · Scalp</span>
+      <span class="ftag">Non-medical Aesthetic</span>
+    </div>
+    <div class="disclaimer">${tx(UI.disc)}</div>
+  </div>`;
+  document.getElementById('menu').innerHTML=h;
+  hydrateGalleries();
+  const pdfL={ko:'PDF 저장',en:'Save PDF',th:'บันทึก PDF',ja:'PDF保存',zh:'保存PDF'};
+  document.getElementById('pdfbtn').innerHTML='⤓ '+(pdfL[LANG]||'PDF');
+  document.documentElement.lang=LANG;
+}
+
+/* ===================== Before/After Gallery Engine ===================== */
+const BA_LABELS={
+  before:{ko:'전',en:'Before',th:'ก่อน',ja:'Before',zh:'前'},
+  after:{ko:'후',en:'After',th:'หลัง',ja:'After',zh:'后'},
+  title:{ko:'전 · 후 사진',en:'Before & After',th:'ก่อน · หลัง',ja:'ビフォー・アフター',zh:'前后对比'},
+  add:{ko:'사진 추가',en:'Add photo',th:'เพิ่มรูป',ja:'写真追加',zh:'添加照片'},
+  editOn:{ko:'✎ 사진 편집',en:'✎ Edit photos',th:'✎ แก้ไขรูป',ja:'✎ 写真編集',zh:'✎ 编辑照片'},
+  editOff:{ko:'✓ 완료',en:'✓ Done',th:'✓ เสร็จ',ja:'✓ 完了',zh:'✓ 完成'},
+  disclaimer:{ko:'예시 이미지 · 개인차 있음',en:'Illustrative · results vary',th:'ภาพตัวอย่าง · ผลลัพธ์ต่างกัน',ja:'イメージ · 個人差あり',zh:'示例图·因人而异'},
+  slotHint:{ko:'클릭·붙여넣기·드래그',en:'click · paste · drag',th:'คลิก·วาง·ลาก',ja:'クリック·貼付·D&D',zh:'点击·粘贴·拖放'},
+  armed:{ko:'📋 여기에 붙여넣기(Ctrl+V) 또는 클릭',en:'📋 Paste (Ctrl+V) here or click',th:'📋 วาง (Ctrl+V) ที่นี่ หรือคลิก',ja:'📋 ここに貼付(Ctrl+V)またはクリック',zh:'📋 在此粘贴(Ctrl+V)或点击'},
+  focusHint:{ko:'드래그로 중심 이동',en:'drag to reposition',th:'ลากเพื่อจัดตำแหน่ง',ja:'ドラッグで位置調整',zh:'拖动调整中心'},
+  capPlaceholder:{ko:'시술명 입력 (예: 볼 HIFU 3회)',en:'Treatment name (e.g. Cheek HIFU ×3)',th:'ชื่อทรีตเมนต์ (เช่น HIFU แก้ม ×3)',ja:'施術名 (例: 頬HIFU ×3)',zh:'护理名称 (如 脸颊HIFU ×3)'},
+  replace:{ko:'사진 교체',en:'Replace photo',th:'เปลี่ยนรูป',ja:'写真差し替え',zh:'更换照片'},
+  recenter:{ko:'중심 리셋',en:'Recenter',th:'จัดกึ่งกลาง',ja:'中心リセット',zh:'重置中心'},
+  removeImg:{ko:'사진 삭제',en:'Remove photo',th:'ลบรูป',ja:'写真削除',zh:'删除照片'},
+  deleted:{ko:'삭제됨',en:'Deleted',th:'ลบแล้ว',ja:'削除しました',zh:'已删除'},
+  undo:{ko:'실행취소',en:'Undo',th:'เลิกทำ',ja:'元に戻す',zh:'撤销'}
+};
+function baT(o){return o[LANG]||o.ko}
+
+/* ---- IndexedDB tiny wrapper ---- */
+let _badb=null;
+function baDB(){
+  return new Promise((res,rej)=>{
+    if(_badb)return res(_badb);
+    const r=indexedDB.open('hnh_ba_photos',1);
+    r.onupgradeneeded=e=>{const db=e.target.result; if(!db.objectStoreNames.contains('pairs'))db.createObjectStore('pairs',{keyPath:'id'});};
+    r.onsuccess=e=>{_badb=e.target.result;res(_badb);};
+    r.onerror=e=>rej(e);
+  });
+}
+async function baAll(sec){
+  const db=await baDB();
+  return new Promise((res)=>{
+    const out=[]; const tx=db.transaction('pairs','readonly').objectStore('pairs').openCursor();
+    tx.onsuccess=e=>{const c=e.target.result; if(c){if(c.value.sec===sec)out.push(c.value); c.continue();} else {out.sort((a,b)=>a.ord-b.ord); res(out);}};
+    tx.onerror=()=>res(out);
+  });
+}
+async function baPut(rec){const db=await baDB(); return new Promise((res,rej)=>{const r=db.transaction('pairs','readwrite').objectStore('pairs').put(rec); r.onsuccess=()=>res(); r.onerror=e=>rej(e);});}
+async function baDel(id){const db=await baDB(); return new Promise((res)=>{const r=db.transaction('pairs','readwrite').objectStore('pairs').delete(id); r.onsuccess=()=>res(); r.onerror=()=>res();});}
+
+/* ---- image compression to keep DB light ---- */
+function baCompress(file,maxW=900,q=0.82){
+  return new Promise((res,rej)=>{
+    const img=new Image(); const rd=new FileReader();
+    rd.onload=()=>{img.onload=()=>{
+      const sc=Math.min(1,maxW/img.width); const w=Math.round(img.width*sc), hh=Math.round(img.height*sc);
+      const c=document.createElement('canvas'); c.width=w; c.height=hh;
+      c.getContext('2d').drawImage(img,0,0,w,hh);
+      res(c.toDataURL('image/jpeg',q));
+    }; img.onerror=rej; img.src=rd.result;};
+    rd.onerror=rej; rd.readAsDataURL(file);
+  });
+}
+
+let BA_EDIT=false;
+
+async function hydrateGalleries(){
+  const gals=document.querySelectorAll('.ba-gallery');
+  for(const g of gals){
+    const sec=g.getAttribute('data-sec');
+    const pairs=await baAll(sec);
+    renderGallery(g,sec,pairs);
+  }
+  document.body.classList.toggle('edit-on',BA_EDIT);
+}
+
+function slotHtml(rec,side){
+  const img=rec[side];
+  if(img){
+    const pos=rec[side+'Pos']||'50% 50%';
+    return `<div class="ba-slot filled" data-id="${rec.id}" data-side="${side}"><img src="${img}" alt="${side}" style="object-position:${pos}" draggable="false"><span class="ba-lab">${baT(BA_LABELS[side])}</span><span class="ba-focus-hint">${baT(BA_LABELS.focusHint)}</span><div class="ba-slot-tools"><button class="ba-tbtn" data-act="replace" data-id="${rec.id}" data-side="${side}" title="${baT(BA_LABELS.replace)}">🔄</button><button class="ba-tbtn" data-act="resetfocus" data-id="${rec.id}" data-side="${side}" title="${baT(BA_LABELS.recenter)}">⌖</button><button class="ba-tbtn danger" data-act="rmimg" data-id="${rec.id}" data-side="${side}" title="${baT(BA_LABELS.removeImg)}">🗑</button></div></div>`;
+  }
+  return `<div class="ba-slot empty" data-id="${rec.id}" data-side="${side}"><span class="ba-plus">＋</span><span>${baT(BA_LABELS[side])}</span><span class="ba-hint">${baT(BA_LABELS.slotHint)}</span></div>`;
+}
+
+function renderGallery(g,sec,pairs){
+  let html=`<div class="ba-title">${baT(BA_LABELS.title)} <span style="font-weight:400;color:#b7ad97;text-transform:none;letter-spacing:0">· ${baT(BA_LABELS.disclaimer)}</span></div><div class="ba-strip">`;
+  pairs.forEach(rec=>{
+    html+=`<div class="ba-pair">
+      <div class="ba-imgs">
+        ${slotHtml(rec,'before')}
+        ${slotHtml(rec,'after')}
+        <button class="ba-del" data-act="del" data-id="${rec.id}">✕</button>
+      </div>
+      <input class="ba-cap-input" data-act="cap" data-id="${rec.id}" value="${(rec.cap||'').replace(/"/g,'&quot;')}" placeholder="${baT(BA_LABELS.capPlaceholder)}" maxlength="60"><div class="ba-cap-view">${rec.cap?rec.cap:''}</div>
+    </div>`;
+  });
+  html+=`<button class="ba-addpair" data-act="addpair" data-sec="${sec}">＋</button></div>`;
+  g.innerHTML=html;
+  g.classList.toggle('empty-hide', pairs.length===0);
+}
+
+
+/* ---- shared: apply an image file/blob to a slot ---- */
+let BA_ARMED=null; // {id, side, el}
+let _baToastT=null;
+function baToast(msg,actionLabel,onAction){
+  let el=document.getElementById('baToast');
+  if(!el){el=document.createElement('div'); el.id='baToast'; el.className='ba-toast'; document.body.appendChild(el);}
+  el.innerHTML=`<span>${msg}</span>`+(actionLabel?`<button id="baToastBtn">${actionLabel}</button>`:'');
+  el.classList.add('show');
+  if(onAction){const b=document.getElementById('baToastBtn'); if(b)b.onclick=async()=>{el.classList.remove('show'); await onAction();};}
+  clearTimeout(_baToastT); _baToastT=setTimeout(()=>el.classList.remove('show'),4500);
+}
+async function baToolAction(tb){
+  const act=tb.getAttribute('data-act');
+  const id=tb.getAttribute('data-id'), side=tb.getAttribute('data-side');
+  const db=await baDB();
+  const getRec=async()=>await new Promise(res=>{const r=db.transaction('pairs','readonly').objectStore('pairs').get(id); r.onsuccess=()=>res(r.result);});
+  const refresh=async()=>{const g=tb.closest('.ba-gallery'); const sec=g.getAttribute('data-sec'); renderGallery(g,sec,await baAll(sec));};
+  if(act==='resetfocus'){
+    const rec=await getRec(); if(rec){rec[side+'Pos']='50% 50%'; await baPut(rec); await refresh();}
+  }else if(act==='replace'){
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+    inp.onchange=async()=>{ if(inp.files&&inp.files[0]){ await baResetPos(id,side); await baApplyImage(id,side,inp.files[0]); } };
+    inp.click();
+  }else if(act==='rmimg'){
+    const rec=await getRec();
+    if(rec){
+      const bkImg=rec[side], bkPos=rec[side+'Pos'];
+      rec[side]=''; rec[side+'Pos']='50% 50%'; await baPut(rec); await refresh();
+      baToast(baT(BA_LABELS.deleted), baT(BA_LABELS.undo), async()=>{
+        const r2=await getRec(); if(r2){r2[side]=bkImg; r2[side+'Pos']=bkPos||'50% 50%'; await baPut(r2); await refresh();}
+      });
+    }
+  }
+}
+async function baResetPos(id,side){
+  const db=await baDB();
+  const rec=await new Promise(res=>{const r=db.transaction('pairs','readonly').objectStore('pairs').get(id); r.onsuccess=()=>res(r.result);});
+  if(rec){rec[side+'Pos']='50% 50%'; await baPut(rec);}
+}
+async function baApplyImage(id,side,fileOrBlob){
+  try{
+    const data=await baCompress(fileOrBlob);
+    const db=await baDB();
+    const rec=await new Promise(res=>{const r=db.transaction('pairs','readonly').objectStore('pairs').get(id); r.onsuccess=()=>res(r.result);});
+    if(rec){rec[side]=data; await baPut(rec);
+      const g=document.querySelector(`.ba-gallery[data-sec="${rec.sec}"]`);
+      if(g)renderGallery(g,rec.sec,await baAll(rec.sec));
+    }
+    BA_ARMED=null;
+  }catch(err){alert('이미지 처리 실패 / image error');}
+}
+function baArmSlot(el,id,side){
+  document.querySelectorAll('.ba-slot.armed').forEach(x=>{x.classList.remove('armed'); const h=x.querySelector('.ba-hint'); if(h)h.textContent=baT(BA_LABELS.slotHint);});
+  el.classList.add('armed'); BA_ARMED={id,side,el};
+  const h=el.querySelector('.ba-hint'); if(h)h.textContent=baT(BA_LABELS.armed);
+}
+
+/* ---- global paste: drops image into the armed slot (or first empty slot) ---- */
+document.addEventListener('paste',async e=>{
+  if(!BA_EDIT)return;
+  const items=(e.clipboardData||{}).items||[];
+  let blob=null;
+  for(const it of items){ if(it.type&&it.type.indexOf('image')===0){ blob=it.getAsFile(); break; } }
+  if(!blob)return;
+  e.preventDefault();
+  let target=BA_ARMED;
+  if(!target){ // no armed slot: use first empty slot on the page
+    const first=document.querySelector('.ba-slot.empty');
+    if(first)target={id:first.getAttribute('data-id'),side:first.getAttribute('data-side')};
+  }
+  if(target)await baApplyImage(target.id,target.side,blob);
+});
+
+/* ---- drag & drop directly onto any empty slot ---- */
+document.addEventListener('dragover',e=>{ const sl=e.target.closest&&e.target.closest('.ba-slot.empty'); if(sl&&BA_EDIT){e.preventDefault(); sl.classList.add('dragover');} });
+document.addEventListener('dragleave',e=>{ const sl=e.target.closest&&e.target.closest('.ba-slot.empty'); if(sl)sl.classList.remove('dragover'); });
+document.addEventListener('drop',async e=>{
+  const sl=e.target.closest&&e.target.closest('.ba-slot.empty');
+  if(!sl||!BA_EDIT)return;
+  e.preventDefault(); sl.classList.remove('dragover');
+  const f=(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0])||null;
+  if(f&&f.type.indexOf('image')===0){ await baApplyImage(sl.getAttribute('data-id'),sl.getAttribute('data-side'),f); }
+});
+
+
+/* ---- caption editing ---- */
+document.addEventListener('input',async e=>{
+  const inp=e.target.closest('.ba-cap-input'); if(!inp||!BA_EDIT)return;
+  const id=inp.getAttribute('data-id');
+  clearTimeout(inp._t);
+  inp._t=setTimeout(async()=>{
+    const db=await baDB();
+    const rec=await new Promise(res=>{const r=db.transaction('pairs','readonly').objectStore('pairs').get(id); r.onsuccess=()=>res(r.result);});
+    if(rec){rec.cap=inp.value; await baPut(rec);
+      const v=inp.parentElement.querySelector('.ba-cap-view'); if(v)v.textContent=inp.value;
+    }
+  },350);
+});
+
+/* ---- drag to reposition focus point on filled images (edit mode) ---- */
+let BA_DRAG=null;
+function baFocusStart(el,clientX,clientY){
+  const img=el.querySelector('img'); if(!img)return;
+  BA_DRAG={el,img,id:el.getAttribute('data-id'),side:el.getAttribute('data-side')};
+  baFocusMove(clientX,clientY);
+}
+function baFocusMove(clientX,clientY){
+  if(!BA_DRAG)return;
+  const r=BA_DRAG.el.getBoundingClientRect();
+  let x=(clientX-r.left)/r.width*100, y=(clientY-r.top)/r.height*100;
+  x=Math.max(0,Math.min(100,x)); y=Math.max(0,Math.min(100,y));
+  BA_DRAG.img.style.objectPosition=x.toFixed(1)+'% '+y.toFixed(1)+'%';
+  BA_DRAG._pos=x.toFixed(1)+'% '+y.toFixed(1)+'%';
+}
+async function baFocusEnd(){
+  if(!BA_DRAG||!BA_DRAG._pos){BA_DRAG=null;return;}
+  const {id,side,_pos}=BA_DRAG;
+  const db=await baDB();
+  const rec=await new Promise(res=>{const r=db.transaction('pairs','readonly').objectStore('pairs').get(id); r.onsuccess=()=>res(r.result);});
+  if(rec){rec[side+'Pos']=_pos; await baPut(rec);}
+  BA_DRAG=null;
+}
+document.addEventListener('mousedown',async e=>{
+  if(!BA_EDIT)return;
+  const tb=e.target.closest('.ba-tbtn');
+  if(tb){ e.preventDefault(); e.stopPropagation(); await baToolAction(tb); return; }
+  const el=e.target.closest('.ba-slot.filled'); if(el){e.preventDefault(); baFocusStart(el,e.clientX,e.clientY);}
+});
+document.addEventListener('mousemove',e=>{ if(BA_DRAG){e.preventDefault(); baFocusMove(e.clientX,e.clientY);} });
+document.addEventListener('mouseup',()=>{ if(BA_DRAG)baFocusEnd(); });
+document.addEventListener('touchstart',async e=>{
+  if(!BA_EDIT)return;
+  const tb=e.target.closest('.ba-tbtn');
+  if(tb){ await baToolAction(tb); return; }
+  const el=e.target.closest('.ba-slot.filled'); if(el){const t=e.touches[0]; baFocusStart(el,t.clientX,t.clientY);}
+},{passive:true});
+document.addEventListener('touchmove',e=>{ if(BA_DRAG){const t=e.touches[0]; baFocusMove(t.clientX,t.clientY);} },{passive:true});
+document.addEventListener('touchend',()=>{ if(BA_DRAG)baFocusEnd(); });
+
+/* ---- interaction (event delegation) ---- */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]'); if(!t)return;
+  const act=t.getAttribute('data-act');
+  if(act==='addpair'){
+    const sec=t.getAttribute('data-sec');
+    const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    await baPut({id,sec,ord:Date.now(),before:'',after:'',cap:''});
+    const g=document.querySelector(`.ba-gallery[data-sec="${sec}"]`);
+    renderGallery(g,sec,await baAll(sec));
+  }
+  const emptySlot=e.target.closest('.ba-slot.empty');
+  if(emptySlot && BA_EDIT){
+    const id=emptySlot.getAttribute('data-id'), side=emptySlot.getAttribute('data-side');
+    // if already armed -> open file picker; else arm it for paste
+    if(emptySlot.classList.contains('armed')){
+      const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+      inp.onchange=async()=>{ if(inp.files&&inp.files[0]) await baApplyImage(id,side,inp.files[0]); };
+      inp.click();
+    }else{
+      baArmSlot(emptySlot,id,side);
+    }
+    return;
+  }
+  if(act==='del'){
+    const id=t.getAttribute('data-id');
+    await baDel(id);
+    const g=t.closest('.ba-gallery'); const sec=g.getAttribute('data-sec');
+    renderGallery(g,sec,await baAll(sec));
+  }
+});
+
+/* ---- edit-mode toggle button ---- */
+function baToggleEdit(){
+  BA_EDIT=!BA_EDIT;
+  document.body.classList.toggle('edit-on',BA_EDIT);
+  const b=document.getElementById('editBadge');
+  b.textContent=BA_EDIT?baT(BA_LABELS.editOff):baT(BA_LABELS.editOn);
+  b.classList.toggle('on',BA_EDIT);
+  hydrateGalleries();
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  const b=document.createElement('button');
+  b.id='editBadge'; b.className='edit-badge'; b.textContent=baT(BA_LABELS.editOn);
+  b.onclick=baToggleEdit; document.body.appendChild(b);
+});
+
+function setLang(l){LANG=l;localStorage.setItem('hnh_menu_lang',l);render();
+  const eb=document.getElementById('editBadge'); if(eb)eb.textContent=BA_EDIT?baT(BA_LABELS.editOff):baT(BA_LABELS.editOn);
+  window.scrollTo({top:0,behavior:'smooth'});}
+render();
+</script>
+</body>
+</html>

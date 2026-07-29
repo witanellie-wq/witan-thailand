@@ -106,6 +106,13 @@
   .fc-diff{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px;font-size:11px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .fc-diff b{font-weight:700}
   .fc-up{color:#1c7a41}.fc-down{color:#c0392b}
+  /* 메모 자동 번역 */
+  .memotr{margin-top:6px;background:var(--soft2);border:1.2px dashed var(--line);border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.6;color:#40506a}
+  .memotr b{color:var(--gold-d);font-weight:700;margin-right:4px}
+  .memotr .mt-row{display:flex;gap:6px;align-items:flex-start;word-break:break-word}
+  .memotr .mt-copy{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
+    padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;flex:0 0 auto;font-weight:700}
+  .memo-th{font-size:10.5px;color:#2a5b93;margin-top:2px;word-break:break-word}
   /* 선결제 아이콘 */
   .preic{display:inline-flex;align-items:center;gap:1px;font-size:.86em;font-weight:700;letter-spacing:-.02em;
     background:rgba(183,155,94,.16);border-radius:3px;padding:0 3px;margin-left:3px;vertical-align:middle;white-space:nowrap}
@@ -596,6 +603,9 @@
   </div>
 
   <div class="toolbar">
+    <button class="btn gold" style="background:var(--gold-d);border-color:var(--gold-d)" onclick="window.open('menu.html','_blank')">📖 Menu · เมนู · 메뉴판</button>
+  </div>
+  <div class="toolbar">
     <button class="btn owner-only" data-i18n="discMgr" onclick="openDiscMgr()">⚙ 할인 관리</button>
     <button class="btn" data-i18n="stMgr" onclick="openStaffMgr()">👩‍⚕️ 담당자 관리</button>
     <button class="btn gold owner-only" data-i18n="csv" onclick="exportCSV()">⬇ CSV</button>
@@ -760,7 +770,8 @@
     <label class="lab" data-i18n="mStaff">담당 (1~2명)</label>
     <div class="chips" id="m_staff"></div>
     <label class="lab" data-i18n="mMemo">메모</label>
-    <textarea id="m_memo" data-i18n-ph="ph_memo" placeholder="피부고민·특이사항·다음 예약 등"></textarea>
+    <textarea id="m_memo" data-i18n-ph="ph_memo" placeholder="피부고민·특이사항·다음 예약 등" oninput="renderMemoTrans()"></textarea>
+    <div id="memoTrans" class="memotr" style="display:none"></div>
 
     <div id="careBlock">
       <label class="lab" data-i18n="mCare">시술 관리 기록</label>
@@ -1990,6 +2001,74 @@ function renderStatBox(s){
   _statListStatus=null;
 }
 /* 💳🎟️ 선결제 고객 아이콘 — 예약 리스트 어디서나 한눈에 */
+/* ============================================================
+   🌐 메모 자동 번역 (한↔태↔영) — 오프라인 구문 사전
+   새 표현은 MEMO_DICT에 한 줄만 추가하면 바로 반영됩니다.
+   ============================================================ */
+const MEMO_DICT=[
+  // 예약·결제
+  ['선입금','มัดจำ','deposit'],['선결제','จ่ายล่วงหน้า','prepaid'],['예약금','มัดจำ','deposit'],
+  ['현장결제','จ่ายหน้าร้าน','pay on site'],['현장 결제','จ่ายหน้าร้าน','pay on site'],
+  ['계좌이체','โอนเงิน','bank transfer'],['이체','โอน','transfer'],['현금','เงินสด','cash'],['카드','บัตร','card'],
+  ['대리예약','จองแทน','booked by someone else'],['재방문','ลูกค้าเก่า','returning'],['신규','ลูกค้าใหม่','new'],
+  ['노쇼','ไม่มา','no-show'],['취소','ยกเลิก','cancelled'],['연기','เลื่อน','postponed'],['변경','เปลี่ยน','changed'],
+  ['확정','ยืนยันแล้ว','confirmed'],['미확정','ยังไม่ยืนยัน','not confirmed'],['대기','รอ','waiting'],
+  // 유입·채널
+  ['광고 유입','มาจากโฆษณา','from ad'],['광고','โฆษณา','ad'],['지인소개','เพื่อนแนะนำ','referral'],['소개','แนะนำ','referral'],
+  ['단골','ลูกค้าประจำ','regular'],['워크인','วอล์กอิน','walk-in'],
+  // 시술 관련
+  ['부위 현장결정','เลือกจุดที่ร้าน','area decided on site'],['현장결정','ตัดสินใจที่ร้าน','decided on site'],
+  ['현장 결정','ตัดสินใจที่ร้าน','decided on site'],['부위','จุด/บริเวณ','area'],
+  ['전후사진','ถ่ายรูปก่อน-หลัง','before/after photo'],['사진','รูปถ่าย','photo'],['필수','จำเป็น','required'],
+  ['피부평가','ประเมินผิว','skin assessment'],['상담','ปรึกษา','consultation'],['추천','แนะนำ','recommend'],
+  ['민감','ผิวแพ้ง่าย','sensitive'],['트러블','สิว/ผิวมีปัญหา','breakout'],['여드름','สิว','acne'],
+  ['색소','ฝ้า/กระ','pigmentation'],['모공','รูขุมขน','pores'],['주름','ริ้วรอย','wrinkles'],['미백','ผิวขาวใส','brightening'],
+  ['두피','หนังศีรษะ','scalp'],['얼굴','ใบหน้า','face'],['전신','ทั้งตัว','full body'],['목','คอ','neck'],
+  ['임신','ตั้งครรภ์','pregnant'],['수유','ให้นมบุตร','breastfeeding'],['알러지','ภูมิแพ้','allergy'],
+  // 방문·동반
+  ['동반','มาด้วยกัน','companion'],['친구','เพื่อน','friend'],['가족','ครอบครัว','family'],['2인','2 คน','2 people'],
+  ['지각','มาสาย','late'],['일찍','มาเร็ว','early'],['차량','มาด้วยรถ','by car'],['주차','ที่จอดรถ','parking'],
+  // 언어
+  ['영어','ภาษาอังกฤษ','English'],['한국어','ภาษาเกาหลี','Korean'],['태국어','ภาษาไทย','Thai'],['일본어','ภาษาญี่ปุ่น','Japanese'],
+  ['통역','ล่าม','interpreter'],
+  // 기타
+  ['다음 예약','นัดครั้งหน้า','next appointment'],['다음','ครั้งหน้า','next'],['회차','ครั้ง','session'],
+  ['멤버십','สมาชิก','membership'],['회차권','คอร์ส','course'],['할인','ส่วนลด','discount'],['무료','ฟรี','free'],
+  ['추가','เพิ่ม','add'],['제안','เสนอ','suggested'],['요청','ขอ','request'],['확인','ตรวจสอบ','check'],['주의','ระวัง','caution'],
+  // 자주 쓰는 일반 낱말
+  ['시간 미확정','เวลายังไม่แน่นอน','time TBC'],['시간','เวลา','time'],['피부','ผิว','skin'],['예약','คิว','booking'],['방문','มาร้าน','visit'],
+  ['오전','เช้า','AM'],['오후','บ่าย','PM'],['이름','ชื่อ','name'],['번호','เบอร์','number'],['전화','โทร','phone'],
+  ['미기재','ไม่ได้ระบุ','not stated'],['미확보','ยังไม่ได้','not obtained'],['가격','ราคา','price'],['금액','ยอดเงิน','amount'],
+  ['남성','ผู้ชาย','male'],['여성','ผู้หญิง','female'],['외국인','ชาวต่างชาติ','foreigner'],['한국인','คนเกาหลี','Korean'],
+  ['담당','ผู้ดูแล','staff'],['원장','หมอ','director'],['직원','พนักงาน','staff'],['첫','ครั้งแรก','first']
+].sort((a,b)=>b[0].length-a[0].length);   // 긴 표현 우선 매칭
+function translateMemo(txt,idx){
+  let s=String(txt||''); if(!s.trim())return '';
+  let hit=false;
+  MEMO_DICT.forEach(row=>{
+    if(!row[0]||s.indexOf(row[0])<0)return;
+    s=s.split(row[0]).join(' '+row[idx]+'');hit=true;
+  });
+  if(!hit)return '';
+  return s.replace(/[ ]/g,'');
+}
+function renderMemoTrans(){
+  const box=$('memoTrans'); if(!box)return;
+  const v=$('m_memo').value;
+  const th=translateMemo(v,1), en=translateMemo(v,2);
+  if(!th&&!en){box.style.display='none';box.innerHTML='';return}
+  box.style.display='block';
+  box.innerHTML=`${th?`<div class="mt-row"><b>TH</b><span id="mtTh">${esc(th)}</span>
+      <button type="button" class="mt-copy" onclick="copyMemoTrans()">📋 복사</button></div>`:''}
+    ${en?`<div class="mt-row" style="margin-top:3px"><b>EN</b><span>${esc(en)}</span></div>`:''}`;
+}
+function copyMemoTrans(){
+  const el=$('mtTh'); if(!el)return;
+  const t=el.textContent||'';
+  const done=()=>alert('📋 Copied · คัดลอกแล้ว · 복사했어요\n'+t);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,()=>{});
+  else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}ta.remove();}
+}
 const DEPOSIT_RE=/선입금|선결제|예약금|계약금|มัดจำ|จ่ายล่วงหน้า|deposit|prepaid|paid in advance/i;
 function hasDeposit(e){return !!(e&&(e.deposit||DEPOSIT_RE.test(String(e.memo||'')+' '+String(e.care||''))));}
 function prepaidIcon(e){
@@ -2502,6 +2581,7 @@ function openModal(id){
     $('m_date').value=e.date;
     $('m_dur').value=e.dur||'60';updateEndTime();
     $('m_line').value=e.line||'';$('m_pay').value=e.pay||'현금';$('m_visit').value=e.visit||'신규';$('m_memo').value=e.memo||'';setStaff(e.staff);
+    renderMemoTrans();
     $('m_src').value=e.src||'LINE';$('m_srcid').value=e.srcid||'';
     $('m_nat').value=e.nat||'태국';$('m_natc').value=e.natc||'한국 🇰🇷';onNat();
     $('m_gender').value=e.gender||'여성';
@@ -2529,6 +2609,7 @@ function openModal(id){
     $('rebookBtn').style.display='none';
     $('phMatch').style.display='none';$('phMatch').innerHTML='';
     ['m_name','m_time','m_phone','m_line','m_itemamt','m_memo','m_srcid','m_discval','m_care','m_service','m_companion'].forEach(i=>$(i).value='');
+    renderMemoTrans();
     $('m_seats').value='1';$('m_dur').value='60';$('m_end').value='';
     $('m_date').value=selDate;
     $('m_pay').value='현금';$('m_visit').value='신규';setStaff('');
@@ -3365,6 +3446,8 @@ function renderCheckin(){
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
       <div class="ck-meta">${meta||'—'}</div>
+      ${e.memo?`<div class="ck-meta" style="color:#40506a">📝 ${esc(e.memo)}</div>`:''}
+      ${(()=>{const th=translateMemo(e.memo,1);return th?`<div class="memo-th">🌐 ${esc(th)}</div>`:''})()}
       ${ckLedgerChips(e)}
       <div class="ckacts">
         <button class="ckbtn visit${st==='방문'?' on':''}" onclick="ckSet('${e.id}','방문')">${T('ckBVisit')}</button>
