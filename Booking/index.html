@@ -134,6 +134,13 @@
   .memotr .mt-copy{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
     padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit;flex:0 0 auto;font-weight:700}
   .memo-th{font-size:10.5px;color:#2a5b93;margin-top:2px;word-break:break-word}
+  /* 휴무·근무 인원 배너 */
+  .staffload{background:#FFF8E4;border:1.3px solid #EBD48A;border-radius:4px;padding:8px 11px;margin-bottom:9px;
+    font-size:12px;color:#7a5f16;line-height:1.5}
+  .staffload.warn{background:#fbe9e9;border-color:#e3a9a9;color:#8e2a20}
+  .staffload b{font-weight:800}
+  .staffload .sl-th{display:block;font-size:10px;opacity:.8;margin-top:2px}
+  .cell .offmark.thin{color:#b5341f;font-weight:700}
   .anonnm{color:#7a8090;font-weight:700}
   .tl-block .anonnm{color:#dfe4ee}
   /* 선결제 아이콘 */
@@ -636,6 +643,7 @@
 
   <div class="panel" id="dayPanel">
     <div class="selbanner"><span id="pDate" data-i18n="selectDate">날짜를 선택하세요</span><span class="dsum" id="pSum"></span></div>
+    <div id="staffLoad" class="staffload" style="display:none"></div>
     <button class="addbtn" data-i18n="addBtn" onclick="openModal(null)">+ 예약·방문 추가</button>
     <button class="addbtn" style="background:var(--gold-d);border-color:var(--gold-d)" onclick="openPasteImport()">📋 Paste booking text · วางข้อความจอง</button>
     <button class="addbtn" style="background:#2f8f5b;border-color:#2f8f5b" data-i18n="ckBtn" onclick="openCheckin()">✅ 체크인 리스트 (방문·노쇼·연기)</button>
@@ -1112,6 +1120,12 @@ function toggleOffDate(name,dateStr){
 function offStaffFor(dateStr){
   if(!dateStr)return[];
   return staffList.filter(n=>(staffOffDates[n]||[]).includes(dateStr));
+}
+// 그날 실제 근무 가능한 담당자
+function workStaffFor(dateStr){
+  if(!dateStr)return staffList.slice();
+  const off=offStaffFor(dateStr);
+  return staffList.filter(n=>!off.includes(n));
 }
 let _snapB=new Map(),_snapC=new Map();   // 서버 스냅샷 (id → JSON 문자열) : 변경분만 업로드
 let _dirty={bookings:false,customers:false,staff:false,settings:false};
@@ -2624,7 +2638,7 @@ function render(){
       ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
       ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
-      ${offStaffFor(ds).length?`<div class="offmark" title="Day off">🏖</div>`:''}
+      ${(()=>{const of=offStaffFor(ds);return of.length?`<div class="offmark${staffList.length&&(staffList.length-of.length)<=1?' thin':''}" title="Day off: ${esc(of.join(', '))} · 근무 ${staffList.length-of.length}명">🏖${of.length}</div>`:''})()}
     </div>`;
   }
   $('calGrid').innerHTML=html;
@@ -2926,7 +2940,21 @@ function renderDay(){
     ps=parts.length?parts.join(' · '):(dayE.length?`${T('bookN')} ${dayE.length}`:'');
   }
   const _poffs=offStaffFor(selDate);
-  $('pSum').textContent=ps+(_poffs.length?` · 🏖 ${_poffs.join(', ')}`:'');
+  const _pwork=workStaffFor(selDate);
+  $('pSum').textContent=ps+(_poffs.length?` · 👩‍⚕️근무 ${_pwork.length} · 🏖휴무 ${_poffs.length} (${_poffs.join(', ')})`:'');
+  // 근무 인원 대비 예약이 많으면 알림 배너
+  const _banner=$('staffLoad');
+  if(_banner){
+    const liveN=dayE.filter(e=>e.status!=='캔슬'&&e.status!=='연기대기').length;
+    if(_poffs.length){
+      const per=_pwork.length?(liveN/_pwork.length):liveN;
+      const heavy=_pwork.length===0||per>=4;
+      _banner.style.display='block';
+      _banner.className='staffload'+(heavy?' warn':'');
+      _banner.innerHTML=`🏖 <b>휴무 ${_poffs.length}명</b> (${esc(_poffs.join(', '))}) · 근무 <b>${_pwork.length}명</b>${_pwork.length?` · 1인당 예약 <b>${(Math.round(per*10)/10)}건</b>`:''}`
+        +`<span class="sl-th">พนักงานทำงาน ${_pwork.length} คน · หยุด ${_poffs.length} คน</span>`;
+    }else _banner.style.display='none';
+  }
   const list=$('bkList');
   if(!dayE.length){list.innerHTML='<div class="empty">No bookings · ยังไม่มีการจอง</div>';return}
 
@@ -3866,7 +3894,9 @@ function renderCheckin(){
   const[y,mo,dd]=ckDate.split('-').map(Number);
   const dows=I18N.dow[LANG]||I18N.dow.ko;
   const dw=dows[new Date(y,mo-1,dd).getDay()];
-  $('ckDateLbl').textContent=`${mo}/${dd} (${dw})`;
+  const _ckoff=offStaffFor(ckDate),_ckwork=workStaffFor(ckDate);
+  $('ckDateLbl').innerHTML=`${mo}/${dd} (${dw})`
+    +(_ckoff.length?`<div style="font-size:10.5px;font-weight:700;color:#8e2a20;margin-top:2px">🏖 휴무 ${_ckoff.length} (${esc(_ckoff.join(', '))}) · 근무 ${_ckwork.length}명</div>`:'');
   let list=data.filter(e=>e.date===ckDate);
   list.sort((a,b)=>{const ta=t2m(a.time),tb=t2m(b.time);if(ta==null&&tb==null)return 0;if(ta==null)return 1;if(tb==null)return -1;return ta-tb;});
   const waiting=list.filter(e=>e.status==='예약').length;
