@@ -3200,6 +3200,54 @@ function parseBookingText(t){
     else if(hasColon && /(branch|สาขา|지점)/i.test(head)){ out.branch=val(l); }
     else if(!out.time){ const tm=l.match(/^(\d{1,2})[:.](\d{2})\s*(pm|am)?$/i); if(tm){let h=+tm[1];if(/pm/i.test(tm[3]||'')&&h<12)h+=12;out.time=String(h).padStart(2,'0')+':'+tm[2];} }
   }
+  // ── 라벨 없는 이모지·자유형 텍스트 보조 파싱 (부족한 필드만 채움) ──
+  if(!(out.name&&out.phone)){
+    const extras=[];
+    const strip=s=>s.replace(/^[\p{Extended_Pictographic}️‍\s·]+/gu,'').trim();
+    for(const raw of lines){
+      const l=strip(raw); if(!l)continue;
+      if(l.length<26&&/จองคิว|ยืนยันคิว|booking|confirm|예약\s*확정/i.test(l))continue; // 헤더줄
+      let used=false;
+      if(!out.date){
+        const dm=l.match(/(\d{1,2})\s+([ก-๙]+(?:\.[ก-๙]+)?)\.?/u);
+        const mo=dm?TH_MONTHS[dm[2].replace(/\.$/,'')]:null;
+        if(mo){out.date=(new Date()).getFullYear()+'-'+String(mo).padStart(2,'0')+'-'+String(+dm[1]).padStart(2,'0');used=true;}
+        else if(/วันนี้|오늘|today/i.test(l)){out.date=todayStr();used=true;}
+        else if(/พรุ่งนี้|내일|tomorrow/i.test(l)){const d=new Date();d.setDate(d.getDate()+1);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());out.date=d.toISOString().slice(0,10);used=true;}
+      }
+      const tr=l.match(/(\d{1,2})[:.](\d{2})\s*(?:น\.)?\s*[–—~\-]\s*(\d{1,2})[:.](\d{2})/);
+      if(tr){
+        if(!out.time)out.time=String(+tr[1]).padStart(2,'0')+':'+tr[2];
+        if(!out.dur){const d=(+tr[3]*60+ +tr[4])-(+tr[1]*60+ +tr[2]);if(d>=15&&d<=300)out.dur=String(d);}
+        used=true;
+      }
+      if(!out.name&&(/^👤/u.test(raw)||/^คุณ/.test(l))&&!/\d{3}/.test(l)&&l.length<=40){out.name=l;used=true;}
+      if(!out.phone){const ph=l.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);if(ph){out.phone=ph[1];used=true;}}
+      if(!out.line){
+        const fb=l.match(/(FB|Facebook|IG|Insta(?:gram)?|LINE|ไลน์)\s*[:：]\s*([^·\n]+)/i);
+        if(fb){
+          const c=fb[1].toUpperCase();const chn=/^F/.test(c)?'FB':(/^I/.test(c)?'IG':'LINE');const id=fb[2].trim();
+          out.line=chn==='LINE'?('LINE: '+id):(chn+': '+id);
+          if(!out.src)out.src=chn==='FB'?'Facebook':(chn==='IG'?'Instagram':'LINE');
+          if(!out.srcid)out.srcid=id;
+          used=true;
+        }
+      }
+      if(!out.treat){
+        const pr=l.match(/([\d,]{2,7})\s*\.?-/);
+        if(pr&&/นาที|min|💆/iu.test(raw)){
+          out.price=Math.round(+pr[1].replace(/,/g,''));
+          if(!out.dur){const du=l.match(/(\d{2,3})\s*(?:นาที|min)/i);if(du)out.dur=du[1];}
+          const tt=l.slice(0,pr.index).replace(/[·\s]+$/,'').trim();if(tt)out.treat=tt;
+          used=true;
+        }
+      }
+      if(/ลูกค้าใหม่|🆕|신규/u.test(raw)&&!out.visit)out.visit='신규';
+      if(/ลูกค้าเก่า|🔁|재방문/u.test(raw)&&!out.visit)out.visit='재방문';
+      if(!used)extras.push(l);
+    }
+    if(extras.length&&!out.note)out.note=extras.join(' · ');
+  }
   // 제목줄 보조: [Booking] 5:30PM / hifu promo 399
   if(!out.time){const m=t.match(/(\d{1,2})[:.](\d{2})\s*(PM|AM)/i); if(m){let h=+m[1];if(/pm/i.test(m[3])&&h<12)h+=12;out.time=String(h).padStart(2,'0')+':'+m[2];}}
   if(!out.price){const m=t.match(/(\d{2,6})\s*(THB|บาท|฿|밧)/i); if(m)out.price=+m[1];}
