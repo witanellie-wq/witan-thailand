@@ -176,8 +176,20 @@
   .cell .rev+.exp{margin-top:0}
   .cell.sel .exp{color:#fff !important;opacity:.85}
   .cell .dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
-  .cell.full{background:#fbe9e9;border-color:#e3a9a9}
-  .cell.full.sel{background:linear-gradient(150deg,#26365A,#111D36);border-color:var(--gold-d)}
+  /* 예약 밀도 히트맵 — 많을수록 진한 초록(장사 잘된 날), 베드 초과만 빨강 경고 */
+  .cell.h1{background:linear-gradient(160deg,#F7F9FC,#EDF1F7);border-color:#DCE3EC}
+  .cell.h2{background:linear-gradient(160deg,#FFF8E4,#FDEFC4);border-color:#EBD48A}
+  .cell.h2 .cnt,.cell.h2 .rev{color:#8a6d1f}
+  .cell.h3{background:linear-gradient(160deg,#E3F4E9,#C9E9D5);border-color:#8FCBA6}
+  .cell.h3 .dnum{color:#1c6b3f}
+  .cell.h3 .cnt,.cell.h3 .rev{color:#1c7a41}
+  .cell.h3 .cnt{font-weight:700}
+  .cell.over{background:#fbe9e9;border-color:#e3a9a9}
+  .cell.over .cnt,.cell.over .rev{color:#b5341f}
+  .cell.full.sel,.cell.over.sel,.cell.h2.sel,.cell.h3.sel{background:linear-gradient(150deg,#26365A,#111D36);border-color:var(--gold-d)}
+  .heatlg{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:9.5px;color:var(--muted);margin-top:8px;padding-top:7px;border-top:1px solid var(--soft)}
+  .heatlg i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:3px;vertical-align:-1px;border:1px solid rgba(0,0,0,.08)}
+  .heatlg .l1 i{background:#EDF1F7}.heatlg .l2 i{background:#FDEFC4}.heatlg .l3 i{background:#C9E9D5}.heatlg .l4 i{background:#fbe9e9}
   .cell .fullbadge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:700;color:#fff;background:#d34d4d;
     border-radius:2px;padding:1px 4px;line-height:1.3}
   .cell.sel .fullbadge{background:#fff;color:var(--gold-d)}
@@ -612,6 +624,12 @@
   <div class="cal">
     <div class="dow" id="dowHead"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
     <div class="grid" id="calGrid"></div>
+    <div class="heatlg">
+      <span class="l1"><i></i>1~3 여유</span>
+      <span class="l2"><i></i>4~7 보통</span>
+      <span class="l3"><i></i>8+ 많음 👍</span>
+      <span class="l4"><i></i>베드 초과</span>
+    </div>
   </div>
 
   <div class="panel" id="dayPanel">
@@ -2066,6 +2084,7 @@ function renderPrepaidSection(actual,memUsed,pre){
       ${memUsed?`<div style="font-size:10px;color:var(--muted);margin-top:7px;line-height:1.5">※ 이번 달 선결제 잔액 사용 ${fmt(memUsed)} — 이미 받은 돈이라 입금 매출에 다시 더하지 않습니다 · ใช้ยอดสมาชิก ${fmt(memUsed)} (ไม่นับซ้ำ)</div>`:''}
     </div>`;
 }
+const BUSY_MID=4, BUSY_HI=8;   // 예약 수: 4~7건 보통(옐로), 8건 이상 많음(그린)
 function renderStatBox(s){
   const hb=s.visitCount||0;
   const pc=v=>hb?Math.round((v||0)/hb*100):0;
@@ -2436,7 +2455,9 @@ function render(){
     const {peak,over}=peakOccupancy(dayE,beds);
     const isFull=peak>=beds;
     const dow=new Date(y,m,d).getDay();
-    const cls=['cell',dow===0?'sun':'',dayE.length?'has':'',ds===todayStr()?'today':'',isFull?'full':'',ds===selDate?'sel':''].join(' ');
+    const liveN=dayE.filter(e=>e.status!=='캔슬'&&e.status!=='연기대기').length;   // 실제 잡힌 예약 수
+    const heat=liveN>=BUSY_HI?'h3':(liveN>=BUSY_MID?'h2':(liveN?'h1':''));
+    const cls=['cell',dow===0?'sun':'',dayE.length?'has':'',heat,ds===todayStr()?'today':'',over?'over':'',ds===selDate?'sel':''].join(' ');
     html+=`<div class="${cls}" onclick="selectDay('${ds}')">
       ${isFull?`<div class="fullbadge">${over?'OVER':'FULL'}</div>`:''}
       <div class="dnum">${d}</div>
