@@ -3306,6 +3306,13 @@ function parseMultiBooking(t){
     if(m){date=m[1]+'-'+String(+m[2]).padStart(2,'0')+'-'+String(+m[3]).padStart(2,'0');break;}
     m=l.match(/(\d{1,2})\s+([ก-๙]+(?:\.[ก-๙]+)?\.?)/u);
     if(m){const mo=TH_MONTHS[m[2].replace(/\.$/,'')];if(mo){const y=new Date().getFullYear();date=y+'-'+String(mo).padStart(2,'0')+'-'+String(+m[1]).padStart(2,'0');break;}}
+    m=l.match(/(\d{1,2})\s*[\/.]\s*(\d{1,2})(?!\d|\s*[:.]\d)/);
+    if(m){
+      let a=+m[1],b=+m[2],mm,dd;
+      if(a>12){dd=a;mm=b;}else if(b>12){mm=a;dd=b;}
+      else if(/[가-힣]/.test(l)){mm=a;dd=b;}else{dd=a;mm=b;} // 한국어 헤더면 월/일, 아니면 일/월
+      if(mm>=1&&mm<=12&&dd>=1&&dd<=31){date=new Date().getFullYear()+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');break;}
+    }
   }
   if(!date){
     if(lines.slice(0,3).some(l=>/พรุ่งนี้|내일|tomorrow/i.test(l))){const d=new Date();d.setDate(d.getDate()+1);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());date=d.toISOString().slice(0,10);}
@@ -3314,11 +3321,44 @@ function parseMultiBooking(t){
   const blocks=[];let cur=null;
   for(const l of lines){
     const lt=l.replace(/^[\p{Extended_Pictographic}️‍\s]+/gu,'');
-    const tm=lt.match(/^(\d{1,2})[:.](\d{2})\s*(?:น\.)?\s*[—–\-]\s*(.+)$/u);
-    if(tm){cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[3].trim(),memo:[]};blocks.push(cur);continue;}
+    const tm=lt.match(/^(\d{1,2})[:.](\d{2})(?:\s*[–—~\-]\s*(\d{1,2})[:.](\d{2}))?\s*(?:น\.)?\s*[|｜—–\-·]\s*(.+)$/u);
+    if(tm){
+      cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[5].trim(),memo:[]};
+      if(tm[3]){const d=(+tm[3]*60+ +tm[4])-(+tm[1]*60+ +tm[2]);if(d>=15&&d<=360)cur.dur=String(d);}
+      // 파이프(|) 구분 필드: 이름 | 전화 | 채널 | 시술+가격 | 신규/재방문 | 메모
+      if(cur.name.includes('|')||cur.name.includes('｜')){
+        const segs=cur.name.split(/[|｜]/).map(s=>s.trim()).filter(Boolean);
+        cur.name=segs.shift()||'';
+        for(const sg of segs){
+          const ph=sg.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
+          if(ph&&!cur.phone){cur.phone=ph[1];const rest=sg.replace(ph[1],'').replace(/^[\s\/·,]+|[\s\/·,]+$/g,'');if(rest)cur.memo.push(sg);continue;}
+          if(!cur.src&&/^(FB|Facebook|IG|Insta(?:gram)?|LINE|ไลน์|GoWabi|TikTok)\b/i.test(sg)){
+            const c=sg.toUpperCase();
+            cur.src=/^F/.test(c)?'Facebook':(/^I(G|N)/.test(c)?'Instagram':(/^GO/.test(c)?'GoWabi':(/^T/.test(c)?'TikTok':'LINE')));
+            const id=sg.replace(/^[^:：]*[:：]?\s*/,'').trim();if(id)cur.srcid=id;
+            continue;
+          }
+          if(!cur.visit&&/신규|ลูกค้าใหม่|new/i.test(sg)){cur.visit='신규';continue;}
+          if(!cur.visit&&/재방문|ลูกค้าเก่า|revisit|regular/i.test(sg)){cur.visit='재방문';continue;}
+          if(!cur.treat&&/\d/.test(sg)&&/[가-힣A-Za-zก-๙]/.test(sg)){
+            let price=null;
+            const eq=sg.match(/=\s*([\d,]{2,9})/);          // "990 × 2 = 1,980" → 합계
+            if(eq)price=+eq[1].replace(/,/g,'');
+            else{const p1=sg.match(/([\d,]{3,9})(?:\s*\.?-)?(?=\s|$|\()/);if(p1)price=+p1[1].replace(/,/g,'');}
+            if(price&&price>=50){
+              cur.price=Math.round(price);cur.treat=sg;
+              const x2=sg.match(/[×x]\s*(\d{1,2})/i);if(x2&&+x2[1]>1)cur.seats=x2[1];
+              continue;
+            }
+          }
+          cur.memo.push(sg);
+        }
+      }
+      blocks.push(cur);continue;
+    }
     if(!cur)continue;
     if(/^[━─═=]{3,}/.test(l)||/^รวม\s/.test(l)){cur=null;continue;}
-    if(!l)continue;
+    if(!l){cur=null;continue;}
     const ph=l.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
     if(ph&&!cur.phone)cur.phone=ph[1];
     const fb=l.match(/(FB|Facebook|IG|Insta(?:gram)?|LINE|ไลน์)\s*[:：]\s*([^·\n]+)/i);
@@ -3348,7 +3388,7 @@ function renderBulkPreview(P){
     +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
     +(b.src?' · '+b.src+(b.srcid?': '+esc(b.srcid):''):'')
     +(b.treat?' · '+esc(b.treat):'')+(b.price?' · ฿'+b.price.toLocaleString():'')
-    +(b.dur?' · '+b.dur+'min':'')+(b.visit?' · '+b.visit:'')+'</span>'
+    +(b.dur?' · '+b.dur+'min':'')+(b.seats?' · 👥'+b.seats:'')+(b.visit?' · '+b.visit:'')+'</span>'
     +(dups[i]?'':'<div class="bpick">'
       +'<button class="bpb'+(b.status==='예약'?' on':'')+'" onclick="bulkSetStatus('+i+',\'예약\',this)">📌 예약 จอง</button>'
       +'<button class="bpb v'+(b.status==='방문'?' on':'')+'" onclick="bulkSetStatus('+i+',\'방문\',this)">✅ 방문 มาแล้ว</button>'
@@ -3372,7 +3412,7 @@ function bulkAddParsed(){
   P.blocks.forEach((b,i)=>{
     if(data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||''))){skipped++;return;}
     data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
-      seats:'1',companion:'',dur:b.dur||'60',line:'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
+      seats:b.seats||'1',companion:'',dur:b.dur||'60',line:'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
     added++;
