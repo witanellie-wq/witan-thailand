@@ -3394,9 +3394,10 @@ function parseMultiBooking(t){
       if(mm>=1&&mm<=12&&dd>=1&&dd<=31){date=new Date().getFullYear()+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');break;}
     }
   }
+  let guessed=false;
   if(!date){
     if(lines.slice(0,3).some(l=>/พรุ่งนี้|내일|tomorrow/i.test(l))){const d=new Date();d.setDate(d.getDate()+1);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());date=d.toISOString().slice(0,10);}
-    else date=todayStr();
+    else{date=(typeof selDate!=='undefined'&&selDate)?selDate:todayStr();guessed=true;} // 텍스트에 날짜 없음 → 달력에서 선택한 날짜 우선
   }
   const blocks=[];let cur=null;
   for(const l of lines){
@@ -3456,13 +3457,20 @@ function parseMultiBooking(t){
     if(/ลูกค้าเก่า|🔁/u.test(l))cur.visit='재방문';
     if(!ph&&!fb){const clean=l.replace(/^[\p{Extended_Pictographic}️‍\s·]+/gu,'').trim();if(clean)cur.memo.push(clean);}
   }
-  return {date,blocks};
+  return {date,blocks,guessed};
+}
+function bulkSetDate(v){
+  if(!_bulkParsed||!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
+  _bulkParsed.date=v;renderBulkPreview(_bulkParsed);
 }
 function renderBulkPreview(P){
   _bulkParsed=P;
   const dups=P.blocks.map(b=>!!data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||'')));
   P.blocks.forEach(b=>{if(!b.status)b.status='예약';});
-  let html='<b style="color:var(--wine)">📅 '+P.date+' · '+P.blocks.length+' bookings found · พบ '+P.blocks.length+' คิว</b><br>';
+  let html='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="color:var(--wine)">📅</b>'
+    +'<input type="date" value="'+P.date+'" onchange="bulkSetDate(this.value)" style="width:auto;padding:6px 8px;font-size:13px;font-weight:700">'
+    +'<b style="color:var(--wine)">'+P.blocks.length+' bookings · พบ '+P.blocks.length+' คิว</b></div>'
+    +(P.guessed?'<div style="color:#b5341f;font-size:11px;font-weight:700;margin:4px 0 2px">⚠️ 텍스트에 날짜가 없어 위 날짜로 추정했어요 — 꼭 확인! · ไม่พบวันที่ในข้อความ กรุณาตรวจสอบ</div>':'');
   html+=P.blocks.map((b,i)=>'<div style="padding:4px 0 7px;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
     +'<b>'+(b.time||'--')+'</b> '+esc(b.name||'')+' '+(dups[i]?'<span style="color:#c0392b">(duplicate — skip · ซ้ำ)</span>':'')+'<br>'
     +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
