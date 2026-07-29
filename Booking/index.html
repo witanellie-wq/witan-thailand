@@ -615,6 +615,9 @@
     <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 Customer Ledger · ทะเบียนลูกค้า (Course·Membership)</button>
   </div>
   <div class="toolbar owner-only">
+    <button class="btn gold" style="background:#2f8f5b;border-color:#2f8f5b" onclick="openManualRev()">💵 Daily revenue entry · บันทึกยอดขาย · 매출 직접 입력</button>
+  </div>
+  <div class="toolbar owner-only">
     <button class="btn" data-i18n="backup" onclick="backupData()">💾 백업</button>
     <button class="btn" data-i18n="restore" onclick="document.getElementById('restoreFile').click()">📂 복원</button>
     <input type="file" id="restoreFile" accept=".json" hidden onchange="restoreData(this)">
@@ -765,6 +768,14 @@
 
     <div class="g2">
       <div><label class="lab" data-i18n="mPay">결제</label><select id="m_pay" data-i18n-opt="opt_pay"><option value="현금">현금</option><option value="카드">카드</option><option value="이체">이체</option><option value="PromptPay">PromptPay</option><option value="LINE Pay">LINE Pay</option></select></div>
+      <div class="owner-only"><label class="lab">💰 선입금 ฿ · มัดจำ</label>
+        <div style="display:flex;gap:6px">
+          <input id="m_depamt" inputmode="numeric" placeholder="0" style="flex:1">
+          <select id="m_deppay" style="flex:0 0 84px"><option value="현금">현금</option><option value="이체">이체</option><option value="카드">카드</option></select>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:5px">
+          <input type="checkbox" id="m_deprefund" style="width:auto"> 환불함 · คืนเงินแล้ว (매출 제외)</label>
+      </div>
       <div><label class="lab" data-i18n="mVisit">방문</label><select id="m_visit" data-i18n-opt="opt_visit"><option value="신규">신규</option><option value="재방문">재방문</option></select></div>
     </div>
     <label class="lab" data-i18n="mStaff">담당 (1~2명)</label>
@@ -908,6 +919,32 @@
 </div>
 
 <!-- CHECK-IN LIST MODAL -->
+<!-- MANUAL REVENUE MODAL -->
+<div class="overlay" id="revOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">💵 Daily revenue entry · บันทึกยอดขาย · 매출 직접 입력</h2>
+      <button class="sheet-x" onclick="closeManualRev()" aria-label="Close">✕</button></div>
+    <div class="sub">예약별 기록이 없는 날의 입금 매출을 직접 넣습니다. 예약 기록과 합산되어 월 매출에 반영됩니다. · บันทึกยอดขายรวมของวันนั้น</div>
+    <div class="g2">
+      <div><label class="lab">📅 Date · วันที่</label><input type="date" id="r_date"></div>
+      <div><label class="lab">💰 Amount ฿ · ยอดเงิน</label><input id="r_amt" inputmode="numeric" placeholder="0" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)"></div>
+    </div>
+    <label class="lab">💳 Payment · วิธีชำระ · 결제수단</label>
+    <div class="statusseg" id="r_payseg">
+      <div class="chip on" data-pay="현금" onclick="revPickPay(this)">💵 Cash · เงินสด<small>현금</small></div>
+      <div class="chip" data-pay="이체" onclick="revPickPay(this)">🏦 Transfer · โอน<small>이체</small></div>
+      <div class="chip" data-pay="카드" onclick="revPickPay(this)">💳 Card · บัตร<small>신용카드</small></div>
+    </div>
+    <label class="lab">👥 Customers (opt.) · จำนวนลูกค้า</label>
+    <input id="r_cnt" inputmode="numeric" placeholder="예: 6 (비워도 됨)">
+    <label class="lab">📝 Memo (opt.)</label>
+    <input id="r_memo" placeholder="예: 예약장부 정리 전 입금 합계">
+    <button class="save" style="width:100%;margin-top:12px" onclick="addManualRev()">➕ Add · เพิ่ม · 추가</button>
+    <div id="revList" style="margin-top:14px"></div>
+    <button class="cancel" onclick="closeManualRev()">닫기</button>
+  </div>
+</div>
+
 <div class="overlay" id="checkinOverlay">
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0" data-i18n="ckTitle">✅ 체크인 리스트</h2>
@@ -977,6 +1014,7 @@ const sb=(CLOUD_READY&&window.supabase)?window.supabase.createClient(SUPABASE_UR
 let cloudOn=false;                       // 로그인 + 서버 데이터 로드 완료
 let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
+let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
 function toggleOffDate(name,dateStr){
   const arr=staffOffDates[name]||(staffOffDates[name]=[]);
   const i=arr.indexOf(dateStr);
@@ -1064,7 +1102,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1089,6 +1127,8 @@ async function fetchAll(){
   if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
   if(smap.staff_offdates&&typeof smap.staff_offdates==='object')staffOffDates=smap.staff_offdates;
   try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}
+  if(Array.isArray(smap.manual_rev))manualRev=smap.manual_rev;else if(manualRev.length)_dirty.settings=true;
+  try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1139,6 +1179,7 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(Array.isArray(smap.discounts))discounts=smap.discounts;
         if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
         if(smap.staff_offdates&&typeof smap.staff_offdates==='object'){staffOffDates=smap.staff_offdates;try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}}
+        if(Array.isArray(smap.manual_rev)){manualRev=smap.manual_rev;try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
@@ -1926,30 +1967,37 @@ function prepaidEvents(y,m){
 let _preOpen=false;
 function togglePreList(){_preOpen=!_preOpen;render();}
 /* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
-function renderForecast(monthEntries,actual,pendingExp,memUsed,pre){
+function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev){
   const box=$('fcBox'); if(!box)return;
   if(isStaff()){box.innerHTML='';return}
-  memUsed=Number(memUsed)||0; pre=pre||[];
+  memUsed=Number(memUsed)||0; pre=pre||[]; man=man||[]; depRev=Number(depRev)||0;
+  const manTot=man.reduce((s,r)=>s+r.amt,0);
   const visited=monthEntries.filter(e=>e.status==='방문');
   // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
   const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
+  const bookRev=actual-manTot-depRev;   // 예약 기록에서 나온 매출만
   const pend=monthEntries.filter(e=>e.status==='예약');
   const forecast=actual+pendingExp;               // 이번 달 최종 예상 = 확정 + 남은 예약
-  const diff=actual-doneExp;                      // 방문 건에서 예상 대비 증감
-  const rate=doneExp?Math.round(actual/doneExp*100):0;
+  const diff=bookRev-doneExp;                     // 방문 건에서 예상 대비 증감
+  const rate=doneExp?Math.round(bookRev/doneExp*100):0;
   const pctD=forecast?Math.round(actual/forecast*100):0;
   const pctP=forecast?Math.round(pendingExp/forecast*100):0;
   box.innerHTML=`
     <div class="fc-t">💰 Expected vs actual · ยอดคาด/ยอดจริง · 예상 매출 대비 실제</div>
     <div class="fc-g">
-      <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정 매출<br>ยอดจริง (${visited.length})</div></div>
+      <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정 매출<br>ยอดจริง (${visited.length}${manTot?'+직접'+man.length:''})</div></div>
       <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.length})</div></div>
       <div class="fc-c fore"><div class="fv">${fmt(forecast)}</div><div class="fl">월 예상 합계<br>รวมคาดการณ์</div></div>
     </div>
     <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
     <div class="fc-lg"><span>✅ 확정 ${pctD}%</span><span>⏳ 예약분 ${pctP}%</span></div>
+    ${(manTot||depRev)?`<div class="fc-lg" style="color:#4A5678">
+      ${manTot?`<span>💵 직접 입력 ${fmt(manTot)} (${man.length}건)</span>`:''}
+      ${depRev?`<span>💰 선입금 ${fmt(depRev)}</span>`:''}
+      ${manTot?`<span>${Object.entries(man.reduce((o,r)=>{o[r.pay]=(o[r.pay]||0)+r.amt;return o},{})).map(([k,v])=>(k==='이체'?'🏦':(k==='카드'?'💳':'💵'))+k+' '+fmt(v)).join(' · ')}</span>`:''}
+    </div>`:''}
     ${doneExp?`<div class="fc-diff">
-      <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(actual)}</span>
+      <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(bookRev)}</span>
       <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
     </div>`:''}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
@@ -2001,6 +2049,69 @@ function renderStatBox(s){
   _statListStatus=null;
 }
 /* 💳🎟️ 선결제 고객 아이콘 — 예약 리스트 어디서나 한눈에 */
+/* ============================================================
+   💵 매출 직접 입력 (예약 기록이 없는 날의 입금 매출)
+   ============================================================ */
+let _revPay='현금';
+function openManualRev(){
+  $('r_date').value=selDate||todayStr();
+  $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
+  revSetPay('현금');
+  $('revOverlay').classList.add('on');
+  renderRevList();
+}
+function closeManualRev(){$('revOverlay').classList.remove('on');}
+function revPickPay(el){revSetPay(el.dataset.pay);}
+function revSetPay(p){
+  _revPay=p;
+  document.querySelectorAll('#r_payseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.pay===p));
+}
+function addManualRev(){
+  const d=$('r_date').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){alert('Check the date · ตรวจวันที่ · 날짜를 확인하세요');return}
+  const amt=Math.round(parseFloat(($('r_amt').value||'').replace(/[^0-9.]/g,''))||0);
+  if(amt<=0){alert('Enter the amount · กรอกยอดเงิน · 금액을 입력하세요');$('r_amt').focus();return}
+  manualRev.push({id:Date.now(),date:d,amt,pay:_revPay,cnt:parseInt($('r_cnt').value)||0,memo:$('r_memo').value.trim()});
+  saveManualRev();
+  $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
+  selDate=d;cur=new Date(d+'T00:00');cur.setDate(1);
+  renderRevList();render();
+}
+function delManualRev(id){
+  const r=manualRev.find(x=>x.id==id); if(!r)return;
+  if(!confirm(`🗑 ${r.date} ${fmt(r.amt)} (${r.pay})\nDelete? · ลบ? · 삭제할까요?`))return;
+  manualRev=manualRev.filter(x=>x.id!=id);
+  saveManualRev();renderRevList();render();
+}
+function saveManualRev(){
+  try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}
+  queueSync('settings');
+}
+function manualRevMonth(y,m){return manualRev.filter(r=>{const p=String(r.date).split('-');return +p[0]===y&&+p[1]===m+1});}
+function manualRevDay(d){return manualRev.filter(r=>r.date===d);}
+function renderRevList(){
+  const box=$('revList'); if(!box)return;
+  const y=cur.getFullYear(),m=cur.getMonth();
+  const rows=manualRevMonth(y,m).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  if(!rows.length){box.innerHTML='<div class="sl-empty">이 달 직접 입력 매출 없음 · ยังไม่มีรายการ</div>';return}
+  const tot=rows.reduce((s,r)=>s+r.amt,0);
+  const byPay={};rows.forEach(r=>{byPay[r.pay]=(byPay[r.pay]||0)+r.amt});
+  const icon=p=>p==='이체'?'🏦':(p==='카드'?'💳':'💵');
+  box.innerHTML=`<div class="sr-sum">${y}.${m+1} · <b>${rows.length}</b>건 · 합계 <b>${fmt(tot)}</b><br>
+      ${Object.entries(byPay).map(([k,v])=>icon(k)+' '+k+' '+fmt(v)).join(' · ')}</div>`
+    +rows.map(r=>`<div class="sl-item">
+      <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}</div>
+      <div class="sl-r"><b style="color:var(--wine);font-size:13px">${fmt(r.amt)}</b>
+        <br><span style="color:#b33;cursor:pointer" onclick="delManualRev(${r.id})">🗑 삭제</span></div>
+    </div>`).join('');
+}
+/* 💰 선입금: 아직 방문 전이라도 받은 돈은 확정 매출 (환불분 제외) */
+function depositOf(e){
+  const v=Number(e&&e.depAmt)||0;
+  if(!v||e.depRefund)return 0;
+  return e.status==='방문'?0:v;   // 방문 완료 건은 결제금액(amount)에 이미 포함
+}
+function depositsIn(list){return list.reduce((s,e)=>s+depositOf(e),0);}
 /* ============================================================
    🌐 메모 자동 번역 (한↔태↔영) — 오프라인 구문 사전
    새 표현은 MEMO_DICT에 한 줄만 추가하면 바로 반영됩니다.
@@ -2148,10 +2259,13 @@ function render(){
   const monthEntries=data.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em===m+1});
   const sumSeats=arr=>arr.reduce((s,e)=>s+(parseInt(e.seats)||1),0);
   const visited=monthEntries.filter(e=>e.status==='방문');
-  const total=visited.reduce((s,e)=>s+Number(e.amount||0),0);
+  const bookRev=visited.reduce((s,e)=>s+Number(e.amount||0),0);
+  const manRev=manualRevMonth(y,m).reduce((s,r)=>s+r.amt,0);       // 직접 입력 매출
+  const depRev=depositsIn(monthEntries);                            // 방문 전 선입금 (환불 제외)
+  const total=bookRev+manRev+depRev;
   // 손님 수 = 실제 온 사람 수 (동반 인원 seats 합산)
-  const headcount=sumSeats(visited);
-  const expSum=monthEntries.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
+  const headcount=sumSeats(visited)+manualRevMonth(y,m).reduce((s,r)=>s+(parseInt(r.cnt)||0),0);
+  const expSum=monthEntries.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
   $('mCount').textContent=headcount;
   $('mTotal').textContent=fmt(total);
   $('mAvg').textContent=fmt(headcount?Math.round(total/headcount):0);
@@ -2168,7 +2282,7 @@ function render(){
   const preP=sumSeats(visited.filter(isPrepaidCust));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP});
   const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m));
+  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev);
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2182,8 +2296,8 @@ function render(){
     const ds=ymd(y,m,d);
     const dayE=data.filter(e=>e.date===ds);
     const vis=dayE.filter(e=>e.status==='방문');
-    const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0);
-    const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
+    const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0)+manualRevDay(ds).reduce((s,r)=>s+r.amt,0)+depositsIn(dayE);
+    const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
     const {peak,over}=peakOccupancy(dayE,beds);
     const isFull=peak>=beds;
     const dow=new Date(y,m,d).getDay();
@@ -2399,6 +2513,9 @@ function openDayReview(){
   const preDay=prepaidEvents(y,mo-1).filter(x=>x.d===day);
   const preSum=preDay.reduce((s,x)=>s+x.amt,0);
   const memUsedDay=vis.filter(e=>e.memPaid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const manDay=manualRevDay(day);
+  const manSum=manDay.reduce((s,r)=>s+r.amt,0);
+  const depSum=depositsIn(list);
   $('printSheet').innerHTML=`
     <div class="ps-head">
       <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>
@@ -2429,7 +2546,9 @@ function openDayReview(){
       <div class="rs">ยอดชำระ 결제 합계 <b>${fmt(sumPaid)}</b></div>
       ${payChips}
       ${preDay.length?'<div class="rs">💳 선결제 입금 เงินล่วงหน้า <b>'+preDay.length+'</b> · <b>'+fmt(preSum)+'</b></div>':''}
-      ${(preSum||memUsedDay)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,sumPaid-memUsedDay)+preSum)+'</b></div>':''}
+      ${manDay.length?'<div class="rs">💵 직접 입력 매출 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)).join(', ')+')</div>':''}
+      ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
+      ${(preSum||memUsedDay||manSum||depSum)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,sumPaid-memUsedDay)+preSum+manSum+depSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
     ${preDay.length?'<div class="ps-note" style="margin-top:6px">💳 선결제 내역 · '+preDay.map(x=>esc(x.name)+' '+x.label+' '+fmt(x.amt)).join(' / ')+'</div>':''}
@@ -2473,7 +2592,8 @@ function renderDay(){
   const beds=getBeds();
   const dayE=data.filter(e=>e.date===selDate);
   const vis=dayE.filter(e=>e.status==='방문');
-  const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0);
+  const manD=manualRevDay(selDate).reduce((s,r)=>s+r.amt,0);
+  const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0)+manD+depositsIn(dayE);
   const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
   const [yy,mm,dd]=selDate.split('-');
   const dows=I18N.dow[LANG]||I18N.dow.ko;
@@ -2581,6 +2701,7 @@ function openModal(id){
     $('m_date').value=e.date;
     $('m_dur').value=e.dur||'60';updateEndTime();
     $('m_line').value=e.line||'';$('m_pay').value=e.pay||'현금';$('m_visit').value=e.visit||'신규';$('m_memo').value=e.memo||'';setStaff(e.staff);
+    $('m_depamt').value=e.depAmt||'';$('m_deppay').value=e.depPay||'현금';$('m_deprefund').checked=!!e.depRefund;
     renderMemoTrans();
     $('m_src').value=e.src||'LINE';$('m_srcid').value=e.srcid||'';
     $('m_nat').value=e.nat||'태국';$('m_natc').value=e.natc||'한국 🇰🇷';onNat();
@@ -2608,7 +2729,8 @@ function openModal(id){
     setStatus('예약');
     $('rebookBtn').style.display='none';
     $('phMatch').style.display='none';$('phMatch').innerHTML='';
-    ['m_name','m_time','m_phone','m_line','m_itemamt','m_memo','m_srcid','m_discval','m_care','m_service','m_companion'].forEach(i=>$(i).value='');
+    ['m_name','m_time','m_phone','m_line','m_itemamt','m_memo','m_srcid','m_discval','m_care','m_service','m_companion','m_depamt'].forEach(i=>$(i).value='');
+    $('m_deppay').value='현금';$('m_deprefund').checked=false;
     renderMemoTrans();
     $('m_seats').value='1';$('m_dur').value='60';$('m_end').value='';
     $('m_date').value=selDate;
@@ -2685,6 +2807,7 @@ function saveBooking(){
     nat:$('m_nat').value,natc:$('m_nat').value==='외국'?$('m_natc').value:'',gender:$('m_gender').value,
     items,treat,bktreat,subtotal,discount,discname,disctype,discval,adjust,amount,expAmt,
     pay:$('m_pay').value,staff:getStaff(),visit:$('m_visit').value,
+    depAmt:parseFloat(($('m_depamt').value||'').replace(/[^0-9.]/g,''))||0,depPay:$('m_deppay').value,depRefund:!!$('m_deprefund').checked,
     memo:$('m_memo').value.trim(),care:$('m_care').value.trim(),service:$('m_service').value.trim()};
   // 💳 멤버십 잔액 결제 (모달에서 예약해둔 경우 저장 시점에 확정 금액으로 차감)
   if(_memPayPlan){
