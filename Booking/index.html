@@ -2412,11 +2412,17 @@ function closeModal(){$('overlay').classList.remove('on')}
 function saveBooking(){
   const name=$('m_name').value.trim();
   if(!name){alert('Enter a name · กรอกชื่อ');$('m_name').focus();return false}
-  if(!$('m_phone').value.trim()){
-    // 전화번호 누락 시에도 저장은 허용하되 알림으로 입력 유도
-    if(!confirm('⚠️ No phone number! · ไม่มีเบอร์โทร!\n전화번호가 비어 있어요 — 고객 원장·중복확인·멤버십 연결에 필요합니다.\n\n[OK] Save anyway, add later · บันทึกก่อน เติมทีหลัง\n[Cancel] Enter now · กรอกตอนนี้')){$('m_phone').focus();return false}
+  // 필수 정보 누락 시에도 저장은 허용하되 한 번에 모아 경고
+  {
+    const missing=[];
+    if(!$('m_phone').value.trim())missing.push('· 📞 Phone 전화번호 · เบอร์โทร');
+    if(!$('m_srcid').value.trim() && $('m_src').value!=='워크인 Walk-in')missing.push('· 🛎 Account/Booking no. 계정·예약번호 · ไอดี/เลขจอง');
+    if(missing.length){
+      if(!confirm('⚠️ Missing info · ข้อมูลไม่ครบ · 필수 정보가 비어 있어요:\n'+missing.join('\n')+'\n\n[OK] Save anyway, fill later · บันทึกก่อน เติมทีหลัง · 일단 저장\n[Cancel] Fill now · กรอกตอนนี้ · 지금 입력')){
+        ($('m_phone').value.trim()?$('m_srcid'):$('m_phone')).focus();return false;
+      }
+    }
   }
-  if(!$('m_srcid').value.trim() && $('m_src').value!=='워크인 Walk-in'){alert('Enter booking source info — ID / booking no. · กรอกข้อมูลช่องทางจอง (ไอดี/เลขจอง)');$('m_srcid').focus();return false}
   const status=getStatus();
   // 베드 충돌 체크 (노쇼 아니고 시간 있을 때)
   if(status==='예약'||status==='방문'){
