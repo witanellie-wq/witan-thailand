@@ -3519,9 +3519,44 @@ function bulkSetDate(v){
   if(!_bulkParsed||!/^\d{4}-\d{2}-\d{2}$/.test(v))return;
   _bulkParsed.date=v;renderBulkPreview(_bulkParsed);
 }
+// 붙여넣기 블록 ↔ 기존 예약 매칭: 같은 날 + (전화번호 일치 | 시간 일치 | 이름 일치)
+function bulkFindExisting(date,b){
+  const day=data.filter(e=>e.date===date);
+  const ph=normPh(b.phone||'');
+  if(ph.length>=7){const m=day.find(e=>normPh(e.phone)===ph);if(m)return m;}
+  const nm=String(b.name||'').trim();
+  if(b.time){const m=day.find(e=>e.time===b.time&&(!nm||!e.name||e.name.trim()===nm||normPh(e.phone)===ph));if(m)return m;}
+  if(nm){const m=day.find(e=>String(e.name||'').trim()===nm);if(m)return m;}
+  return null;
+}
+// 기존 예약의 "비어 있는 칸"만 채우기 (수기 수정 내용은 절대 덮어쓰지 않음)
+function bulkFillMissing(){
+  const P=_bulkParsed;if(!P)return;
+  let filled=0,fields=0;
+  P.blocks.forEach(b=>{
+    const e=bulkFindExisting(P.date,b);if(!e)return;
+    let n=0;
+    const set=(k,v)=>{if(v!=null&&v!==''&&(e[k]==null||e[k]===''||e[k]===0)){e[k]=v;n++;}};
+    set('phone',b.phone);set('srcid',b.srcid);set('line',b.line);
+    if(b.src&&(!e.src||e.src==='기타')){e.src=b.src;n++;}
+    set('treat',b.treat);set('bktreat',b.treat);set('visit',b.visit);
+    if(b.price&&!Number(e.expAmt)){e.expAmt=b.price;n++;}
+    if(b.dur&&(!e.dur||e.dur==='60')){e.dur=b.dur;n++;}
+    if(b.seats&&(!e.seats||e.seats==='1')){e.seats=b.seats;n++;}
+    if(!e.srcid&&e.phone){e.srcid=e.phone;n++;}
+    if(n){filled++;fields+=n;}
+  });
+  if(!filled){alert('No matching bookings to fill · ไม่พบคิวที่ตรงกัน · 채울 예약을 못 찾았어요');return;}
+  save();closeParsePreviewAndGo(P.date);
+  alert(`🔄 Filled ${fields} empty fields in ${filled} bookings · เติมข้อมูล ${filled} คิว · ${filled}건의 빈 항목 ${fields}개를 채웠어요`);
+}
+function closeParsePreviewAndGo(date){
+  _bulkParsed=null;selDate=date;cur=new Date(date+'T00:00');cur.setDate(1);
+  closePasteImport();render();
+}
 function renderBulkPreview(P){
   _bulkParsed=P;
-  const dups=P.blocks.map(b=>!!data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||'')));
+  const dups=P.blocks.map(b=>!!bulkFindExisting(P.date,b));
   P.blocks.forEach(b=>{if(!b.status)b.status='예약';});
   let html='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="color:var(--wine)">📅</b>'
     +'<input type="date" value="'+P.date+'" onchange="bulkSetDate(this.value)" style="width:auto;padding:6px 8px;font-size:13px;font-weight:700">'
@@ -3539,7 +3574,10 @@ function renderBulkPreview(P){
       +'<button class="bpb n'+(b.status==='노쇼'?' on':'')+'" onclick="bulkSetStatus('+i+',\'노쇼\',this)">❌ 노쇼 ไม่มา</button>'
       +'</div>')
     +'</div>').join('');
-  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+dups.filter(x=>!x).length+' bookings · เพิ่มคิวทั้งหมด</button>';
+  const newN=dups.filter(x=>!x).length, dupN=dups.filter(Boolean).length;
+  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+newN+' bookings · เพิ่มคิวทั้งหมด</button>';
+  if(dupN)html+='<button class="save" style="width:100%;margin-top:7px;background:linear-gradient(150deg,#8C7647,#6e5c36)" onclick="bulkFillMissing()">🔄 Fill missing info in '+dupN+' existing · เติมข้อมูลที่ขาด · 기존 '+dupN+'건 빈칸 채우기</button>'
+    +'<div style="font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5">※ 빈 항목만 채우고 이미 입력된 값은 그대로 둡니다 · เติมเฉพาะช่องว่าง</div>';
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=html;
 }
@@ -3554,7 +3592,7 @@ function bulkAddParsed(){
   const P=_bulkParsed;if(!P)return;
   let added=0,skipped=0;
   P.blocks.forEach((b,i)=>{
-    if(data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||''))){skipped++;return;}
+    if(bulkFindExisting(P.date,b)){skipped++;return;}
     data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
       seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
