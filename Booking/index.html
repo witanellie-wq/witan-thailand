@@ -872,6 +872,26 @@
 </div>
 
 <!-- CUSTOMER LEDGER MODAL -->
+<!-- CUSTOMER (MEMBERSHIP/COURSE) PASTE MODAL -->
+<div class="overlay" id="custPasteOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">📋 Paste memberships/courses · วางข้อมูลสมาชิก</h2>
+      <button class="sheet-x" onclick="closeCustPaste()" aria-label="Close">✕</button></div>
+    <div class="sub">멤버십·회차권을 한 번에 등록합니다. <b>전화번호가 같으면 기존 고객에 자동 연동</b>(충전/회차 추가)되고, 없으면 새로 만듭니다.</div>
+    <textarea id="custPasteBox" style="width:100%;min-height:170px;font-size:12px" placeholder="한 줄에 한 명 · 구분자 |
+이름 | 전화 | 멤버십 | 충전 10,000 | 보너스 1,000 | 2026-07-05
+พิมพ์ใจ | 081-234-5678 | 회차권 | BB Glow 3회 | 9,000 | 2026-07-12
+คุณสุ | 064-236-9872 | 멤버십 | 5,000
+
+· 멤버십/membership/สมาชิก, 회차권/코스/course/คอร์ส 로 종류 인식
+· '3회' 또는 'x3' → 총 횟수, 숫자만 있으면 금액
+· 날짜 없으면 오늘로 등록"></textarea>
+    <div id="custPastePrev" style="display:none;background:var(--soft2);border:1.3px solid var(--line);border-radius:4px;padding:10px 12px;margin-top:10px;font-size:12px;line-height:1.7"></div>
+    <button class="save" style="width:100%;margin-top:12px" onclick="parseCustPaste()">🔍 Parse · วิเคราะห์ · 분석하기</button>
+    <button class="cancel" onclick="closeCustPaste()">닫기</button>
+  </div>
+</div>
+
 <div class="overlay" id="custOverlay">
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0" data-i18n="ledTitle">👤 고객 원장</h2>
@@ -881,6 +901,7 @@
     <div class="filtsw" style="margin-top:2px">
       <button class="filtbtn on" id="cv_list" onclick="custView('list')" data-i18n="ledTabList">📋 고객 리스트</button>
       <button class="filtbtn" id="cv_form" onclick="custView('form')" data-i18n="ledTabForm">＋ 새 고객 등록</button>
+      <button class="filtbtn" onclick="openCustPaste()" style="flex:0 0 auto">📋 붙여넣기</button>
     </div>
 
     <div class="ledsum" id="ledSum"></div>
@@ -2112,6 +2133,129 @@ function renderStatBox(s){
     <div id="statList"></div>
     <div class="conv"><span>${T('convRate')}</span><b>${s.convRate}%</b></div>`;
   _statListStatus=null;
+}
+/* ============================================================
+   📋 멤버십·회차권 텍스트 붙여넣기 등록
+   전화번호가 같으면 기존 고객에 연동(충전/회차 추가)
+   ============================================================ */
+let _custParsed=null;
+function openCustPaste(){$('custPasteBox').value='';$('custPastePrev').style.display='none';$('custPasteOverlay').classList.add('on');setTimeout(()=>{try{$('custPasteBox').focus()}catch(e){}},60);}
+function closeCustPaste(){$('custPasteOverlay').classList.remove('on');}
+function parseCustText(t){
+  const out=[];
+  String(t||'').split(/\n/).forEach(raw=>{
+    const l=String(raw||'').replace(/^[\p{Extended_Pictographic}️‍\s·]+/gu,'').trim();
+    if(!l||/^[-=─━]{3,}/.test(l))return;
+    if(/^(이름|name|ชื่อ)\s*[|｜]/i.test(l))return;                 // 표 머리글
+    const segs=l.split(/[|｜\t]/).map(x=>x.trim()).filter(x=>x!=='');
+    if(segs.length<2)return;
+    const r={memo:[]};
+    r.name=segs.shift();
+    segs.forEach(sg=>{
+      const ph=sg.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
+      if(ph&&!r.phone){r.phone=ph[1];return;}
+      const dm=sg.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(dm&&!r.buyDate){r.buyDate=dm[1]+'-'+String(+dm[2]).padStart(2,'0')+'-'+String(+dm[3]).padStart(2,'0');return;}
+      if(!r.type&&/(멤버십|멤버쉽|membership|member|สมาชิก|충전)/i.test(sg)){r.type='membership';}
+      if(!r.type&&/(회차권|회차|코스|course|คอร์ส|패키지|package)/i.test(sg)){r.type='course';}
+      // "3회" / "3 ครั้ง" / "x5" — 한글·태국어 뒤에는 \b 가 성립하지 않으므로 쓰지 않음
+      const ses=sg.match(/(\d{1,2})\s*(?:회차|회|ครั้ง|times?|sessions?)(?!\d)/i)||sg.match(/[x×]\s*(\d{1,2})(?!\d)/i);
+      if(ses&&!r.total){
+        r.total=+ses[1];r.type=r.type||'course';
+        const tt=sg.replace(ses[0],' ').replace(/\s{2,}/g,' ').trim();
+        if(tt&&!/^[\d,.\-฿]*$/.test(tt)&&!r.treat)r.treat=tt;
+        if(!/[\d,]{3,}/.test(tt))return;      // 같은 칸에 금액이 없으면 여기서 끝
+      }
+      const bon=sg.match(/(?:보너스|bonus|โบนัส)\D{0,3}([\d,]{2,9})/i);
+      if(bon){r.bonus=+bon[1].replace(/,/g,'');return;}
+      const used=sg.match(/(?:사용|used|ใช้)\D{0,3}(\d{1,2})/i);
+      if(used){r.used=+used[1];return;}
+      const money=sg.match(/([\d,]{3,9})(?:\s*\.?-|\s*฿|\s*บาท)?/);
+      if(money&&+money[1].replace(/,/g,'')>=100&&!r.amt){
+        r.amt=Math.round(+money[1].replace(/,/g,''));
+        const tt=sg.slice(0,money.index).replace(/[·,\s]+$/,'').trim();
+        if(tt&&!/^(충전|top-?up|เติม)$/i.test(tt))r.treat=r.treat||tt;
+        return;
+      }
+      if(/^[A-Za-zก-๙가-힣][\w\sก-๙가-힣.+/&-]{1,30}$/.test(sg)&&!r.treat&&!/^(멤버십|멤버쉽|회차권|코스|membership|course|สมาชิก|คอร์ส)$/i.test(sg))r.treat=sg;
+      else if(!/^(멤버십|멤버쉽|회차권|코스|membership|course|สมาชิก|คอร์ส|충전)$/i.test(sg))r.memo.push(sg);
+    });
+    if(!r.type)r.type=r.total?'course':'membership';
+    if(!r.name)return;
+    out.push(r);
+  });
+  return out;
+}
+function parseCustPaste(){
+  const rows=parseCustText($('custPasteBox').value);
+  const box=$('custPastePrev');
+  box.style.display='block';
+  if(!rows.length){box.innerHTML='⚠️ 인식된 항목이 없어요 — 형식을 확인해 주세요 · ไม่พบข้อมูล';_custParsed=null;return}
+  rows.forEach(r=>{
+    const q=normPh(r.phone||'');
+    r._match=(q.length>=7)?customers.find(c=>normPh(c.phone)===q&&c.type===r.type):null;
+    if(!r._match&&q.length>=7){
+      const bk=data.find(e=>normPh(e.phone)===q&&String(e.name||'').trim());
+      if(bk)r._bookName=bk.name;                       // 예약 기록에 있는 이름
+    }
+  });
+  _custParsed=rows;
+  const nNew=rows.filter(r=>!r._match).length,nLink=rows.filter(r=>r._match).length;
+  box.innerHTML=`<b style="color:var(--wine)">${rows.length}건 인식 · 신규 ${nNew} · 기존 연동 ${nLink}</b>`
+    +rows.map(r=>{
+      const ico=r.type==='course'?'🎟️':'💳';
+      const detail=r.type==='course'
+        ? `${esc(r.treat||'코스')} ${r.total||'?'}회${r.amt?' · ฿'+r.amt.toLocaleString():''}${r.used?' (사용 '+r.used+')':''}`
+        : `충전 ฿${(r.amt||0).toLocaleString()}${r.bonus?' +보너스 ฿'+r.bonus.toLocaleString():''}`;
+      const link=r._match
+        ? `<span style="color:#1c7a41;font-weight:700">↳ 기존 고객 연동: ${esc(r._match.name||'')} ${r.type==='course'?'(현재 '+(r._match.used||0)+'/'+(r._match.total||0)+'회)':'(잔액 '+fmt(r._match.balance||0)+')'}</span>`
+        : (r._bookName?`<span style="color:#2a5b93">↳ 예약 기록의 이름: ${esc(r._bookName)} · 새 원장 생성</span>`:`<span style="color:var(--muted)">↳ 새 원장 생성</span>`);
+      return `<div style="padding:5px 0;border-bottom:1px dashed var(--line)">
+        ${ico} <b>${esc(r.name)}</b> ${r.phone?esc(r.phone):'<span style="color:#b5341f">전화번호 없음</span>'}<br>
+        <span style="font-size:11px;color:#4A5678">${detail}${r.buyDate?' · '+r.buyDate:''}</span><br>
+        <span style="font-size:11px">${link}</span></div>`;
+    }).join('')
+    +`<button class="save" style="width:100%;margin-top:10px" onclick="applyCustPaste()">➕ ${rows.length}건 등록 · บันทึก</button>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:5px">※ 기존 고객은 충전/회차가 <b>더해집니다</b> (덮어쓰지 않음)</div>`;
+}
+function applyCustPaste(){
+  const rows=_custParsed; if(!rows||!rows.length)return;
+  let created=0,linked=0;
+  rows.forEach((r,i)=>{
+    const amt=Number(r.amt)||0, bonus=Number(r.bonus)||0;
+    const when=r.buyDate||todayStr();
+    if(r._match){
+      const c=r._match;
+      if(c.type==='course'){
+        if(r.total)c.total=(c.total||0)+r.total;
+        if(amt)c.price=(Number(c.price)||0)+amt;
+        (c.history=c.history||[]).unshift({t:nowStamp(),note:`붙여넣기 추가 +${r.total||0}회${amt?' · 선결제 '+fmt(amt):''}`,delta:r.total||0,amt});
+      }else{
+        c.balance=(Number(c.balance)||0)+amt+bonus;
+        c.charged=(Number(c.charged)||0)+amt;
+        if(bonus)c.bonus=(Number(c.bonus)||0)+bonus;
+        (c.history=c.history||[]).unshift({t:nowStamp(),note:`붙여넣기 충전 +${fmt(amt)}${bonus?' +보너스 '+fmt(bonus):''} · 잔액 ${fmt(c.balance)}`,delta:amt,amt});
+      }
+      if(!c.phone&&r.phone)c.phone=r.phone;
+      linked++;
+    }else{
+      const base={id:Date.now()+i,name:r._bookName||r.name,phone:r.phone||'',line:'',type:r.type,
+        buyDate:when,expiry:'',memo:(r.memo||[]).join(' · '),createdAt:todayStr()};
+      if(r.type==='course'){
+        base.treat=r.treat||'코스';base.total=r.total||1;base.used=r.used||0;
+        base.uses=Array.from({length:base.used},()=>({t:when+' 00:00'}));
+        base.price=amt;
+        base.history=[{t:nowStamp(),note:`붙여넣기 등록 (${base.used}/${base.total})${amt?' · 선결제 '+fmt(amt):''}`,delta:0,amt}];
+      }else{
+        base.charged=amt;base.bonus=bonus;base.balance=amt+bonus;base.tier='';
+        base.history=[{t:nowStamp(),note:`붙여넣기 등록 · 잔액 ${fmt(base.balance)}`,delta:0,amt}];
+      }
+      customers.push(base);created++;
+    }
+  });
+  saveCusts();_custParsed=null;
+  closeCustPaste();renderLedSum();renderCustList();custView('list');render();
+  alert(`✅ ${created+linked}건 처리 · บันทึกแล้ว\n신규 ${created} · 기존 고객 연동 ${linked}`);
 }
 /* 🚶 무기명(워크인) 표시: 이름을 안 받은 예약 */
 function isAnon(e){return !!(e&&(e.anon||!String(e.name||'').trim()));}
