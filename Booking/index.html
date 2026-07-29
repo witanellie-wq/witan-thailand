@@ -1039,6 +1039,11 @@
       <div class="chip" data-pay="이체" onclick="revPickPay(this)">🏦 Transfer · โอน<small>이체</small></div>
       <div class="chip" data-pay="카드" onclick="revPickPay(this)">💳 Card · บัตร<small>신용카드</small></div>
     </div>
+    <label class="lab">🧮 How to count · วิธีนับ · 집계 방식</label>
+    <div class="statusseg" id="r_modeseg">
+      <div class="chip on" data-m="total" onclick="revPickMode(this)">📊 그날 총 입금액<small>예약기록과 겹치면 차액만</small></div>
+      <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 별도 추가 입금<small>그대로 더함</small></div>
+    </div>
     <label class="lab">👥 Customers (opt.) · จำนวนลูกค้า</label>
     <input id="r_cnt" inputmode="numeric" placeholder="예: 6 (비워도 됨)">
     <label class="lab">📝 Memo (opt.)</label>
@@ -2081,11 +2086,13 @@ function prepaidEvents(y,m){
 let _preOpen=false;
 function togglePreList(){_preOpen=!_preOpen;render();}
 /* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
-function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev){
+function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,manNet,overDays){
   const box=$('fcBox'); if(!box)return;
   if(isStaff()){box.innerHTML='';return}
   memUsed=Number(memUsed)||0; pre=pre||[]; man=man||[]; depRev=Number(depRev)||0;
-  const manTot=man.reduce((s,r)=>s+r.amt,0);
+  const manRaw=man.reduce((s,r)=>s+r.amt,0);
+  const manTot=(manNet!=null)?manNet:manRaw;      // 이중 계상 제거 후 실제 반영액
+  overDays=overDays||0;
   const visited=monthEntries.filter(e=>e.status==='방문');
   // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
   const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
@@ -2106,7 +2113,8 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev){
     <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
     <div class="fc-lg"><span>✅ 확정 ${pctD}%</span><span>⏳ 예약분 ${pctP}%</span></div>
     ${(manTot||depRev)?`<div class="fc-lg" style="color:#4A5678">
-      ${manTot?`<span>💵 직접 입력 ${fmt(manTot)} (${man.length}건)</span>`:''}
+      ${manTot?`<span>💵 직접 입력 ${fmt(manTot)} (${man.length}건)${manRaw!==manTot?` <span style="color:#8a6d1f">· 입력 ${fmt(manRaw)} 중 예약기록과 겹치는 ${fmt(manRaw-manTot)} 제외</span>`:''}</span>`:''}
+      ${overDays?`<span style="color:#b5341f">⚠️ 예약합이 입력 총액을 넘은 날 ${overDays}일 — 확인 필요</span>`:''}
       ${depRev?`<span>💰 선입금 ${fmt(depRev)}</span>`:''}
       ${manTot?`<span>${Object.entries(man.reduce((o,r)=>{o[r.pay]=(o[r.pay]||0)+r.amt;return o},{})).map(([k,v])=>(k==='이체'?'🏦':(k==='카드'?'💳':'💵'))+k+' '+fmt(v)).join(' · ')}</span>`:''}
     </div>`:''}
@@ -2331,7 +2339,15 @@ function trendBuckets(mode){
     }
     b.rev+=depositOf(e);
   });
-  (manualRev||[]).forEach(r=>{const k=keyOf(r.date);get(k).rev+=r.amt;get(k).cust+=parseInt(r.cnt)||0;});
+  // 직접입력은 하루 단위로 이중 계상을 걸러낸 금액만 반영
+  const seen=new Set();
+  (manualRev||[]).forEach(r=>{
+    const b=get(keyOf(r.date));
+    b.cust+=parseInt(r.cnt)||0;
+    if(seen.has(r.date))return; seen.add(r.date);
+    const pt=dayRevParts(r.date);
+    b.rev+=pt.gap+pt.manAdd;
+  });
   let keys=Object.keys(map).filter(k=>map[k].book||map[k].rev||map[k].cust).sort();
   if(!keys.length)return [];
   // 빈 구간도 0으로 채워 연속 표시 (최대 26칸)
@@ -2404,16 +2420,18 @@ function renderTrend(){
 /* ============================================================
    💵 매출 직접 입력 (예약 기록이 없는 날의 입금 매출)
    ============================================================ */
-let _revPay='현금';
+let _revPay='현금',_revMode='total';
 function openManualRev(){
   $('r_date').value=selDate||todayStr();
   $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
-  revSetPay('현금');
+  revSetPay('현금');revSetMode('total');
   $('revOverlay').classList.add('on');
   renderRevList();
 }
 function closeManualRev(){$('revOverlay').classList.remove('on');}
 function revPickPay(el){revSetPay(el.dataset.pay);}
+function revPickMode(el){revSetMode(el.dataset.m);}
+function revSetMode(m){_revMode=m;document.querySelectorAll('#r_modeseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===m));}
 function revSetPay(p){
   _revPay=p;
   document.querySelectorAll('#r_payseg .chip').forEach(c=>c.classList.toggle('on',c.dataset.pay===p));
@@ -2423,7 +2441,7 @@ function addManualRev(){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){alert('Check the date · ตรวจวันที่ · 날짜를 확인하세요');return}
   const amt=Math.round(parseFloat(($('r_amt').value||'').replace(/[^0-9.]/g,''))||0);
   if(amt<=0){alert('Enter the amount · กรอกยอดเงิน · 금액을 입력하세요');$('r_amt').focus();return}
-  manualRev.push({id:Date.now(),date:d,amt,pay:_revPay,cnt:parseInt($('r_cnt').value)||0,memo:$('r_memo').value.trim()});
+  manualRev.push({id:Date.now(),date:d,amt,pay:_revPay,mode:_revMode,cnt:parseInt($('r_cnt').value)||0,memo:$('r_memo').value.trim()});
   saveManualRev();
   $('r_amt').value='';$('r_cnt').value='';$('r_memo').value='';
   selDate=d;cur=new Date(d+'T00:00');cur.setDate(1);
@@ -2439,6 +2457,28 @@ function saveManualRev(){
   try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}
   queueSync('settings');
 }
+/* 하루 매출 구성 — 직접입력과 예약기록이 겹칠 때 이중 계상 방지
+   · mode 'total'(기본): 직접입력 = 그날 총 입금액 → 예약기록에 없는 차액만 더함
+   · mode 'add'        : 별도 입금 → 그대로 더함  */
+function dayRevParts(ds){
+  const dayE=data.filter(e=>e.date===ds);
+  const visRev=dayE.filter(e=>e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
+  const dep=depositsIn(dayE);
+  const bookRev=visRev+dep;                                   // 예약 기록에서 나온 매출
+  const man=manualRevDay(ds);
+  const manTotal=man.filter(r=>r.mode!=='add').reduce((s,r)=>s+r.amt,0);
+  const manAdd=man.filter(r=>r.mode==='add').reduce((s,r)=>s+r.amt,0);
+  const gap=Math.max(0,manTotal-bookRev);                     // 아직 예약으로 안 채워진 부분
+  return {bookRev,visRev,dep,manTotal,manAdd,gap,manCount:man.length,
+          total:bookRev+gap+manAdd,
+          over:(manTotal&&bookRev>manTotal)?(bookRev-manTotal):0};   // 예약합이 신고총액 초과
+}
+function revDates(y,m){
+  const set=new Set();
+  data.forEach(e=>{const p=String(e.date||'').split('-');if(+p[0]===y&&+p[1]===m+1)set.add(e.date)});
+  (manualRev||[]).forEach(r=>{const p=String(r.date||'').split('-');if(+p[0]===y&&+p[1]===m+1)set.add(r.date)});
+  return [...set];
+}
 function manualRevMonth(y,m){return manualRev.filter(r=>{const p=String(r.date).split('-');return +p[0]===y&&+p[1]===m+1});}
 function manualRevDay(d){return manualRev.filter(r=>r.date===d);}
 function renderRevList(){
@@ -2451,11 +2491,15 @@ function renderRevList(){
   const icon=p=>p==='이체'?'🏦':(p==='카드'?'💳':'💵');
   box.innerHTML=`<div class="sr-sum">${y}.${m+1} · <b>${rows.length}</b>건 · 합계 <b>${fmt(tot)}</b><br>
       ${Object.entries(byPay).map(([k,v])=>icon(k)+' '+k+' '+fmt(v)).join(' · ')}</div>`
-    +rows.map(r=>`<div class="sl-item">
-      <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}</div>
+    +rows.map(r=>{const pt=dayRevParts(r.date);
+      const tag=r.mode==='add'?'<span style="color:#2a5b93">➕별도</span>':'<span style="color:#8a6d1f">📊총액</span>';
+      const cmp=(r.mode!=='add'&&pt.bookRev)
+        ? `<br><span class="sl-ph">예약기록 ${fmt(pt.bookRev)} · ${pt.over?'<b style="color:#b5341f">예약합이 '+fmt(pt.over)+' 많음</b>':'미기록 차액 '+fmt(pt.gap)+' 반영'}</span>`:'';
+      return `<div class="sl-item">
+      <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay} ${tag}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}${cmp}</div>
       <div class="sl-r"><b style="color:var(--wine);font-size:13px">${fmt(r.amt)}</b>
         <br><span style="color:#b33;cursor:pointer" onclick="delManualRev(${r.id})">🗑 삭제</span></div>
-    </div>`).join('');
+    </div>`}).join('');
 }
 /* 💰 선입금: 아직 방문 전이라도 받은 돈은 확정 매출 (환불분 제외) */
 function depositOf(e){
@@ -2612,9 +2656,9 @@ function render(){
   const sumSeats=arr=>arr.reduce((s,e)=>s+(parseInt(e.seats)||1),0);
   const visited=monthEntries.filter(e=>e.status==='방문');
   const bookRev=visited.reduce((s,e)=>s+Number(e.amount||0),0);
-  const manRev=manualRevMonth(y,m).reduce((s,r)=>s+r.amt,0);       // 직접 입력 매출
   const depRev=depositsIn(monthEntries);                            // 방문 전 선입금 (환불 제외)
-  const total=bookRev+manRev+depRev;
+  let manRev=0,total=0,overDays=0;
+  revDates(y,m).forEach(ds=>{const pt=dayRevParts(ds);total+=pt.total;manRev+=pt.gap+pt.manAdd;if(pt.over)overDays++;});
   // 손님 수 = 실제 온 사람 수 (동반 인원 seats 합산)
   const headcount=sumSeats(visited)+manualRevMonth(y,m).reduce((s,r)=>s+(parseInt(r.cnt)||0),0);
   const expSum=monthEntries.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
@@ -2635,7 +2679,7 @@ function render(){
   const anonP=sumSeats(visited.filter(isAnon));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP,anonP});
   const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev);
+  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev,manRev,overDays);
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2649,7 +2693,7 @@ function render(){
     const ds=ymd(y,m,d);
     const dayE=data.filter(e=>e.date===ds);
     const vis=dayE.filter(e=>e.status==='방문');
-    const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0)+manualRevDay(ds).reduce((s,r)=>s+r.amt,0)+depositsIn(dayE);
+    const rev=dayRevParts(ds).total;
     const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
     const {peak,over}=peakOccupancy(dayE,beds);
     const isFull=peak>=beds;
@@ -2874,6 +2918,7 @@ function openDayReview(){
   const memUsedDay=vis.filter(e=>e.memPaid).reduce((s,e)=>s+(Number(e.amount)||0),0);
   const manDay=manualRevDay(day);
   const manSum=manDay.reduce((s,r)=>s+r.amt,0);
+  const _rpt=dayRevParts(day);
   const depSum=depositsIn(list);
   $('printSheet').innerHTML=`
     <div class="ps-head">
@@ -2905,9 +2950,10 @@ function openDayReview(){
       <div class="rs">ยอดชำระ 결제 합계 <b>${fmt(sumPaid)}</b></div>
       ${payChips}
       ${preDay.length?'<div class="rs">💳 선결제 입금 เงินล่วงหน้า <b>'+preDay.length+'</b> · <b>'+fmt(preSum)+'</b></div>':''}
-      ${manDay.length?'<div class="rs">💵 직접 입력 매출 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)).join(', ')+')</div>':''}
+      ${manDay.length?'<div class="rs">💵 직접 입력 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)+(r.mode==='add'?' 별도':'')).join(', ')+')</div>':''}
+      ${(manDay.length&&_rpt.bookRev&&manDay.some(r=>r.mode!=='add'))?('<div class="rs'+(_rpt.over?' warn':'')+'">🧮 대조: 예약기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 입력 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.over?'예약합이 <b>'+fmt(_rpt.over)+'</b> 많음 (입력 확인)':'미기록 <b>'+fmt(_rpt.gap)+'</b> 반영')+'</div>'):''}
       ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
-      ${(preSum||memUsedDay||manSum||depSum)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,sumPaid-memUsedDay)+preSum+manSum+depSum)+'</b></div>':''}
+      ${(preSum||memUsedDay||manSum||depSum)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
     ${preDay.length?'<div class="ps-note" style="margin-top:6px">💳 선결제 내역 · '+preDay.map(x=>esc(x.name)+' '+x.label+' '+fmt(x.amt)).join(' / ')+'</div>':''}
@@ -2951,8 +2997,9 @@ function renderDay(){
   const beds=getBeds();
   const dayE=data.filter(e=>e.date===selDate);
   const vis=dayE.filter(e=>e.status==='방문');
-  const manD=manualRevDay(selDate).reduce((s,r)=>s+r.amt,0);
-  const rev=vis.reduce((s,e)=>s+Number(e.amount||0),0)+manD+depositsIn(dayE);
+  const _pt=dayRevParts(selDate);
+  const manD=_pt.gap+_pt.manAdd;
+  const rev=_pt.total;
   const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
   const [yy,mm,dd]=selDate.split('-');
   const dows=I18N.dow[LANG]||I18N.dow.ko;
