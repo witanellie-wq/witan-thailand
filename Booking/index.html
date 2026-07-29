@@ -1028,7 +1028,7 @@
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0">💵 Daily revenue entry · บันทึกยอดขาย · 매출 직접 입력</h2>
       <button class="sheet-x" onclick="closeManualRev()" aria-label="Close">✕</button></div>
-    <div class="sub">예약별 기록이 없는 날의 입금 매출을 직접 넣습니다. 예약 기록과 합산되어 월 매출에 반영됩니다. · บันทึกยอดขายรวมของวันนั้น</div>
+    <div class="sub">그날 실제 입금된 매출을 직접 넣습니다. <b>예약 기록과 합산하지 않고</b> 그 값이 그날 매출이 되며, 예약 기록과 나란히 비교됩니다. · บันทึกยอดขายจริงของวันนั้น (ไม่บวกซ้ำ)</div>
     <div class="g2">
       <div><label class="lab">📅 Date · วันที่</label><input type="date" id="r_date"></div>
       <div><label class="lab">💰 Amount ฿ · ยอดเงิน</label><input id="r_amt" inputmode="numeric" placeholder="0" style="font-size:18px;font-weight:700;text-align:right;color:var(--gold-d)"></div>
@@ -1041,8 +1041,8 @@
     </div>
     <label class="lab">🧮 How to count · วิธีนับ · 집계 방식</label>
     <div class="statusseg" id="r_modeseg">
-      <div class="chip on" data-m="total" onclick="revPickMode(this)">📊 그날 총 입금액<small>예약기록과 겹치면 차액만</small></div>
-      <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 별도 추가 입금<small>그대로 더함</small></div>
+      <div class="chip on" data-m="total" onclick="revPickMode(this)">💵 그날 실입금 총액<small>예약기록 대신 이 값 사용</small></div>
+      <div class="chip" data-m="add" onclick="revPickMode(this)">➕ 별도 추가 입금<small>기록에 더함 (제품판매 등)</small></div>
     </div>
     <label class="lab">👥 Customers (opt.) · จำนวนลูกค้า</label>
     <input id="r_cnt" inputmode="numeric" placeholder="예: 6 (비워도 됨)">
@@ -2086,17 +2086,16 @@ function prepaidEvents(y,m){
 let _preOpen=false;
 function togglePreList(){_preOpen=!_preOpen;render();}
 /* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
-function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,manNet,overDays){
+function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,recon){
   const box=$('fcBox'); if(!box)return;
   if(isStaff()){box.innerHTML='';return}
   memUsed=Number(memUsed)||0; pre=pre||[]; man=man||[]; depRev=Number(depRev)||0;
-  const manRaw=man.reduce((s,r)=>s+r.amt,0);
-  const manTot=(manNet!=null)?manNet:manRaw;      // 이중 계상 제거 후 실제 반영액
-  overDays=overDays||0;
+  recon=recon||{bookSum:0,manDays:0,gapDays:0,total:actual};
+  const manTot=man.reduce((s,r)=>s+r.amt,0);
   const visited=monthEntries.filter(e=>e.status==='방문');
   // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
   const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
-  const bookRev=actual-manTot-depRev;   // 예약 기록에서 나온 매출만
+  const bookRev=recon.bookSum;          // 예약 기록에서 나온 매출 (실입금 입력분 제외)만
   const pend=monthEntries.filter(e=>e.status==='예약');
   const forecast=actual+pendingExp;               // 이번 달 최종 예상 = 확정 + 남은 예약
   const diff=bookRev-doneExp;                     // 방문 건에서 예상 대비 증감
@@ -2113,8 +2112,7 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,ma
     <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
     <div class="fc-lg"><span>✅ 확정 ${pctD}%</span><span>⏳ 예약분 ${pctP}%</span></div>
     ${(manTot||depRev)?`<div class="fc-lg" style="color:#4A5678">
-      ${manTot?`<span>💵 직접 입력 ${fmt(manTot)} (${man.length}건)${manRaw!==manTot?` <span style="color:#8a6d1f">· 입력 ${fmt(manRaw)} 중 예약기록과 겹치는 ${fmt(manRaw-manTot)} 제외</span>`:''}</span>`:''}
-      ${overDays?`<span style="color:#b5341f">⚠️ 예약합이 입력 총액을 넘은 날 ${overDays}일 — 확인 필요</span>`:''}
+      ${recon.manDays?`<span>💵 실입금 직접입력 ${recon.manDays}일</span>`:''}
       ${depRev?`<span>💰 선입금 ${fmt(depRev)}</span>`:''}
       ${manTot?`<span>${Object.entries(man.reduce((o,r)=>{o[r.pay]=(o[r.pay]||0)+r.amt;return o},{})).map(([k,v])=>(k==='이체'?'🏦':(k==='카드'?'💳':'💵'))+k+' '+fmt(v)).join(' · ')}</span>`:''}
     </div>`:''}
@@ -2122,7 +2120,27 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,ma
       <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(bookRev)}</span>
       <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
     </div>`:''}
+    ${renderReconSection(recon)}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
+}
+/* 🧮 기록 vs 실입금 대조 — 합산하지 않고 나란히 비교 */
+function renderReconSection(rc){
+  if(!rc||!rc.manDays)return '';
+  const d=rc.total-rc.bookSum;
+  const pct=rc.total?Math.round(rc.bookSum/rc.total*100):0;
+  const cls=d>0?'fc-down':(d<0?'fc-up':'');
+  return `
+    <div class="fc-diff" style="display:block">
+      <div style="font-size:11px;font-weight:700;color:var(--wine-d);margin-bottom:7px">🧮 기록 vs 실입금 · บันทึก/เงินเข้าจริง</div>
+      <div class="fc-g">
+        <div class="fc-c pend"><div class="fv">${fmt(rc.bookSum)}</div><div class="fl">📋 예약 기록<br>จากคิว</div></div>
+        <div class="fc-c done"><div class="fv">${fmt(rc.total)}</div><div class="fl">💵 실입금 기준<br>เงินเข้าจริง</div></div>
+        <div class="fc-c"><div class="fv ${cls}">${fmt(Math.abs(d))}</div><div class="fl">${d>0?'📋 미기록분':(d<0?'⚠️ 기록 초과':'일치 ✅')}<br>ยังไม่บันทึก</div></div>
+      </div>
+      <div class="fc-bar"><i class="d" style="width:${Math.max(0,Math.min(100,pct))}%"></i></div>
+      <div class="fc-lg"><span>📋 기록률 ${pct}%</span><span>💵 직접입력 ${rc.manDays}일${rc.gapDays?` · 차이나는 날 ${rc.gapDays}일`:''}</span></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">※ 실입금을 입력한 날은 그 금액이 그날 매출입니다 (예약 기록과 <b>합산하지 않음</b>) · 기록률이 100%에 가까울수록 예약 데이터가 정확합니다</div>
+    </div>`;
 }
 /* 💳 선결제 구역: 현장결제 / 선결제 사용 / 이번 달 선결제 입금 → 총 입금 매출 */
 function renderPrepaidSection(actual,memUsed,pre){
@@ -2464,14 +2482,16 @@ function dayRevParts(ds){
   const dayE=data.filter(e=>e.date===ds);
   const visRev=dayE.filter(e=>e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
   const dep=depositsIn(dayE);
-  const bookRev=visRev+dep;                                   // 예약 기록에서 나온 매출
+  const bookRev=visRev+dep;                                   // 📋 예약 기록 기준 매출
   const man=manualRevDay(ds);
-  const manTotal=man.filter(r=>r.mode!=='add').reduce((s,r)=>s+r.amt,0);
-  const manAdd=man.filter(r=>r.mode==='add').reduce((s,r)=>s+r.amt,0);
-  const gap=Math.max(0,manTotal-bookRev);                     // 아직 예약으로 안 채워진 부분
-  return {bookRev,visRev,dep,manTotal,manAdd,gap,manCount:man.length,
-          total:bookRev+gap+manAdd,
-          over:(manTotal&&bookRev>manTotal)?(bookRev-manTotal):0};   // 예약합이 신고총액 초과
+  const manTotal=man.filter(r=>r.mode!=='add').reduce((s,r)=>s+r.amt,0);   // 💵 실입금(그날 총액)
+  const manAdd=man.filter(r=>r.mode==='add').reduce((s,r)=>s+r.amt,0);     // ➕ 별도 추가 입금
+  const hasMan=man.some(r=>r.mode!=='add');
+  // 실입금을 직접 넣은 날은 그 값이 그날 매출 (예약 기록과 합치지 않음)
+  const actual=(hasMan?manTotal:bookRev)+manAdd;
+  return {bookRev,visRev,dep,manTotal,manAdd,hasMan,manCount:man.length,
+          total:actual,actual,
+          diff:hasMan?(manTotal-bookRev):0};                  // 실입금 − 기록 (음수면 기록이 더 큼)
 }
 function revDates(y,m){
   const set=new Set();
@@ -2492,9 +2512,9 @@ function renderRevList(){
   box.innerHTML=`<div class="sr-sum">${y}.${m+1} · <b>${rows.length}</b>건 · 합계 <b>${fmt(tot)}</b><br>
       ${Object.entries(byPay).map(([k,v])=>icon(k)+' '+k+' '+fmt(v)).join(' · ')}</div>`
     +rows.map(r=>{const pt=dayRevParts(r.date);
-      const tag=r.mode==='add'?'<span style="color:#2a5b93">➕별도</span>':'<span style="color:#8a6d1f">📊총액</span>';
+      const tag=r.mode==='add'?'<span style="color:#2a5b93">➕별도추가</span>':'<span style="color:#8a6d1f">💵실입금</span>';
       const cmp=(r.mode!=='add'&&pt.bookRev)
-        ? `<br><span class="sl-ph">예약기록 ${fmt(pt.bookRev)} · ${pt.over?'<b style="color:#b5341f">예약합이 '+fmt(pt.over)+' 많음</b>':'미기록 차액 '+fmt(pt.gap)+' 반영'}</span>`:'';
+        ? `<br><span class="sl-ph">📋기록 ${fmt(pt.bookRev)} · ${pt.diff>0?`미기록 <b style="color:#8a6d1f">${fmt(pt.diff)}</b>`:(pt.diff<0?`<b style="color:#b5341f">⚠️기록이 ${fmt(-pt.diff)} 더 큼 — 확인</b>`:'<b style="color:#1c7a41">일치 ✅</b>')}</span>`:'';
       return `<div class="sl-item">
       <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay} ${tag}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}${cmp}</div>
       <div class="sl-r"><b style="color:var(--wine);font-size:13px">${fmt(r.amt)}</b>
@@ -2657,8 +2677,15 @@ function render(){
   const visited=monthEntries.filter(e=>e.status==='방문');
   const bookRev=visited.reduce((s,e)=>s+Number(e.amount||0),0);
   const depRev=depositsIn(monthEntries);                            // 방문 전 선입금 (환불 제외)
-  let manRev=0,total=0,overDays=0;
-  revDates(y,m).forEach(ds=>{const pt=dayRevParts(ds);total+=pt.total;manRev+=pt.gap+pt.manAdd;if(pt.over)overDays++;});
+  let total=0,bookSum=0,manSum=0,manDays=0,gapDays=0;
+  revDates(y,m).forEach(ds=>{
+    const pt=dayRevParts(ds);
+    total+=pt.total; bookSum+=pt.bookRev;
+    if(pt.hasMan){manSum+=pt.manTotal;manDays++;if(Math.abs(pt.diff)>=1)gapDays++;}
+    else manSum+=pt.bookRev;
+    manSum+=pt.manAdd;
+  });
+  const manRev=total-bookSum;   // 실입금 기준과 기록의 차이(참고용)
   // 손님 수 = 실제 온 사람 수 (동반 인원 seats 합산)
   const headcount=sumSeats(visited)+manualRevMonth(y,m).reduce((s,r)=>s+(parseInt(r.cnt)||0),0);
   const expSum=monthEntries.filter(e=>e.status==='예약').reduce((s,e)=>s+Math.max(0,Number(e.expAmt||0)-depositOf(e)),0);
@@ -2679,7 +2706,7 @@ function render(){
   const anonP=sumSeats(visited.filter(isAnon));
   renderStatBox({headcount,visitCount:headcount,total,booked:bookedP,noshow:noshowP,cancel:cancelP,convRate,reP,newP,preP,anonP});
   const memUsed=visited.filter(e=>e.memPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev,manRev,overDays);
+  renderForecast(monthEntries,total,expSum,memUsed,prepaidEvents(y,m),manualRevMonth(y,m),depRev,{bookSum,manDays,gapDays,total});
 
   // grid
   const first=new Date(y,m,1).getDay();
@@ -2710,7 +2737,7 @@ function render(){
         return `<span class="offmark ${lv}" title="🏖 휴무 ${of.length} (${esc(of.join(', '))}) · 근무 ${work}명">🏖</span>`;
       })()}</div>
       ${dayE.length?`<div class="cnt">${dayE.length}</div>`:''}
-      ${rev?`<div class="rev">${fmt(rev)}</div>`:''}
+      ${rev?`<div class="rev"${dayRevParts(ds).hasMan?' title="실입금 직접입력"':''}>${dayRevParts(ds).hasMan?'💵':''}${fmt(rev)}</div>`:''}
       ${!isFull&&dayE.some(e=>e.status==='예약')?'<div class="dot"></div>':''}
     </div>`;
   }
@@ -2951,7 +2978,7 @@ function openDayReview(){
       ${payChips}
       ${preDay.length?'<div class="rs">💳 선결제 입금 เงินล่วงหน้า <b>'+preDay.length+'</b> · <b>'+fmt(preSum)+'</b></div>':''}
       ${manDay.length?'<div class="rs">💵 직접 입력 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)+(r.mode==='add'?' 별도':'')).join(', ')+')</div>':''}
-      ${(manDay.length&&_rpt.bookRev&&manDay.some(r=>r.mode!=='add'))?('<div class="rs'+(_rpt.over?' warn':'')+'">🧮 대조: 예약기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 입력 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.over?'예약합이 <b>'+fmt(_rpt.over)+'</b> 많음 (입력 확인)':'미기록 <b>'+fmt(_rpt.gap)+'</b> 반영')+'</div>'):''}
+      ${_rpt.hasMan?('<div class="rs'+(_rpt.diff<0?' warn':'')+'">🧮 대조: 📋기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 💵실입금 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.diff>0?'미기록 <b>'+fmt(_rpt.diff)+'</b>':(_rpt.diff<0?'⚠️기록이 <b>'+fmt(-_rpt.diff)+'</b> 더 큼 (확인)':'일치 ✅'))+'</div>'):''}
       ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
       ${(preSum||memUsedDay||manSum||depSum)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
@@ -2998,7 +3025,7 @@ function renderDay(){
   const dayE=data.filter(e=>e.date===selDate);
   const vis=dayE.filter(e=>e.status==='방문');
   const _pt=dayRevParts(selDate);
-  const manD=_pt.gap+_pt.manAdd;
+  const manD=_pt.hasMan?_pt.manTotal:0;
   const rev=_pt.total;
   const expD=dayE.filter(e=>e.status==='예약').reduce((s,e)=>s+Number(e.expAmt||0),0);
   const [yy,mm,dd]=selDate.split('-');
@@ -3010,9 +3037,9 @@ function renderDay(){
   else{
     // 사장 모드: 확정 매출 + 남은 예약의 예상 매출을 함께 표시
     const parts=[];
-    if(vis.length)parts.push(`${T('visitN')} ${vis.length} · ${fmt(rev)}`);
+    if(_pt.hasMan)parts.push(`💵 ${fmt(_pt.manTotal)}${_pt.bookRev?` (📋기록 ${fmt(_pt.bookRev)}${_pt.diff>0?`, 미기록 ${fmt(_pt.diff)}`:(_pt.diff<0?`, ⚠️기록초과 ${fmt(-_pt.diff)}`:', 일치 ✅')})`:''}`);
+    else if(vis.length)parts.push(`${T('visitN')} ${vis.length} · ${fmt(rev)}`);
     if(expD)parts.push(`⏳ ${fmt(expD)}`);
-    if(rev&&expD)parts.push(`= ${fmt(rev+expD)}`);
     ps=parts.length?parts.join(' · '):(dayE.length?`${T('bookN')} ${dayE.length}`:'');
   }
   const _poffs=offStaffFor(selDate);
