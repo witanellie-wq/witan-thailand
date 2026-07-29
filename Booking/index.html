@@ -3463,7 +3463,10 @@ function parseMultiBooking(t){
           if(!cur.src&&/^(FB|Facebook|IG|Insta(?:gram)?|LINE|ไลน์|GoWabi|TikTok)\b/i.test(sg)){
             const c=sg.toUpperCase();
             cur.src=/^F/.test(c)?'Facebook':(/^I(G|N)/.test(c)?'Instagram':(/^GO/.test(c)?'GoWabi':(/^T/.test(c)?'TikTok':'LINE')));
-            const id=sg.replace(/^[^:：]*[:：]?\s*/,'').trim();if(id)cur.srcid=id;
+            cur.chan=/^F/.test(c)?'FB':(/^I(G|N)/.test(c)?'IG':(/^L|^ไ/.test(c)?'LINE':''));
+            // "FB: 아이디" 처럼 뒤에 아이디가 붙은 경우만 추출 (채널명만 있으면 빈 값)
+            const im=sg.match(/^[A-Za-zก-๙]+\s*[:：]\s*(.+)$/);
+            if(im&&im[1].trim())cur.srcid=im[1].trim();
             continue;
           }
           if(!cur.visit&&/신규|ลูกค้าใหม่|new/i.test(sg)){cur.visit='신규';continue;}
@@ -3481,7 +3484,13 @@ function parseMultiBooking(t){
           }
           cur.memo.push(sg);
         }
+        // 아이디가 따로 없으면 이름 괄호 안의 프로필명을 계정으로 사용 — 예: คุณสุ (Supannee Su)
+        if(!cur.srcid&&cur.name){
+          const pm=cur.name.match(/[（(]\s*([^()（）]{2,40}?)\s*[)）]\s*$/);
+          if(pm&&!/^\d+$/.test(pm[1].trim()))cur.srcid=pm[1].trim();
+        }
       }
+      if(cur.chan&&cur.srcid)cur.line=cur.chan+': '+cur.srcid;   // LINE/IG 표시란
       blocks.push(cur);continue;
     }
     if(!cur)continue;
@@ -3547,7 +3556,7 @@ function bulkAddParsed(){
   P.blocks.forEach((b,i)=>{
     if(data.find(e=>e.date===P.date&&e.time===b.time&&normPh(e.phone)===normPh(b.phone||''))){skipped++;return;}
     data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
-      seats:b.seats||'1',companion:'',dur:b.dur||'60',line:'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
+      seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
     added++;
