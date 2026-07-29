@@ -106,6 +106,10 @@
   .fc-diff{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px;font-size:11px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .fc-diff b{font-weight:700}
   .fc-up{color:#1c7a41}.fc-down{color:#c0392b}
+  /* 선결제 아이콘 */
+  .preic{display:inline-flex;align-items:center;gap:1px;font-size:.86em;font-weight:700;letter-spacing:-.02em;
+    background:rgba(183,155,94,.16);border-radius:3px;padding:0 3px;margin-left:3px;vertical-align:middle;white-space:nowrap}
+  .tl-block .preic{background:rgba(255,255,255,.22)}
   /* 월별 고객 구성 (재방문·신규·선구매) */
   .mixbox{margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
   .mx{margin-bottom:8px;cursor:pointer}
@@ -1978,6 +1982,28 @@ function renderStatBox(s){
     <div class="conv"><span>${T('convRate')}</span><b>${s.convRate}%</b></div>`;
   _statListStatus=null;
 }
+/* 💳🎟️ 선결제 고객 아이콘 — 예약 리스트 어디서나 한눈에 */
+function prepaidIcon(e){
+  if(!e)return '';
+  if(e.memPaid)return '<span title="Paid from membership balance · ชำระด้วยยอดสมาชิก · 멤버십 잔액 결제 완료">💳✅</span>';
+  const q=normPh(e.phone); if(!q||q.length<7)return '';
+  const hits=(customers||[]).filter(c=>normPh(c.phone)===q);
+  if(!hits.length)return '';
+  let out='';
+  const cr=hits.filter(c=>c.type==='course');
+  const live=cr.find(c=>Math.max(0,(c.total||0)-(c.used||0))>0);
+  if(live){
+    const rem=Math.max(0,(live.total||0)-(live.used||0));
+    out+=`<span title="Course ${rem}/${live.total} left · คอร์สเหลือ ${rem} · 회차권 잔여 ${rem}회">🎟️${rem}</span>`;
+  }else if(cr.length){out+=`<span title="Course used up · คอร์สหมด · 회차권 소진" style="opacity:.45">🎟️</span>`;}
+  const mb=hits.find(c=>c.type==='membership');
+  if(mb){
+    const bal=Number(mb.balance||0);
+    out+=bal>0?`<span title="Membership balance ${fmt(bal)} · ยอดสมาชิก · 멤버십 잔액">💳</span>`
+              :`<span title="Membership balance 0 · ยอดหมด · 멤버십 잔액 0" style="opacity:.45">💳</span>`;
+  }
+  return out?`<span class="preic">${out}</span>`:'';
+}
 // 선구매 고객 여부: 전화번호가 멤버십/회차권 원장에 등록되어 있는가
 function isPrepaidCust(e){
   const q=normPh(e.phone);
@@ -1997,7 +2023,7 @@ function showMixList(kind){
     const [yy,mo,d]=e.date.split('-');
     const amt=isStaff()?'':(fmt(e.amount||0));
     return `<div class="sl-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}</div>
+      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
       <div class="sl-r">${esc(e.treat||e.bktreat||'')}${amt?' · '+amt:''}${e.phone?'<br><span class="sl-ph">'+esc(e.phone)+'</span>':''}</div>
     </div>`}).join('');
 }
@@ -2015,7 +2041,7 @@ function showStatList(st){
     const [yy,mo,d]=e.date.split('-');
     const amt=isStaff()?'':(e.status==='방문'?fmt(e.amount||0):(e.expAmt?'~'+fmt(e.expAmt):''));
     return `<div class="sl-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}</div>
+      <div class="sl-l"><b>${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</b> · ${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${prepaidIcon(e)}</div>
       <div class="sl-r">${esc(e.treat||e.bktreat||'')}${amt?' · '+amt:''}${e.phone?'<br><span class="sl-ph">'+esc(e.phone)+'</span>':''}</div>
     </div>`}).join('');
 }
@@ -2403,7 +2429,7 @@ function renderDay(){
     const cls=['tl-block',e.status==='예약'?'pending':'',p.conflict?'conflict':''].join(' ');
     blocks+=`<div class="${cls}" style="top:${top}px;height:${h}px;left:${left};width:${w}" onclick="openModal('${e.id}')">
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
-      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}</div>
+      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${esc(e.name)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}</div>
       <div class="tb-m">${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div>
     </div>`;
   });
@@ -2416,10 +2442,10 @@ function renderDay(){
   const noshowHtml=inactiveEntries.map(em=>{
     const ic=em.status==='캔슬'?'❌':(em.status==='연기대기'?'⏸':'🚫');
     const info=[em.time||null, esc(em.treat||em.bktreat||''), (!isStaff()&&em.expAmt)?'~'+fmt(em.expAmt):null, em.phone?esc(em.phone):null].filter(Boolean).join(' · ');
-    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${esc(em.name)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
+    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${esc(em.name)}${prepaidIcon(em)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
   }).join('');
   const inactiveLabel = inactiveEntries.length?T('inactiveLbl'):'';
-  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${esc(e.name)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
+  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${esc(e.name)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
 
   list.innerHTML=`${conflictBanner}
     <div class="tl-headrow">${heads}</div>
@@ -2723,7 +2749,7 @@ function doSearch(){
     const [y,mo,d]=e.date.split('-');
     const st=({'예약':'📅'+T('s_예약'),'방문':'✅'+T('s_방문'),'노쇼':'🚫'+T('s_노쇼'),'캔슬':'❌'+T('s_캔슬')}[e.status]||e.status);
     return `<div class="sr-item" onclick="gotoBooking('${e.date}','${e.id}')">
-      <div class="si-l"><div class="si-nm">${e.gender?genIcon(e.gender)+' ':''}${esc(e.name)} <span style="font-size:10px;color:var(--gold-d)">${st}</span></div>
+      <div class="si-l"><div class="si-nm">${e.gender?genIcon(e.gender)+' ':''}${esc(e.name)}${prepaidIcon(e)} <span style="font-size:10px;color:var(--gold-d)">${st}</span></div>
         <div class="si-meta">${esc(e.treat)}${e.srcid?' · '+esc(e.srcid):''}${e.phone?' · '+esc(e.phone):''}${e.line?' · '+esc(e.line):''}</div></div>
       <div class="si-r"><div class="si-date">${Number(mo)}/${Number(d)}${e.time?' '+e.time:''}</div>
         <div class="si-pr">${isStaff()?'':(e.status==='방문'?fmt(e.amount):'')}</div></div>
@@ -3323,7 +3349,7 @@ function renderCheckin(){
     const st=e.status;
     return `<div class="ckrow s${st}">
       <div class="ck-top">
-        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${ckStatusBadge(st)}</div>
+        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${esc(e.name)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}</div>
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
       <div class="ck-meta">${meta||'—'}</div>
