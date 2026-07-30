@@ -434,6 +434,15 @@
   .ckbtn.no.on{background:#c0392b;color:#fff;border-color:#c0392b}
   .ckbtn.post{color:#5b4fd0;border-color:#cdc7f4}
   .ckbtn.reset{flex:0 0 auto;padding:10px 12px;color:var(--muted)}
+  .ckedit{margin-top:9px;background:#F4FAF6;border:1.3px solid #A9D8BC;border-radius:4px;padding:9px 10px}
+  .ckedit .cke-h{font-size:11px;font-weight:800;color:#1c6b3f;margin-bottom:6px}
+  .ckedit select,.ckedit input{font-size:13px;padding:9px 10px}
+  .ckedit .cke-amt{display:flex;gap:6px;margin-top:6px}
+  .ckedit .cke-amt input{flex:1;text-align:right;font-weight:800;font-size:16px;color:var(--gold-d)}
+  .ckedit .cke-amt button{flex:0 0 auto;border:none;background:#2f8f5b;color:#fff;border-radius:3px;padding:0 14px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+  .ckedit .cke-hint{margin-top:6px;font-size:11px;color:#4A5678;display:flex;align-items:center;gap:6px}
+  .ckedit .cke-hint button{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .ckbtn.edit{flex:0 0 auto;padding:10px 12px;color:#1c6b3f;border-color:#A9D8BC}
   .cklrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .cklchip{border:1.3px solid #BCD3EE;background:#EAF2FB;color:#2a5b93;border-radius:3px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
   .cklchip b{color:#1b4c86}
@@ -4168,11 +4177,13 @@ function renderCheckin(){
       ${e.memo?`<div class="ck-meta" style="color:#40506a">📝 ${esc(e.memo)}</div>`:''}
       ${(()=>{const th=translateMemo(e.memo,1);return th?`<div class="memo-th">🌐 ${esc(th)}</div>`:''})()}
       ${ckLedgerChips(e)}
+      ${ckEditPanel(e)}
       <div class="ckacts">
         <button class="ckbtn visit${st==='방문'?' on':''}" onclick="ckSet('${e.id}','방문')">${T('ckBVisit')}</button>
         <button class="ckbtn no${st==='노쇼'?' on':''}" onclick="ckSet('${e.id}','노쇼')">${T('ckBNo')}</button>
         <button class="ckbtn post" onclick="ckPostpone('${e.id}')">${T('ckBPost')}</button>
         <button class="ckbtn wait${st==='연기대기'?' on':''}" onclick="ckSet('${e.id}','연기대기')">${T('ckBWait')}</button>
+        ${st==='방문'?`<button class="ckbtn edit" onclick="ckToggleEdit('${e.id}')" title="시술·금액 입력">✍️</button>`:''}
         ${st!=='예약'?`<button class="ckbtn reset" onclick="ckSet('${e.id}','예약')" title="${T('ckReset')}">↩</button>`:''}
       </div>
     </div>`;
@@ -4199,8 +4210,56 @@ function ckSet(id,status){
   if(status==='방문'){
     if(!Number(e.amount))e.amount=Number(e.expAmt)||Number(e.subtotal)||0;
     if((!e.items||!e.items.length)&&e.treat)e.items=[{treat:e.treat,amount:Number(e.amount)||0}];
-  }
+    _ckEdit=String(id);              // 방문 처리하면 바로 시술·금액 입력창 열기
+  }else if(_ckEdit==String(id))_ckEdit=null;
   e.status=status;
+  save();renderCheckin();render();
+  if(ckDate===selDate&&document.getElementById('dayPanel'))renderDay();
+}
+/* ✍️ 체크인에서 실제 시술·결제금액 입력 */
+let _ckEdit=null;
+function ckToggleEdit(id){_ckEdit=(_ckEdit==String(id))?null:String(id);renderCheckin();}
+function ckEditPanel(e){
+  if(_ckEdit!=String(e.id))return '';
+  const cur=String(e.treat||e.bktreat||'').trim();
+  const menus=Object.keys(BKPRICE);
+  const known=menus.includes(cur);
+  const opts=menus.map(m=>`<option value="${esc(m)}"${known&&m===cur?' selected':''}>${esc(m)}</option>`).join('')
+    +`<option value="__custom__"${known?'':' selected'}>✏️ 직접 입력 · กรอกเอง</option>`;
+  const amt=Number(e.amount)||Number(e.expAmt)||0;
+  return `<div class="ckedit">
+    <div class="cke-h">✍️ 실제 시술·결제금액 · บริการจริง/ยอดจ่ายจริง</div>
+    <select id="cke_sel_${e.id}" onchange="ckEditSelChange('${e.id}')">${opts}</select>
+    <input id="cke_txt_${e.id}" placeholder="시술명 직접 입력 · กรอกชื่อบริการ" value="${known?'':esc(cur)}" style="display:${known?'none':'block'};margin-top:6px">
+    <div class="cke-amt">
+      <input id="cke_amt_${e.id}" inputmode="numeric" placeholder="0" value="${amt||''}">
+      <button type="button" onclick="ckSaveVisit('${e.id}')">💾 저장 · บันทึก</button>
+    </div>
+    ${e.expAmt?`<div class="cke-hint">예약가 ${fmt(e.expAmt)} <button type="button" onclick="ckFillAmt('${e.id}',${Number(e.expAmt)||0})">그대로 넣기</button></div>`:''}
+  </div>`;
+}
+function ckEditSelChange(id){
+  const sel=$('cke_sel_'+id),txt=$('cke_txt_'+id),amt=$('cke_amt_'+id);
+  if(!sel)return;
+  if(sel.value==='__custom__'){txt.style.display='block';txt.focus();}
+  else{
+    txt.style.display='none';
+    const v=BKPRICE[sel.value];
+    if(v>0&&amt&&!Number(String(amt.value).replace(/[^0-9.]/g,'')))amt.value=v;   // 기본가 자동 채움
+  }
+}
+function ckFillAmt(id,v){const a=$('cke_amt_'+id);if(a){a.value=v;a.focus();}}
+function ckSaveVisit(id){
+  const e=data.find(x=>x.id==id);if(!e)return;
+  const sel=$('cke_sel_'+id),txt=$('cke_txt_'+id),amtEl=$('cke_amt_'+id);
+  let treat=sel?(sel.value==='__custom__'?String(txt.value||'').trim():sel.value):'';
+  const amt=Math.round(parseFloat(String((amtEl&&amtEl.value)||'').replace(/[^0-9.]/g,''))||0);
+  if(!treat){alert('시술을 선택하거나 입력해 주세요 · เลือก/กรอกบริการ');if(txt)txt.focus();return}
+  if(amt<=0&&!confirm('금액이 0입니다 · ยอด 0\n그대로 저장할까요? · บันทึกเลยไหม?'))return;
+  e.status='방문';e.treat=treat;e.amount=amt;
+  e.items=[{treat,amount:amt}];
+  e.subtotal=amt;e.discount=0;e.adjust=0;
+  _ckEdit=null;
   save();renderCheckin();render();
   if(ckDate===selDate&&document.getElementById('dayPanel'))renderDay();
 }
