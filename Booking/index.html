@@ -156,6 +156,22 @@
   .staffload .sl-th{display:block;font-size:10px;opacity:.8;margin-top:2px}
   .anonnm{color:#7a8090;font-weight:700}
   .tl-block .anonnm{color:#dfe4ee}
+  /* 🎯 목표 매출 */
+  .tgt-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--wine-d)}
+  .tgt-h button,.tgt-empty button,.tgt-next button{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
+    padding:4px 9px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .tgt-bar{height:11px;background:var(--soft);border-radius:3px;margin:8px 0 5px;overflow:hidden}
+  .tgt-bar i{display:block;height:100%;border-radius:3px}
+  .tgt-bar i.low{background:linear-gradient(90deg,#C2CBDB,#9AA6BD)}
+  .tgt-bar i.mid{background:linear-gradient(90deg,#E9C46A,#C9A84A)}
+  .tgt-bar i.ok{background:linear-gradient(90deg,#2f8f5b,#57b184)}
+  .tgt-l{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#4A5678;flex-wrap:wrap}
+  .tgt-pct{font-weight:800}
+  .tgt-pct.ok{color:#1c7a41}.tgt-pct.mid{color:#8a6d1f}.tgt-pct.low{color:var(--muted)}
+  .tgt-pace{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .tgt-empty{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .tgt-next{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:#4A5678;
+    margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
   /* 선결제 아이콘 */
   .preic{display:inline-flex;align-items:center;gap:1px;font-size:.86em;font-weight:700;letter-spacing:-.02em;
     background:rgba(183,155,94,.16);border-radius:3px;padding:0 3px;margin-left:3px;vertical-align:middle;white-space:nowrap}
@@ -1165,6 +1181,7 @@ let cloudOn=false;                       // 로그인 + 서버 데이터 로드 
 let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
 let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
+let revTargets={};try{revTargets=JSON.parse(localStorage.getItem('hanahayan_revtargets')||'{}')||{}}catch(e){}
 function toggleOffDate(name,dateStr){
   const arr=staffOffDates[name]||(staffOffDates[name]=[]);
   const i=arr.indexOf(dateStr);
@@ -1258,7 +1275,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1285,6 +1302,8 @@ async function fetchAll(){
   try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}
   if(Array.isArray(smap.manual_rev))manualRev=smap.manual_rev;else if(manualRev.length)_dirty.settings=true;
   try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}
+  if(smap.rev_targets&&typeof smap.rev_targets==='object')revTargets=smap.rev_targets;
+  try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1336,6 +1355,7 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(typeof smap.ownerpin==='string'&&smap.ownerpin)try{localStorage.setItem('hanahayan_ownerpin',smap.ownerpin)}catch(e){}
         if(smap.staff_offdates&&typeof smap.staff_offdates==='object'){staffOffDates=smap.staff_offdates;try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}}
         if(Array.isArray(smap.manual_rev)){manualRev=smap.manual_rev;try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}}
+        if(smap.rev_targets&&typeof smap.rev_targets==='object'){revTargets=smap.rev_targets;try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
@@ -2161,8 +2181,61 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,re
       <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(bookRev)}</span>
       <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
     </div>`:''}
+    ${renderTargetSection(cur.getFullYear(),cur.getMonth(),actual,forecast)}
     ${renderReconSection(recon)}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
+}
+/* 🎯 월 목표 매출 */
+function monKey(y,m){return y+'-'+String(m+1).padStart(2,'0');}
+function getTarget(y,m){return Number(revTargets[monKey(y,m)])||0;}
+function setTargetPrompt(ym){
+  const cy=cur.getFullYear(),cm=cur.getMonth();
+  const key=ym||monKey(cy,cm);
+  const [ty,tm]=key.split('-').map(Number);
+  const now=Number(revTargets[key])||0;
+  const v=prompt(`🎯 ${ty}년 ${tm}월 목표 매출 (฿) · เป้ายอดขาย\n(0 또는 빈칸 = 목표 없음)`, now||'');
+  if(v===null)return;
+  const n=Math.round(parseFloat(String(v).replace(/[^0-9.]/g,''))||0);
+  if(n>0)revTargets[key]=n; else delete revTargets[key];
+  try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}
+  queueSync('settings');render();
+}
+function renderTargetSection(y,m,actual,forecast){
+  const tgt=getTarget(y,m);
+  const nk=(m===11)?monKey(y+1,0):monKey(y,m+1);
+  const nextTgt=Number(revTargets[nk])||0;
+  const nextLbl=nk.split('-')[1].replace(/^0/,'')+'월';
+  if(!tgt){
+    return `<div class="fc-diff" style="display:block">
+      <div class="tgt-empty">
+        <span>🎯 이번 달 목표 매출이 없어요</span>
+        <button type="button" onclick="setTargetPrompt()">＋ 목표 정하기</button>
+      </div>
+      <div class="tgt-next">다음 달(${nextLbl}) 목표 ${nextTgt?`<b>${fmt(nextTgt)}</b>`:'미설정'}
+        <button type="button" onclick="setTargetPrompt('${nk}')">${nextTgt?'수정':'＋ 설정'}</button></div>
+    </div>`;
+  }
+  const pct=Math.round(actual/tgt*100);
+  const left=Math.max(0,tgt-actual);
+  // 이 페이스로 갔을 때 월말 예상 (영업일 평균 × 남은 영업일 가정 대신 경과일 비례)
+  const today=todayStr(), ym=monKey(y,m), days=new Date(y,m+1,0).getDate();
+  const isCur=today.slice(0,7)===ym;
+  const passed=isCur?Number(today.slice(8,10)):days;
+  const pace=passed?Math.round(actual/passed*days):actual;
+  const cls=pct>=100?'ok':(pct>=70?'mid':'low');
+  return `<div class="fc-diff" style="display:block">
+    <div class="tgt-h"><span>🎯 목표 ${fmt(tgt)} · เป้าหมาย</span>
+      <button type="button" onclick="setTargetPrompt()">수정</button></div>
+    <div class="tgt-bar"><i class="${cls}" style="width:${Math.max(0,Math.min(100,pct))}%"></i></div>
+    <div class="tgt-l">
+      <span class="tgt-pct ${cls}">${pct}%</span>
+      <span>달성 ${fmt(actual)}</span>
+      <span>${left?`남은 ${fmt(left)}`:'🎉 목표 달성!'}</span>
+    </div>
+    ${isCur?`<div class="tgt-pace">${passed}일 경과 · 이 페이스면 월말 <b>${fmt(pace)}</b> (${Math.round(pace/tgt*100)}%)${forecast>actual?` · 남은 예약 포함 ${fmt(forecast)}`:''}</div>`:''}
+    <div class="tgt-next">다음 달(${nextLbl}) 목표 ${nextTgt?`<b>${fmt(nextTgt)}</b>`:'미설정'}
+      <button type="button" onclick="setTargetPrompt('${nk}')">${nextTgt?'수정':'＋ 설정'}</button></div>
+  </div>`;
 }
 /* 🧮 기록 vs 실입금 대조 — 합산하지 않고 나란히 비교 */
 function renderReconSection(rc){
