@@ -166,6 +166,18 @@
   .mnutbl tr.mnu-bar td{padding:0 4px 6px;border-bottom:none}
   .mnutbl tr.mnu-bar i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#3D5178,#8FA0C4)}
   .mnu-gw{display:inline-block;margin-left:4px;font-size:9.5px;font-weight:700;color:#8a5a12;background:#FFF3E0;border:1px solid #E8B96B;border-radius:3px;padding:0 4px}
+  /* 대시보드 요약 정리 */
+  .fc-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+  .fcc{font-size:10.5px;font-weight:700;color:#4A5678;background:var(--soft2);border:1px solid var(--line);border-radius:12px;padding:4px 9px}
+  .fcc.gw{background:#FFF8ED;border-color:#E8B96B;color:#8a5a12}
+  .fcc.warn{background:#fbe9e9;border-color:#e3a9a9;color:#b5341f}
+  .fc-more{width:100%;margin-top:9px;border:1px dashed var(--line);background:#fff;color:var(--gold-d);
+    border-radius:4px;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .fc-det{margin-top:2px}
+  .tgt-line{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line)}
+  .tgt-line.empty{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+  .tgt-edit{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;padding:3px 8px;
+    font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
   /* 🎯 목표 매출 */
   .tgt-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--wine-d)}
   .tgt-h button,.tgt-empty button,.tgt-next button{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
@@ -2242,44 +2254,65 @@ function prepaidEvents(y,m){
 let _preOpen=false;
 function togglePreList(){_preOpen=!_preOpen;render();}
 /* 💰 예상 매출 vs 실제 매출 (사장 모드 전용) */
+let _fcDetail=false;
+function toggleFcDetail(){_fcDetail=!_fcDetail;render();}
 function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,recon){
   const box=$('fcBox'); if(!box)return;
   if(isStaff()){box.innerHTML='';return}
   memUsed=Number(memUsed)||0; pre=pre||[]; man=man||[]; depRev=Number(depRev)||0;
   recon=recon||{bookSum:0,manDays:0,gapDays:0,total:actual};
-  const manTot=man.reduce((s,r)=>s+r.amt,0);
+  const y=cur.getFullYear(), m=cur.getMonth();
   const visited=monthEntries.filter(e=>e.status==='방문');
-  // 방문 완료 건의 "예약 당시 예상가" — 예상치가 없으면 실제 결제액으로 대체
-  const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
-  const bookRev=recon.bookSum;          // 예약 기록에서 나온 매출 (실입금 입력분 제외)만
-  const pend=monthEntries.filter(e=>e.status==='예약');
-  const forecast=actual+pendingExp;               // 이번 달 최종 예상 = 확정 + 남은 예약
-  const diff=bookRev-doneExp;                     // 방문 건에서 예상 대비 증감
-  const rate=doneExp?Math.round(bookRev/doneExp*100):0;
+  const pend=monthEntries.filter(e=>e.status==='예약'&&!isFinalDay(e.date));
+  const forecast=actual+pendingExp;
   const pctD=forecast?Math.round(actual/forecast*100):0;
   const pctP=forecast?Math.round(pendingExp/forecast*100):0;
+  // 🎯 목표
+  const tgt=getTarget(y,m);
+  const tPct=tgt?Math.round(actual/tgt*100):0;
+  const tCls=tPct>=100?'ok':(tPct>=70?'mid':'low');
+  const today=todayStr(), isCur=today.slice(0,7)===monKey(y,m);
+  const days=new Date(y,m+1,0).getDate(), passed=isCur?Number(today.slice(8,10)):days;
+  const pace=(tgt&&passed)?Math.round(actual/passed*days):0;
+  // 🛍 GoWabi · 💰 선결제 요약 (한 줄)
+  const g=gowabiMonth(monthEntries,y,m);
   box.innerHTML=`
-    <div class="fc-t">💰 Expected vs actual · ยอดคาด/ยอดจริง · 예상 매출 대비 실제</div>
+    <div class="fc-t">💰 이번 달 매출 · ยอดขายเดือนนี้</div>
     <div class="fc-g">
-      <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정 매출<br>ยอดจริง (${visited.length}${manTot?'+직접'+man.length:''})</div></div>
-      <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.filter(e=>!isFinalDay(e.date)).length})${recon.expSkipped?`<br><span style="color:#8a6d1f">확정일 ${fmt(recon.expSkipped)} 제외</span>`:''}</div></div>
-      <div class="fc-c fore"><div class="fv">${fmt(forecast)}</div><div class="fl">월 예상 합계<br>รวมคาดการณ์</div></div>
+      <div class="fc-c done"><div class="fv">${fmt(actual)}</div><div class="fl">확정<br>ยอดจริง (${visited.length})</div></div>
+      <div class="fc-c pend"><div class="fv">${fmt(pendingExp)}</div><div class="fl">예약 예상<br>คิวที่รอ (${pend.length})</div></div>
+      <div class="fc-c fore"><div class="fv">${fmt(forecast)}</div><div class="fl">월 예상<br>รวมคาด</div></div>
     </div>
     <div class="fc-bar"><i class="d" style="width:${pctD}%"></i><i class="p" style="width:${pctP}%"></i></div>
     <div class="fc-lg"><span>✅ 확정 ${pctD}%</span><span>⏳ 예약분 ${pctP}%</span></div>
-    ${(manTot||depRev)?`<div class="fc-lg" style="color:#4A5678">
-      ${recon.manDays?`<span>💵 실입금 직접입력 ${recon.manDays}일</span>`:''}
-      ${depRev?`<span>💰 선입금 ${fmt(depRev)}</span>`:''}
-      ${manTot?`<span>${Object.entries(man.reduce((o,r)=>{o[r.pay]=(o[r.pay]||0)+r.amt;return o},{})).map(([k,v])=>(k==='이체'?'🏦':(k==='카드'?'💳':'💵'))+k+' '+fmt(v)).join(' · ')}</span>`:''}
+    ${tgt?`<div class="tgt-line">
+      <div class="tgt-bar"><i class="${tCls}" style="width:${Math.max(0,Math.min(100,tPct))}%"></i></div>
+      <div class="tgt-l"><span class="tgt-pct ${tCls}">🎯 ${tPct}%</span>
+        <span>목표 ${fmt(tgt)}</span>
+        <span>${actual>=tgt?'🎉 달성':'남은 '+fmt(tgt-actual)}</span>
+        ${isCur&&pace?`<span>이 페이스 ${fmt(pace)}</span>`:''}
+        <button type="button" class="tgt-edit" onclick="setTargetPrompt()">수정</button></div>
+    </div>`:`<div class="tgt-line empty"><span>🎯 이번 달 목표 미설정</span>
+      <button type="button" class="tgt-edit" onclick="setTargetPrompt()">＋ 목표</button></div>`}
+    ${(g.n||recon.manDays||depRev)?`<div class="fc-chips">
+      ${g.n?`<span class="fcc gw">🛍 GoWabi ${fmt(g.gross)}${gowabiRate?` → ${fmt(g.net)}`:''}</span>`:''}
+      ${depRev?`<span class="fcc">💰 선입금 ${fmt(depRev)}</span>`:''}
+      ${recon.manDays?`<span class="fcc">💵 직접입력 ${recon.manDays}일</span>`:''}
+      ${recon.gapDays?`<span class="fcc warn">⚠️ 기록 차이 ${recon.gapDays}일</span>`:''}
     </div>`:''}
-    ${doneExp?`<div class="fc-diff">
-      <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(bookRev)}</span>
-      <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
-    </div>`:''}
-    ${renderGowabiSection(monthEntries,cur.getFullYear(),cur.getMonth())}
-    ${renderTargetSection(cur.getFullYear(),cur.getMonth(),actual,forecast)}
-    ${renderReconSection(recon)}
-    ${renderPrepaidSection(actual,memUsed,pre)}`;
+    <button type="button" class="fc-more" onclick="toggleFcDetail()">${_fcDetail?'▲ 상세 접기':'▼ 상세 보기 (기록 대조 · 선결제 · GoWabi 정산)'}</button>
+    ${_fcDetail?`<div class="fc-det">
+      ${renderReconSection(recon)}
+      ${renderPrepaidSection(actual,memUsed,pre)}
+      ${renderGowabiSection(monthEntries,y,m)}
+      ${(()=>{const doneExp=visited.reduce((s,e)=>s+(Number(e.expAmt)||Number(e.amount)||0),0);
+        if(!doneExp)return '';
+        const d=recon.bookSum-doneExp, r=Math.round(recon.bookSum/doneExp*100);
+        return `<div class="fc-diff"><span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(recon.bookSum)}</span>
+          <b class="${d>0?'fc-up':(d<0?'fc-down':'')}">${d>0?'▲ +':(d<0?'▼ −':'― ')}${fmt(Math.abs(d))} · ${r}%</b></div>`;})()}
+      ${tgt?`<div class="fc-diff" style="display:block"><div class="tgt-next">다음 달 목표 ${(()=>{const nk=(m===11)?monKey(y+1,0):monKey(y,m+1);const nt=Number(revTargets[nk])||0;
+        return (nt?`<b>${fmt(nt)}</b>`:'미설정')+` <button type="button" class="tgt-edit" onclick="setTargetPrompt('${nk}')">${nt?'수정':'＋ 설정'}</button>`;})()}</div></div>`:''}
+    </div>`:''}`;
 }
 /* ============================================================
    📄 종이 서식 (A4) — 방문자 기록부 · 멤버십 기록부
@@ -2296,6 +2329,12 @@ function openForms(){
   $('formsOverlay').classList.add('on');
 }
 function closeForms(){$('formsOverlay').classList.remove('on');}
+// 인쇄 서식은 태국어·영어만 — 한국어 기록을 변환
+function fmNote(txt){
+  const th=translateMemo(txt,1), en=translateMemo(txt,2);
+  const base=(th||en||txt);
+  return String(base).replace(/\s{2,}/g,' ').slice(0,44);
+}
 const FHEAD=`<div class="ps-head">
   <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>`;
 function printVisitorForm(){
@@ -2315,17 +2354,17 @@ function printVisitorForm(){
       +`<td>${e?esc(e.treat||e.bktreat||''):''}</td>`
       +`<td class="p-price"></td>`
       +`<td class="fm-c">${e?'✓':''}</td>`
-      +`<td>${e&&Number(e.depAmt)&&!e.depRefund?('선결제 '+fmt(e.depAmt)):''}</td></tr>`;
+      +`<td>${e&&Number(e.depAmt)&&!e.depRefund?('มัดจำ '+fmt(e.depAmt)+'<br><small>Deposit</small>'):''}</td></tr>`;
   }
   $('printSheet').innerHTML=`${FHEAD}
-      <div class="ps-doc">บันทึกลูกค้าเข้ารับบริการจริง<small>Actual Visitor &amp; Payment Record · 방문자 기록부</small></div>
+      <div class="ps-doc">บันทึกลูกค้าเข้ารับบริการจริง<small>Actual Visitor &amp; Payment Record</small></div>
     </div>
     <div class="fm-warn">📌 กรุณาบันทึก “ลูกค้าที่มาจริง” ทุกคน พร้อม “ยอดชำระจริง” — ใบนี้ใช้เทียบกับการจองออนไลน์<br>
       <span>Please record every actual visitor and the actual amount paid. This sheet is compared against online bookings.</span></div>
     <div class="ps-meta">
-      <div class="m"><span class="k">วันที่<small>날짜</small></span>${y}. ${mo}. ${dd}</div>
-      <div class="m"><span class="k">วัน<small>요일</small></span>${thDow}</div>
-      <div class="m"><span class="k">ผู้บันทึก<small>기록자</small></span></div>
+      <div class="m"><span class="k">วันที่<small>Date</small></span>${y}. ${mo}. ${dd}</div>
+      <div class="m"><span class="k">วัน<small>Day</small></span>${thDow}</div>
+      <div class="m"><span class="k">ผู้บันทึก<small>Recorded by</small></span></div>
     </div>
     <table class="fmtbl"><thead><tr>
       <th class="p-no">No.</th><th style="width:13mm">เวลา<small>Time</small></th>
@@ -2364,23 +2403,23 @@ function printMemberForm(){
     }
     rows+=`<tr><td class="p-no">${i+1}</td>`
       +`<td class="fm-c">${h?String(h.t||'').slice(0,10):''}</td>`
-      +`<td>${h?esc(String(h.note||'').slice(0,40)):''}</td>`
+      +`<td>${h?esc(fmNote(String(h.note||''))):''}</td>`
       +`<td class="p-price">${plus}</td><td class="p-price">${minus}</td>`
       +`<td class="p-price"></td><td></td><td></td></tr>`;
   }
   $('printSheet').innerHTML=`${FHEAD}
-      <div class="ps-doc">สมุดบันทึกสมาชิก (เมมเบอร์ชิพ)<small>Membership Balance Record · 멤버십 기록부</small></div>
+      <div class="ps-doc">สมุดบันทึกสมาชิก (เมมเบอร์ชิพ)<small>Membership Balance Record</small></div>
     </div>
     <div class="ps-meta">
-      <div class="m"><span class="k">ชื่อสมาชิก<small>회원명</small></span>${c?esc(c.name||''):''}</div>
-      <div class="m"><span class="k">เบอร์โทร<small>전화</small></span>${c?esc(c.phone||''):''}</div>
-      <div class="m"><span class="k">ระดับ<small>등급</small></span>${c?esc(c.tier||''):''}</div>
+      <div class="m"><span class="k">ชื่อสมาชิก<small>Member name</small></span>${c?esc(c.name||''):''}</div>
+      <div class="m"><span class="k">เบอร์โทร<small>Phone</small></span>${c?esc(c.phone||''):''}</div>
+      <div class="m"><span class="k">ระดับ<small>Tier</small></span>${c?esc(c.tier||''):''}</div>
     </div>
     <div class="ps-meta" style="border-top:none">
-      <div class="m"><span class="k">วันสมัคร<small>시작일</small></span>${c?esc(c.buyDate||''):''}</div>
-      <div class="m"><span class="k">ชาร์จ ฿<small>충전</small></span>${c?fmt(Number(c.charged)||0):''}</div>
-      <div class="m"><span class="k">โบนัส ฿<small>보너스</small></span>${c?fmt(Number(c.bonus)||0):''}</div>
-      <div class="m"><span class="k">ยอดคงเหลือ ฿<small>현재 잔액</small></span>${c?fmt(Number(c.balance)||0):''}</div>
+      <div class="m"><span class="k">วันสมัคร<small>Start date</small></span>${c?esc(c.buyDate||''):''}</div>
+      <div class="m"><span class="k">ชาร์จ ฿<small>Charged</small></span>${c?fmt(Number(c.charged)||0):''}</div>
+      <div class="m"><span class="k">โบนัส ฿<small>Bonus</small></span>${c?fmt(Number(c.bonus)||0):''}</div>
+      <div class="m"><span class="k">ยอดคงเหลือ ฿<small>Balance</small></span>${c?fmt(Number(c.balance)||0):''}</div>
     </div>
     <table class="fmtbl"><thead><tr>
       <th class="p-no">No.</th><th style="width:22mm">วันที่<small>Date</small></th>
@@ -3110,7 +3149,10 @@ const MEMO_DICT=[
   ['영어','ภาษาอังกฤษ','English'],['한국어','ภาษาเกาหลี','Korean'],['태국어','ภาษาไทย','Thai'],['일본어','ภาษาญี่ปุ่น','Japanese'],
   ['통역','ล่าม','interpreter'],
   // 기타
-  ['다음 예약','นัดครั้งหน้า','next appointment'],['다음','ครั้งหน้า','next'],['회차','ครั้ง','session'],
+  ['결제 차감','หักชำระ','payment deducted'],['체크인 차감','หักตอนเช็คอิน','deducted at check-in'],
+  ['붙여넣기 충전','เติมเงิน','top-up'],['붙여넣기 등록','ลงทะเบียน','registered'],['붙여넣기 추가','เพิ่มคอร์ส','sessions added'],
+  ['잔액','คงเหลือ','balance'],['충전','เติมเงิน','top-up'],['사용','ใช้','used'],['등록','ลงทะเบียน','registered'],
+  ['선결제','จ่ายล่วงหน้า','prepaid'],['다음 예약','นัดครั้งหน้า','next appointment'],['다음','ครั้งหน้า','next'],['회차','ครั้ง','session'],
   ['멤버십','สมาชิก','membership'],['회차권','คอร์ส','course'],['할인','ส่วนลด','discount'],['무료','ฟรี','free'],
   ['추가','เพิ่ม','add'],['제안','เสนอ','suggested'],['요청','ขอ','request'],['확인','ตรวจสอบ','check'],['주의','ระวัง','caution'],
   // 자주 쓰는 일반 낱말
