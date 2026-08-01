@@ -5152,6 +5152,16 @@ function parseCardBlocks(t){
 }
 /* 💰 메모에서 선결제 금액 읽기
    "선결제 완료" → 전액 / "선결제 300" → 300 / "มัดจำ 500" → 500 */
+// 시술 문구에서 금액만 뽑기 — "HIFU 800샷 1,290" → 1290, "= 합계" 우선
+function priceOfText(t){
+  const s0=String(t||'');
+  const eq=s0.match(/=\s*([\d,]{2,9})/);
+  if(eq)return +eq[1].replace(/,/g,'');
+  const cleaned=s0.replace(/[\d,]+\s*(?:샷|ช็อต|shots?|회차|회|ครั้ง|분|นาที|mins?|min|cc|ml)/gi,' ');
+  const all=cleaned.match(/[\d,]{3,9}/g);
+  if(!all)return 0;
+  return +all[all.length-1].replace(/,/g,'');
+}
 function applyPrepaid(blocks){
   const DONE=/(선결제|선입금|예약금|계약금|มัดจำ|จ่ายล่วงหน้า|deposit|prepaid|paid)\s*(?:은|는)?\s*(완료|완납|끝|됨|แล้ว|done|full)/i;
   const AMT=/(?:선결제|선입금|예약금|계약금|มัดจำ|จ่ายล่วงหน้า|deposit|prepaid)\D{0,4}([\d,]{2,8})/i;
@@ -5199,12 +5209,30 @@ function parseMultiBooking(t){
     applyPrepaid(cards);
     return {date,blocks:cards,guessed:!best,holds:[]};
   }
-  const blocks=[];let cur=null;
+  const blocks=[];let cur=null;let curDate=null;
+  const dateOf=l=>{
+    let m=l.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m)return m[1]+'-'+String(+m[2]).padStart(2,'0')+'-'+String(+m[3]).padStart(2,'0');
+    m=l.match(/(\d{1,2})\s+([ก-๙]+(?:\.[ก-๙]+)?\.?)/u);
+    if(m){const mo=TH_MONTHS[m[2].replace(/\.$/,'')];if(mo)return (new Date()).getFullYear()+'-'+String(mo).padStart(2,'0')+'-'+String(+m[1]).padStart(2,'0');}
+    m=l.match(/(\d{1,2})\s*[\/.]\s*(\d{1,2})(?!\d|\s*[:.]\d)/);
+    if(m){
+      let a=+m[1],b=+m[2],mm,dd;
+      if(a>12){dd=a;mm=b;}else if(b>12){mm=a;dd=b;}
+      else if(/[가-힣]/.test(l)){mm=a;dd=b;}else{dd=a;mm=b;}
+      if(mm>=1&&mm<=12&&dd>=1&&dd<=31)return (new Date()).getFullYear()+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
+    }
+    return null;
+  };
   for(const l of lines){
+    // "2026-08-07 예약 리스트" 같은 날짜 헤더 → 이후 예약들의 날짜
+    if(/(예약\s*리스트|리스트|คิว|list)/i.test(l)&&!/[|｜]/.test(l)){
+      const d=dateOf(l); if(d){curDate=d;cur=null;continue;}
+    }
     const lt=l.replace(/^[\p{Extended_Pictographic}️‍\s]+/gu,'');
     const tm=lt.match(/^(\d{1,2})[:.](\d{2})(?:\s*[–—~\-]\s*(\d{1,2})[:.](\d{2}))?\s*(?:น\.)?\s*[|｜—–\-·]\s*(.+)$/u);
     if(tm){
-      cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[5].trim(),memo:[]};
+      cur={time:String(+tm[1]).padStart(2,'0')+':'+tm[2],name:tm[5].trim(),memo:[],date:curDate||null};
       if(tm[3]){const d=(+tm[3]*60+ +tm[4])-(+tm[1]*60+ +tm[2]);if(d>=15&&d<=360)cur.dur=String(d);}
       // 파이프(|) 구분 필드: 이름 | 전화 | 채널 | 시술+가격 | 신규/재방문 | 메모
       if(cur.name.includes('|')||cur.name.includes('｜')){
@@ -5222,13 +5250,18 @@ function parseMultiBooking(t){
             if(im&&im[1].trim())cur.srcid=im[1].trim();
             continue;
           }
+          if(!cur.treat&&/(BB|HIFU|ไฮฟู|콤보|코스|세트|LDM|RF|맥슈어|MacSure|라라필|LALA|메조|Meso|두피|Glow|peel|필링)/i.test(sg)
+             &&!/신규|재방문|ลูกค้า/i.test(sg)){
+            const p2=priceOfText(sg);
+            cur.treat=sg;
+            if(p2>=50)cur.price=Math.round(p2);
+            const x2=sg.match(/[×x]\s*(\d{1,2})/i);if(x2&&+x2[1]>1)cur.seats=x2[1];
+            continue;
+          }
           if(!cur.visit&&/신규|ลูกค้าใหม่|new/i.test(sg)){cur.visit='신규';continue;}
           if(!cur.visit&&/재방문|ลูกค้าเก่า|revisit|regular/i.test(sg)){cur.visit='재방문';continue;}
           if(!cur.treat&&/\d/.test(sg)&&/[가-힣A-Za-zก-๙]/.test(sg)){
-            let price=null;
-            const eq=sg.match(/=\s*([\d,]{2,9})/);          // "990 × 2 = 1,980" → 합계
-            if(eq)price=+eq[1].replace(/,/g,'');
-            else{const p1=sg.match(/([\d,]{3,9})(?:\s*\.?-)?(?=\s|$|\()/);if(p1)price=+p1[1].replace(/,/g,'');}
+            const price=priceOfText(sg);
             if(price&&price>=50){
               cur.price=Math.round(price);cur.treat=sg;
               const x2=sg.match(/[×x]\s*(\d{1,2})/i);if(x2&&+x2[1]>1)cur.seats=x2[1];
@@ -5268,7 +5301,7 @@ function parseMultiBooking(t){
   }
   // ── 미확정 / 대기 줄 → 연기대기(Pending)로 수집 ──
   const holds=[];
-  const HOLD_RE=/^(미확정|대기|보류|확정\s*대기|pending|hold|รอ(?:ยืนยัน)?)\s*[:：]?\s*(.+)$/i;
+  const HOLD_RE=/^(미확정|가예약|임시|대기|보류|확정\s*대기|pending|hold|tentative|รอ(?:ยืนยัน)?)\s*[:：]?\s*(.+)$/i;
   lines.forEach(l=>{
     const m=String(l||'').trim().match(HOLD_RE);
     if(!m||!m[2])return;
@@ -5345,13 +5378,19 @@ function closeParsePreviewAndGo(date){
 }
 function renderBulkPreview(P){
   _bulkParsed=P;
-  const dups=P.blocks.map(b=>!!bulkFindExisting(P.date,b));
+  const dups=P.blocks.map(b=>!!bulkFindExisting(b.date||P.date,b));
   P.blocks.forEach(b=>{if(!b.status)b.status='예약';});
-  let html='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="color:var(--wine)">📅</b>'
+  const _ds=[...new Set(P.blocks.map(b=>b.date||P.date))];
+  let html=(_ds.length>1?`<div style="background:#EAF6EF;border:1.2px solid #A9D8BC;border-radius:4px;padding:7px 10px;margin-bottom:7px;font-size:11.5px;font-weight:700;color:#1c6b3f">📆 ${_ds.length}개 날짜 · 날짜별로 나눠서 등록됩니다</div>`:'')
+    +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="color:var(--wine)">📅</b>'
     +'<input type="date" value="'+P.date+'" onchange="bulkSetDate(this.value)" style="width:auto;padding:6px 8px;font-size:13px;font-weight:700">'
     +'<b style="color:var(--wine)">'+P.blocks.length+' bookings · พบ '+P.blocks.length+' คิว</b></div>'
     +(P.guessed?'<div style="color:#b5341f;font-size:11px;font-weight:700;margin:4px 0 2px">⚠️ 텍스트에 날짜가 없어 위 날짜로 추정했어요 — 꼭 확인! · ไม่พบวันที่ในข้อความ กรุณาตรวจสอบ</div>':'');
-  html+=P.blocks.map((b,i)=>'<div style="padding:4px 0 7px;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
+  let _lastD=null;
+  html+=P.blocks.map((b,i)=>{
+    const bd=b.date||P.date;
+    const hdr=(bd!==_lastD)?(_lastD=bd,`<div style="margin:8px 0 3px;font-size:11.5px;font-weight:800;color:var(--wine-d);border-top:1px solid var(--line);padding-top:6px">📅 ${bd}</div>`):'';
+    return hdr+'<div style="padding:4px 0 7px;border-bottom:1px dashed var(--line)'+(dups[i]?';opacity:.45':'')+'">'
     +'<b>'+(b.time||'--')+'</b> '+esc(b.name||'')+' '+(dups[i]?'<span style="color:#c0392b">(duplicate — skip · ซ้ำ)</span>':'')+'<br>'
     +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
     +(b.src?' · '+b.src+(b.srcid?': '+esc(b.srcid):''):'')
@@ -5363,7 +5402,7 @@ function renderBulkPreview(P){
       +'<button class="bpb v'+(b.status==='방문'?' on':'')+'" onclick="bulkSetStatus('+i+',\'방문\',this)">✅ 방문 มาแล้ว</button>'
       +'<button class="bpb n'+(b.status==='노쇼'?' on':'')+'" onclick="bulkSetStatus('+i+',\'노쇼\',this)">❌ 노쇼 ไม่มา</button>'
       +'</div>')
-    +'</div>').join('');
+    +'</div>';}).join('');
   const holds=P.holds||[];
   if(holds.length){
     html+='<div style="margin-top:9px;border-top:1px dashed var(--line);padding-top:8px">'
@@ -5391,8 +5430,9 @@ function bulkAddParsed(){
   const P=_bulkParsed;if(!P)return;
   let added=0,skipped=0;
   P.blocks.forEach((b,i)=>{
-    if(bulkFindExisting(P.date,b)){skipped++;return;}
-    data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
+    const bd=b.date||P.date;
+    if(bulkFindExisting(bd,b)){skipped++;return;}
+    data.push({id:Date.now()+i,date:bd,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
       seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:'',
