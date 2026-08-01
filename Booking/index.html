@@ -3769,12 +3769,34 @@ function doSearch(){
     const phoneMatch=qDigits.length>=3 && (String(e.phone||'').replace(/[^0-9]/g,'')).includes(qDigits);
     return textMatch||phoneMatch;
   }).sort((a,b)=>b.date.localeCompare(a.date)||(b.time||'').localeCompare(a.time||''));
+  // 원장(코스·멤버십)도 함께 검색 — 예약 기록이 없어도 찾을 수 있게
+  const ledHits=(customers||[]).filter(c=>{
+    const t=[c.name,c.line,c.treat,c.tier,c.memo].some(f=>(f||'').toLowerCase().includes(raw));
+    const ph=qDigits.length>=3&&String(c.phone||'').replace(/[^0-9]/g,'').includes(qDigits);
+    return t||ph;
+  });
+  const ledHtml=ledHits.length?`<div class="sr-h">🎫 ${T('ledTitle')||'고객 원장'} — ${ledHits.length}</div>`+ledHits.map(c=>{
+    const rem=c.type==='course'?Math.max(0,(c.total||0)-(c.used||0)):0;
+    const info=c.type==='course'
+      ? `🎟️ ${esc(c.treat||'코스')} · 잔여 <b>${rem}/${c.total||0}</b>${rem<=0?' <span style="color:#b5341f">소진</span>':''}`
+      : `💳 멤버십${c.tier?' ('+esc(c.tier)+')':''} · 잔액 <b>${fmt(Number(c.balance)||0)}</b>`;
+    return `<div class="sr-item" onclick="gotoLedger('${esc(String(c.phone||''))}','${esc(String(c.name||''))}')">
+      <div class="si-l"><div class="si-nm">${esc(c.name||'')}</div>
+        <div class="si-meta">${info}${c.phone?' · '+esc(c.phone):''}${c.buyDate?' · 구매 '+c.buyDate:''}</div></div>
+      <div class="si-r"><div class="si-date">원장 보기 ▸</div></div>
+    </div>`;
+  }).join(''):'';
   box.style.display='block';
-  if(!hits.length){box.innerHTML=`<div class="sr-empty">"${esc(raw)}" — no results · ไม่พบผลลัพธ์</div>`;return;}
+  if(!hits.length){
+    box.innerHTML=ledHtml
+      ? ledHtml+`<div class="sr-empty" style="padding:10px">예약 기록은 없어요 · ไม่มีคิว</div>`
+      : `<div class="sr-empty">"${esc(raw)}" — no results · ไม่พบผลลัพธ์</div>`;
+    return;
+  }
   const totalSpent=hits.filter(e=>e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
   const visits=hits.filter(e=>e.status==='방문').length;
   const names=[...new Set(hits.map(e=>e.name))];
-  let html=`<div class="sr-h">🔍 "${esc(raw)}" — ${hits.length}${names.length>1?' ('+names.length+' ppl)':''}</div>`;
+  let html=ledHtml+`<div class="sr-h">🔍 "${esc(raw)}" — ${hits.length}${names.length>1?' ('+names.length+' ppl)':''}</div>`;
   html+=`<div class="sr-sum">${T('visitN')} <b>${visits}</b>${isStaff()?'':' · Total <b>'+fmt(totalSpent)+'</b>'+(visits?' · Avg '+fmt(Math.round(totalSpent/visits)):'')}</div>`;
   html+=hits.map(e=>{
     const [y,mo,d]=e.date.split('-');
@@ -3787,6 +3809,13 @@ function doSearch(){
     </div>`;
   }).join('');
   box.innerHTML=html;
+}
+// 검색 결과에서 원장으로 이동 (해당 고객 필터)
+function gotoLedger(phone,name){
+  openCustMgr();
+  setTimeout(()=>{
+    if($('custSearch')){$('custSearch').value=phone||name||'';renderCustList();}
+  },80);
 }
 function clearSearch(){$('searchInput').value='';$('sclearBtn').style.display='none';$('searchResults').style.display='none';}
 function gotoBooking(date,id){
