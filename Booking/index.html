@@ -4508,6 +4508,82 @@ function parseBookingText(t){
 /* ===== 여러 건 한꺼번에 붙여넣기 (일일 큐 리스트) ===== */
 let _bulkParsed=null;
 const TH_MONTHS={'มกราคม':1,'กุมภาพันธ์':2,'มีนาคม':3,'เมษายน':4,'พฤษภาคม':5,'มิถุนายน':6,'กรกฎาคม':7,'สิงหาคม':8,'กันยายน':9,'ตุลาคม':10,'พฤศจิกายน':11,'ธันวาคม':12,'ม.ค':1,'ก.พ':2,'มี.ค':3,'เม.ย':4,'พ.ค':5,'มิ.ย':6,'ก.ค':7,'ส.ค':8,'ก.ย':9,'ต.ค':10,'พ.ย':11,'ธ.ค':12};
+/* 📋 카드 형식 파서 — ━━ 로 구분되고 이모지 라벨(📅👤📱📲💧💰📝)이 붙은 확인서 묶음 */
+function parseCardBlocks(t){
+  const pad=n=>String(n).padStart(2,'0');
+  const chunks=String(t||'').split(/\n\s*[━─═=]{3,}[^\n]*\n/);
+  const out=[];
+  chunks.forEach(ch=>{
+    const lines=ch.split(/\n/).map(x=>x.trim()).filter(Boolean);
+    if(!lines.some(l=>/^👤/u.test(l)))return;              // 예약 카드가 아닌 묶음(헤더·체크리스트)은 건너뜀
+    const b={memo:[]};
+    let inMemo=false;
+    lines.forEach(raw=>{
+      const s=raw.replace(/^[\p{Extended_Pictographic}️‍\s]+/gu,'').trim();
+      if(!s)return;
+      if(/^📅/u.test(raw)){
+        const iso=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if(iso)b.date=iso[1]+'-'+pad(+iso[2])+'-'+pad(+iso[3]);
+        else{
+          const dm=s.match(/(\d{1,2})\s+([ก-๙.]+)\s+(\d{4})/u);
+          if(dm){const mo=TH_MONTHS[dm[2].replace(/\.$/,'')];if(mo)b.date=dm[3]+'-'+pad(mo)+'-'+pad(+dm[1]);}
+        }
+        const tr=s.match(/(\d{1,2})[:.](\d{2})\s*[–—~\-]\s*(\d{1,2})[:.](\d{2})/);
+        if(tr){
+          b.time=pad(+tr[1])+':'+tr[2];
+          const d=(+tr[3]*60+ +tr[4])-(+tr[1]*60+ +tr[2]);
+          if(d>=15&&d<=360)b.dur=String(d);
+        }else{const t1=s.match(/(\d{1,2})[:.](\d{2})/);if(t1)b.time=pad(+t1[1])+':'+t1[2];}
+        const pax=s.match(/(\d{1,2})\s*(?:ท่าน|คน|인)/u);
+        if(pax&&+pax[1]>1)b.seats=pax[1];
+        return;
+      }
+      if(/^👤/u.test(raw)){
+        b.name=s;
+        if(/[+＋]/.test(s)&&!b.seats)b.seats='2';           // "A + 딸", "B + 친구 1명"
+        return;
+      }
+      if(/^📱/u.test(raw)){
+        const ph=s.match(/(0\d{1,2}[- ]?\d{3}[- ]?\d{3,4})/);
+        if(ph)b.phone=ph[1]; else b.memo.push(s);
+        return;
+      }
+      if(/^📲/u.test(raw)){
+        const c=s.toUpperCase();
+        b.src=/^F|FACEBOOK/.test(c)?'Facebook':(/INSTA|^IG/.test(c)?'Instagram':(/LINE/.test(c)?'LINE':(/WHATSAPP/.test(c)?'기타':(/GOWABI/.test(c)?'GoWabi':'기타'))));
+        const id=s.split(/\s*[·|]\s*/).slice(1).join(' ').trim();
+        if(id)b.srcid=id;
+        if(/WHATSAPP/.test(c))b.memo.push(s);
+        return;
+      }
+      if(/^💰/u.test(raw)){
+        if(/คอร์ส|course|회차권|ห้ามเก็บเงิน/i.test(s)){b.price=0;b.memo.push(s);return;}
+        const eq=s.match(/=\s*([\d,]{3,9})/);
+        if(eq)b.price=Math.round(+eq[1].replace(/,/g,''));
+        else{const m=s.match(/([\d,]{3,9})\s*\.?-/);if(m)b.price=Math.round(+m[1].replace(/,/g,''));}
+        if(/มัดจำ/.test(s)&&!/ไม่ได้มัดจำ/.test(s))b.memo.push(s);
+        if(b.price==null)b.memo.push(s);
+        return;
+      }
+      if(/^(💧|💆|⚡|💉|🧴|✨)/u.test(raw)){
+        const du=s.match(/(?:(\d{2,3})\s*[–—~\-]\s*)?(\d{2,3})\s*(?:นาที|min|분)/i);
+        if(du&&!b.dur)b.dur=du[2];
+        let tt=s.split(/\s*·\s*/).filter(x=>!/นาที|min|분|จบ\s*\d|^\d{1,2}[:.]\d{2}/.test(x)).join(' · ').trim();
+        tt=tt.replace(/\s*\(ครบเซ็ต\)/,'').trim();
+        if(tt)b.treat=b.treat?(b.treat+' + '+tt):tt;
+        return;
+      }
+      if(/^📝/u.test(raw)){inMemo=true;return;}
+      if(/^📍/u.test(raw))return;                            // 지점 정보는 생략
+      if(/ลูกค้าใหม่|신규/.test(s))b.visit='신규';
+      if(/ลูกค้าเก่า|재방문/.test(s))b.visit='재방문';
+      if(inMemo||/^(🔴|⚠️|🎯|💡|📸|🎁|🆕|🔁|🇬🇧|💄|⏰|🚫)/u.test(raw))b.memo.push(s);
+    });
+    if(!b.price)b.price=0;
+    if(b.name)out.push(b);
+  });
+  return out;
+}
 function parseMultiBooking(t){
   const lines=t.split(/\n/).map(s=>s.trim());
   let date='';
@@ -4528,6 +4604,15 @@ function parseMultiBooking(t){
   if(!date){
     if(lines.slice(0,3).some(l=>/พรุ่งนี้|내일|tomorrow/i.test(l))){const d=new Date();d.setDate(d.getDate()+1);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());date=d.toISOString().slice(0,10);}
     else{date=(typeof selDate!=='undefined'&&selDate)?selDate:todayStr();guessed=true;} // 텍스트에 날짜 없음 → 달력에서 선택한 날짜 우선
+  }
+  // 카드 형식(━━ 구분 확인서)이면 그쪽으로 처리
+  const cards=parseCardBlocks(t);
+  if(cards.length>=1){
+    const cnt={};cards.forEach(c=>{if(c.date)cnt[c.date]=(cnt[c.date]||0)+1});
+    const best=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+    if(best){date=best;guessed=false;}
+    cards.forEach(c=>{c.memo=(c.memo||[]).filter(Boolean);});
+    return {date,blocks:cards,guessed:!best,holds:[]};
   }
   const blocks=[];let cur=null;
   for(const l of lines){
