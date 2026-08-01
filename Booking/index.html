@@ -456,6 +456,9 @@
   .ckedit .cke-amt{display:flex;gap:6px;margin-top:6px}
   .ckedit .cke-amt input{flex:1;text-align:right;font-weight:800;font-size:16px;color:var(--gold-d)}
   .ckedit .cke-amt button{flex:0 0 auto;border:none;background:#2f8f5b;color:#fff;border-radius:3px;padding:0 14px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+  .ckedit .cke-crs{display:block;background:#EAF2FB;border:1.2px solid #BCD3EE;border-radius:4px;padding:8px 10px;margin-bottom:7px;font-size:11.5px;color:#2a5b93;font-weight:700;cursor:pointer}
+  .ckedit .cke-crs input{width:auto;margin-right:5px;vertical-align:-1px}
+  .ckedit .cke-crs span{display:block;font-weight:500;font-size:10.5px;color:#40506a;margin-top:3px}
   .ckedit .cke-hint{margin-top:6px;font-size:11px;color:#4A5678;display:flex;align-items:center;gap:6px}
   .ckedit .cke-hint button{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit}
   .ckbtn.edit{flex:0 0 auto;padding:10px 12px;color:#1c6b3f;border-color:#A9D8BC}
@@ -4304,7 +4307,8 @@ function renderPending(pendAll){
 function ckSet(id,status){
   const e=data.find(x=>x.id==id);if(!e)return;
   if(status==='방문'){
-    if(!Number(e.amount))e.amount=Number(e.expAmt)||Number(e.subtotal)||0;
+    // 회차권 보유 손님은 코스분이 이미 결제됨 → 예약가를 자동으로 채우지 않음 (추가분만 입력)
+    if(!Number(e.amount)&&!activeCourseOf(e))e.amount=Number(e.expAmt)||Number(e.subtotal)||0;
     if((!e.items||!e.items.length)&&e.treat)e.items=[{treat:e.treat,amount:Number(e.amount)||0}];
     _ckEdit=String(id);              // 방문 처리하면 바로 시술·금액 입력창 열기
   }else if(_ckEdit==String(id))_ckEdit=null;
@@ -4315,6 +4319,11 @@ function ckSet(id,status){
 /* ✍️ 체크인에서 실제 시술·결제금액 입력 */
 let _ckEdit=null;
 function ckToggleEdit(id){_ckEdit=(_ckEdit==String(id))?null:String(id);renderCheckin();}
+// 이 손님이 쓸 수 있는 회차권 (잔여 있는 코스)
+function activeCourseOf(e){
+  const q=normPh(e&&e.phone); if(!q||q.length<7)return null;
+  return (customers||[]).find(c=>normPh(c.phone)===q&&c.type==='course'&&Math.max(0,(c.total||0)-(c.used||0))>0)||null;
+}
 function ckEditPanel(e){
   if(_ckEdit!=String(e.id))return '';
   const cur=String(e.treat||e.bktreat||'').trim();
@@ -4322,16 +4331,22 @@ function ckEditPanel(e){
   const known=menus.includes(cur);
   const opts=menus.map(m=>`<option value="${esc(m)}"${known&&m===cur?' selected':''}>${esc(m)}</option>`).join('')
     +`<option value="__custom__"${known?'':' selected'}>✏️ 직접 입력 · กรอกเอง</option>`;
-  const amt=Number(e.amount)||Number(e.expAmt)||0;
+  const crs=activeCourseOf(e);
+  const rem=crs?Math.max(0,(crs.total||0)-(crs.used||0)):0;
+  // 회차권 손님은 코스분이 이미 결제됨 → 추가 메뉴 금액만 입력 (기본 0)
+  const amt=crs?(Number(e.amount)||0):(Number(e.amount)||Number(e.expAmt)||0);
   return `<div class="ckedit">
     <div class="cke-h">✍️ 실제 시술·결제금액 · บริการจริง/ยอดจ่ายจริง</div>
+    ${crs?`<label class="cke-crs"><input type="checkbox" id="cke_crs_${e.id}" checked>
+      🎟️ 회차권 1회 차감 · หักคอร์ส 1 ครั้ง <b>(${rem}/${crs.total} 남음)</b>
+      <span>코스분은 이미 결제됨 — 아래엔 <b>추가 메뉴 금액만</b> 입력 · กรอกเฉพาะส่วนเพิ่ม</span></label>`:''}
     <select id="cke_sel_${e.id}" onchange="ckEditSelChange('${e.id}')">${opts}</select>
     <input id="cke_txt_${e.id}" placeholder="시술명 직접 입력 · กรอกชื่อบริการ" value="${known?'':esc(cur)}" style="display:${known?'none':'block'};margin-top:6px">
     <div class="cke-amt">
-      <input id="cke_amt_${e.id}" inputmode="numeric" placeholder="0" value="${amt||''}">
+      <input id="cke_amt_${e.id}" inputmode="numeric" placeholder="${crs?'추가 결제금액 (없으면 0)':'0'}" value="${amt||''}">
       <button type="button" onclick="ckSaveVisit('${e.id}')">💾 저장 · บันทึก</button>
     </div>
-    ${e.expAmt?`<div class="cke-hint">예약가 ${fmt(e.expAmt)} <button type="button" onclick="ckFillAmt('${e.id}',${Number(e.expAmt)||0})">그대로 넣기</button></div>`:''}
+    ${(!crs&&e.expAmt)?`<div class="cke-hint">예약가 ${fmt(e.expAmt)} <button type="button" onclick="ckFillAmt('${e.id}',${Number(e.expAmt)||0})">그대로 넣기</button></div>`:''}
   </div>`;
 }
 function ckEditSelChange(id){
@@ -4351,7 +4366,15 @@ function ckSaveVisit(id){
   let treat=sel?(sel.value==='__custom__'?String(txt.value||'').trim():sel.value):'';
   const amt=Math.round(parseFloat(String((amtEl&&amtEl.value)||'').replace(/[^0-9.]/g,''))||0);
   if(!treat){alert('시술을 선택하거나 입력해 주세요 · เลือก/กรอกบริการ');if(txt)txt.focus();return}
-  if(amt<=0&&!confirm('금액이 0입니다 · ยอด 0\n그대로 저장할까요? · บันทึกเลยไหม?'))return;
+  const crs=activeCourseOf(e), useCrs=crs&&$('cke_crs_'+id)&&$('cke_crs_'+id).checked;
+  if(amt<=0&&!useCrs&&!confirm('금액이 0입니다 · ยอด 0\n그대로 저장할까요? · บันทึกเลยไหม?'))return;
+  if(useCrs){
+    ensureUses(crs);
+    crs.uses.push({t:nowStamp()});crs.used=crs.uses.length;
+    (crs.history=crs.history||[]).unshift({t:nowStamp(),note:`체크인 차감 (${crs.used}/${crs.total})${amt>0?' · 추가결제 '+fmt(amt):''}`,delta:-1});
+    e.memo=(e.memo?e.memo+' / ':'')+`🎟️회차권 1회 차감 (${crs.used}/${crs.total})`;
+    saveCusts();
+  }
   e.status='방문';e.treat=treat;e.amount=amt;
   e.items=[{treat,amount:amt}];
   e.subtotal=amt;e.discount=0;e.adjust=0;
