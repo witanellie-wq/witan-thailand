@@ -468,6 +468,12 @@
   .ckedit .cke-amt{display:flex;gap:6px;margin-top:6px}
   .ckedit .cke-amt input{flex:1;text-align:right;font-weight:800;font-size:16px;color:var(--gold-d)}
   .ckedit .cke-amt button{flex:0 0 auto;border:none;background:#2f8f5b;color:#fff;border-radius:3px;padding:0 14px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+  .ckedit .cke-conf{margin-top:7px;border-radius:4px;padding:7px 10px;font-size:12px;line-height:1.5;display:none}
+  .ckedit .cke-conf.ok{display:block;background:#EAF6EF;border:1.2px solid #A9D8BC;color:#1c6b3f}
+  .ckedit .cke-conf.warn{display:block;background:#FFF8E4;border:1.2px solid #EBD48A;color:#7a5f16}
+  .ckedit .cke-conf.bad{display:block;background:#fbe9e9;border:1.4px solid #e3a9a9;color:#8e2a20}
+  .ckedit .cke-conf b{font-size:15px;font-weight:800}
+  .ckedit .cke-w{font-weight:700}
   .ckedit .cke-crs{display:block;background:#EAF2FB;border:1.2px solid #BCD3EE;border-radius:4px;padding:8px 10px;margin-bottom:7px;font-size:11.5px;color:#2a5b93;font-weight:700;cursor:pointer}
   .ckedit .cke-crs input{width:auto;margin-right:5px;vertical-align:-1px}
   .ckedit .cke-crs span{display:block;font-weight:500;font-size:10.5px;color:#40506a;margin-top:3px}
@@ -4486,11 +4492,42 @@ function ckEditPanel(e){
     <select id="cke_sel_${e.id}" onchange="ckEditSelChange('${e.id}')">${opts}</select>
     <input id="cke_txt_${e.id}" placeholder="시술명 직접 입력 · กรอกชื่อบริการ" value="${known?'':esc(cur)}" style="display:${known?'none':'block'};margin-top:6px">
     <div class="cke-amt">
-      <input id="cke_amt_${e.id}" inputmode="numeric" placeholder="${crs?'추가 결제금액 (없으면 0)':'0'}" value="${amt||''}">
+      <input id="cke_amt_${e.id}" inputmode="numeric" placeholder="${crs?'추가 결제금액 (없으면 0)':'0'}" value="${amt||''}" oninput="ckAmtCheck('${e.id}')">
       <button type="button" onclick="ckSaveVisit('${e.id}')">💾 저장 · บันทึก</button>
     </div>
+    <div id="cke_conf_${e.id}" class="cke-conf"></div>
     ${(!crs&&e.expAmt)?`<div class="cke-hint">예약가 ${fmt(e.expAmt)} <button type="button" onclick="ckFillAmt('${e.id}',${Number(e.expAmt)||0})">그대로 넣기</button></div>`:''}
   </div>`;
+}
+// 입력 금액이 상식적인지 판정 (예약가·메뉴 기본가 기준)
+function ckRefPrice(e,treat){
+  const exp=Number(e&&e.expAmt)||0;      // 예약 때 잡은 금액이 가장 정확한 기준
+  if(exp>0)return exp;
+  return Number(BKPRICE[treat])||0;      // 없으면 메뉴 정가
+}
+function ckAmtWarn(e,treat,amt){
+  if(!(amt>0))return null;
+  if(amt>=20000)return {msg:`฿${amt.toLocaleString()} — 20,000밧이 넘어요. 0을 더 누르지 않았나요?`,hard:true};
+  const ref=ckRefPrice(e,treat);
+  if(ref&&amt>=ref*3&&(amt-ref)>=1500)
+    return {msg:`기준가 ${fmt(ref)}의 ${Math.round(amt/ref*10)/10}배예요 (${fmt(amt)})`,hard:true,ref};
+  if(!ref&&amt>=10000)return {msg:`${fmt(amt)} — 금액이 큽니다. 확인해 주세요`,hard:false};
+  return null;
+}
+function ckCurTreat(id){
+  const sel=$('cke_sel_'+id),txt=$('cke_txt_'+id);
+  if(!sel)return '';
+  return sel.value==='__custom__'?String((txt&&txt.value)||'').trim():sel.value;
+}
+function ckAmtCheck(id){
+  const box=$('cke_conf_'+id); if(!box)return;
+  const e=data.find(x=>x.id==id); if(!e)return;
+  const amtEl=$('cke_amt_'+id);
+  const amt=Math.round(parseFloat(String((amtEl&&amtEl.value)||'').replace(/[^0-9.]/g,''))||0);
+  if(!amt){box.className='cke-conf';box.innerHTML='';return}
+  const w=ckAmtWarn(e,ckCurTreat(id),amt);
+  box.className='cke-conf'+(w?(w.hard?' bad':' warn'):' ok');
+  box.innerHTML=`<b>${fmt(amt)}</b> 받음${w?`<br><span class="cke-w">⚠️ ${w.msg}</span>`:''}`;
 }
 function ckEditSelChange(id){
   const sel=$('cke_sel_'+id),txt=$('cke_txt_'+id),amt=$('cke_amt_'+id);
@@ -4501,6 +4538,7 @@ function ckEditSelChange(id){
     const v=BKPRICE[sel.value];
     if(v>0&&amt&&!Number(String(amt.value).replace(/[^0-9.]/g,'')))amt.value=v;   // 기본가 자동 채움
   }
+  ckAmtCheck(id);
 }
 function ckFillAmt(id,v){const a=$('cke_amt_'+id);if(a){a.value=v;a.focus();}}
 function ckSaveVisit(id){
@@ -4511,6 +4549,15 @@ function ckSaveVisit(id){
   if(!treat){alert('시술을 선택하거나 입력해 주세요 · เลือก/กรอกบริการ');if(txt)txt.focus();return}
   const crs=activeCourseOf(e), useCrs=crs&&$('cke_crs_'+id)&&$('cke_crs_'+id).checked;
   if(amt<=0&&!useCrs&&!confirm('금액이 0입니다 · ยอด 0\n그대로 저장할까요? · บันทึกเลยไหม?'))return;
+  // 금액이 기준가에서 크게 벗어나면 한 번 더 확인 (0 하나 더 누르는 실수 방지)
+  const w=ckAmtWarn(e,treat,amt);
+  if(w){
+    const ref=ckRefPrice(e,treat);
+    if(!confirm(`⚠️ 금액을 확인해 주세요 · ตรวจสอบยอดเงิน\n\n입력한 금액: ${fmt(amt)}\n${ref?`기준가(예약가/정가): ${fmt(ref)}\n`:''}${w.msg}\n\n[확인] 이 금액이 맞습니다\n[취소] 다시 입력`))
+      {const a=$('cke_amt_'+id);if(a){a.focus();a.select();}return;}
+  }
+  // 저장 직전 최종 확인 (시술명 + 금액)
+  if(!confirm(`💾 저장할까요? · บันทึกไหม?\n\n${e.name||''} ${e.time||''}\n시술: ${treat}\n결제: ${fmt(amt)}${useCrs?`\n🎟️ 회차권 1회 차감 (${(crs.used||0)+1}/${crs.total})`:''}`))return;
   if(useCrs){
     ensureUses(crs);
     crs.uses.push({t:nowStamp()});crs.used=crs.uses.length;
