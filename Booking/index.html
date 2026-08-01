@@ -179,6 +179,9 @@
   .tgt-pct{font-weight:800}
   .tgt-pct.ok{color:#1c7a41}.tgt-pct.mid{color:#8a6d1f}.tgt-pct.low{color:var(--muted)}
   .tgt-pace{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .gw-cmp{margin-top:8px;background:#EAF2FB;border:1.2px solid #BCD3EE;border-radius:4px;padding:8px 10px;font-size:11.5px;color:#2a5b93;line-height:1.55}
+  .gw-cmp.gap{background:#fbe9e9;border-color:#e3a9a9;color:#8e2a20}
+  .gw-cmp span{display:block;font-size:10px;opacity:.85;margin-top:3px}
   .gw-lbl{font-size:10.5px;font-weight:700;color:#8a5a12;margin:7px 0 5px}
   .gw-due{margin-top:8px;background:#FFF8E4;border:1.2px solid #EBD48A;border-radius:4px;padding:8px 10px;font-size:11.5px;color:#7a5f16;line-height:1.55}
   .gw-due.ok{background:#EAF6EF;border-color:#A9D8BC;color:#1c6b3f}
@@ -2286,11 +2289,18 @@ function manualGwOfMonth(y,m){
 function gowabiMonth(monthEntries,y,m){
   const list=monthEntries.filter(e=>e.status==='방문'&&isGowabi(e));
   const man=(y!=null)?manualGwOfMonth(y,m):[];
-  const gross=list.reduce((s,e)=>s+Number(e.amount||0),0)+man.reduce((s,r)=>s+r.amt,0);
+  const bookSum=list.reduce((s,e)=>s+Number(e.amount||0),0);   // 직원이 체크한 예약 기록
+  const manSum=man.reduce((s,r)=>s+r.amt,0);                   // 내가 GoWabi에서 확인한 금액
+  const days={};
+  list.forEach(e=>{(days[e.date]=days[e.date]||{b:0,m:0}).b+=Number(e.amount||0)});
+  man.forEach(r=>{(days[r.date]=days[r.date]||{b:0,m:0}).m+=r.amt});
+  let gross=0,cmpDays=0,gapDays=0;
+  Object.values(days).forEach(d=>{gross+=d.m>0?d.m:d.b;if(d.m>0&&d.b>0){cmpDays++;if(d.m!==d.b)gapDays++;}});
   const settled=list.filter(e=>e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0)
               +man.filter(r=>r.gwPaid).reduce((s,r)=>s+r.amt,0);
-  return {n:list.length+man.length,gross,settled,pending:gross-settled,net:gowabiNet(gross),
-          netPending:gowabiNet(gross-settled)};
+  return {n:list.length+man.length,bookN:list.length,manN:man.length,bookSum,manSum,cmpDays,gapDays,
+          gross,settled,pending:Math.max(0,gross-settled),net:gowabiNet(gross),
+          netPending:gowabiNet(Math.max(0,gross-settled))};
 }
 // 정산일: 그 달 매출은 다음 달 15일에 입금
 function gwPayoutDate(y,m){const ny=(m===11)?y+1:y,nm=(m===11)?0:m+1;return {y:ny,m:nm,label:(nm+1)+'월 15일',iso:ny+'-'+String(nm+1).padStart(2,'0')+'-15'};}
@@ -2321,6 +2331,10 @@ function renderGowabiSection(monthEntries,y,m){
       <div class="fc-c pend"><div class="fv">${fmt(g.gross)}</div><div class="fl">매출(정가)<br>ยอดเต็ม</div></div>
       <div class="fc-c done"><div class="fv">${gowabiRate?fmt(g.net):'—'}</div><div class="fl">실수령 예상<br>หลังหักคอม</div></div>
       <div class="fc-c fore"><div class="fv">${po.label}</div><div class="fl">정산 예정일<br>วันโอน</div></div>
+    </div>`:''}
+    ${(g.bookN&&g.manN)?`<div class="gw-cmp${g.bookSum!==g.manSum?' gap':''}">
+      🧮 더블체크 · 직원 체크 <b>${fmt(g.bookSum)}</b> vs GoWabi 확인 <b>${fmt(g.manSum)}</b>${g.bookSum===g.manSum?' → 일치 ✅':` → 차이 <b>${fmt(Math.abs(g.bookSum-g.manSum))}</b>${g.gapDays?` · 안 맞는 날 ${g.gapDays}일`:''} — 확인 필요`}
+      <span>같은 날 둘 다 있으면 GoWabi 확인 금액으로 집계 (중복 합산 안 함)</span>
     </div>`:''}
     <div class="gw-due ${late?'late':(prevPend?'':'ok')}" style="margin-top:${g.n?'8':'2'}px">
       📥 <b>이번 달 받을 돈</b> (${pm+1}월분 · ${inIso})
@@ -2773,7 +2787,7 @@ function revPreview(){
   const newTotal=pt.manTotal+amt;
   const result=_revMode==='add'?(pt.total+amt):(newTotal+pt.manAdd);
   const ico=p=>p==='이체'?'🏦':(p==='카드'?'💳':(p==='GoWabi'?'🛍':'💵'));
-  box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(pt.bookRev)}</b>`
+  box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(pt.bookOnsite)}</b>${pt.bookGw?` <span style="color:#8a5a12">(+🛍GoWabi ${fmt(pt.bookGw)} 별도 집계)</span>`:''}`
     +(pt.hasMan?` · 💵 이미 입력됨 <b>${fmt(pt.manTotal)}</b>`:'')
     +(_revMode!=='add'&&parts.length?`<br>${parts.map(x=>ico(x[0])+x[0]+' '+fmt(x[1])).join(' + ')}${parts.length>1?' = <b>'+fmt(splitSum)+'</b>':''}`:'')
     +`<br>${_revMode==='add'?'➕ 예약 매출 + 입력액 (합산)':'📊 결제수단 합계가 그날 매출 (예약과 합산 안 함)'}`
@@ -2827,18 +2841,25 @@ function saveManualRev(){
    · mode 'add'        : 별도 입금 → 그대로 더함  */
 function dayRevParts(ds){
   const dayE=data.filter(e=>e.date===ds);
-  const visRev=dayE.filter(e=>e.status==='방문').reduce((s,e)=>s+Number(e.amount||0),0);
+  const vis=dayE.filter(e=>e.status==='방문');
+  const visRev=vis.reduce((s,e)=>s+Number(e.amount||0),0);
   const dep=depositsIn(dayE);
-  const bookRev=visRev+dep;                                   // 📋 예약 기록 기준 매출
+  const bookRev=visRev+dep;                                   // 📋 예약 기록 기준 매출 전체
+  // 🛍 GoWabi 매출은 매장에서 받은 돈이 아니라 익월 정산분 → 실입금 총액에 포함되지 않음
+  const bookGw=vis.filter(isGowabi).reduce((s,e)=>s+Number(e.amount||0),0);
+  const bookOnsite=bookRev-bookGw;                            // 그날 매장에서 받은 예약 매출
   const man=manualRevDay(ds);
   const manTotal=man.filter(r=>r.mode!=='add').reduce((s,r)=>s+r.amt,0);   // 💵 실입금(그날 총액)
   const manAdd=man.filter(r=>r.mode==='add').reduce((s,r)=>s+r.amt,0);     // ➕ 별도 추가 입금
+  const manGw=man.filter(r=>r.mode!=='add'&&r.pay==='GoWabi').reduce((s,r)=>s+r.amt,0);
   const hasMan=man.some(r=>r.mode!=='add');
-  // 실입금을 직접 넣은 날은 그 값이 그날 매출 (예약 기록과 합치지 않음)
-  const actual=(hasMan?manTotal:bookRev)+manAdd;
-  return {bookRev,visRev,dep,manTotal,manAdd,hasMan,manCount:man.length,
+  // 실입금을 넣은 날은 그 값이 그날 매출 — 단 GoWabi 예약분은 받은 돈이 아니므로 따로 더함
+  //  (직접입력에 이미 GoWabi를 넣었다면 그만큼은 중복이므로 제외)
+  const gwExtra=hasMan?Math.max(0,bookGw-manGw):0;
+  const actual=(hasMan?(manTotal+gwExtra):bookRev)+manAdd;
+  return {bookRev,visRev,dep,bookGw,bookOnsite,manTotal,manAdd,manGw,gwExtra,hasMan,manCount:man.length,
           total:actual,actual,
-          diff:hasMan?(manTotal-bookRev):0};                  // 실입금 − 기록 (음수면 기록이 더 큼)
+          diff:hasMan?(manTotal-bookOnsite):0};               // 실입금 − 매장 수령 기록 (GoWabi 제외 비교)
 }
 // 실입금(하루 총 매출)을 넣은 날 = 그날 매출 확정 → 남은 예약분을 예상에 더하지 않음
 function finalDays(){
@@ -2868,7 +2889,7 @@ function renderRevList(){
     +rows.map(r=>{const pt=dayRevParts(r.date);
       const tag=r.mode==='add'?'<span style="color:#2a5b93">➕예약 외 수익금</span>':'<span style="color:#8a6d1f">📊하루 총 매출</span>';
       const cmp=(r.mode!=='add'&&pt.bookRev)
-        ? `<br><span class="sl-ph">📋기록 ${fmt(pt.bookRev)} · ${pt.diff>0?`미기록 <b style="color:#8a6d1f">${fmt(pt.diff)}</b>`:(pt.diff<0?`<b style="color:#b5341f">⚠️기록이 ${fmt(-pt.diff)} 더 큼 — 확인</b>`:'<b style="color:#1c7a41">일치 ✅</b>')}</span>`:'';
+        ? `<br><span class="sl-ph">📋기록 ${fmt(pt.bookOnsite)}${pt.gwExtra?` (+🛍${fmt(pt.gwExtra)})`:''} · ${pt.diff>0?`미기록 <b style="color:#8a6d1f">${fmt(pt.diff)}</b>`:(pt.diff<0?`<b style="color:#b5341f">⚠️기록이 ${fmt(-pt.diff)} 더 큼 — 확인</b>`:'<b style="color:#1c7a41">일치 ✅</b>')}</span>`:'';
       const gwLine=r.pay==='GoWabi'
         ? `<br><span class="sl-ph">수수료 ${gowabiRate}% → 실수령 <b>${fmt(gowabiNet(r.amt))}</b> · ${r.gwPaid?'✅ 정산됨':`<span style="color:#b5341f;cursor:pointer" onclick="toggleManGw(${r.id})">정산 대기 (탭하면 완료)</span>`}</span>`:'';
       return `<div class="sl-item">
@@ -3366,9 +3387,10 @@ function openDayReview(){
       ${payChips}
       ${preDay.length?'<div class="rs">💳 선결제 입금 เงินล่วงหน้า <b>'+preDay.length+'</b> · <b>'+fmt(preSum)+'</b></div>':''}
       ${manDay.length?'<div class="rs">💵 직접 입력 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)+(r.mode==='add'?' 별도':'')).join(', ')+')</div>':''}
-      ${_rpt.hasMan?('<div class="rs'+(_rpt.diff<0?' warn':'')+'">🧮 대조: 📋기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 💵실입금 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.diff>0?'미기록 <b>'+fmt(_rpt.diff)+'</b>':(_rpt.diff<0?'⚠️기록이 <b>'+fmt(-_rpt.diff)+'</b> 더 큼 (확인)':'일치 ✅'))+'</div>'):''}
+      ${_rpt.hasMan?('<div class="rs'+(_rpt.diff<0?' warn':'')+'">🧮 대조: 📋기록 <b>'+fmt(_rpt.bookOnsite)+'</b> vs 💵실입금 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.diff>0?'미기록 <b>'+fmt(_rpt.diff)+'</b>':(_rpt.diff<0?'⚠️기록이 <b>'+fmt(-_rpt.diff)+'</b> 더 큼 (확인)':'일치 ✅'))+'</div>'):''}
       ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
       ${gwSum?'<div class="rs">🛍 GoWabi <b>'+gwDay.length+'</b> · <b>'+fmt(gwSum)+'</b>'+(gowabiRate?' → 실수령 <b>'+fmt(gowabiNet(gwSum))+'</b>':'')+' (정산)</div>':''}
+      ${(gwSum&&manGwSum)?('<div class="rs'+(gwSum!==manGwSum?' warn':'')+'">🧮 GoWabi 더블체크: 직원기록 <b>'+fmt(gwSum)+'</b> vs GoWabi 확인 <b>'+fmt(manGwSum)+'</b> → '+(gwSum===manGwSum?'일치':'차이 <b>'+fmt(Math.abs(gwSum-manGwSum))+'</b> 확인 필요')+'</div>'):''}
       ${(preSum||memUsedDay||manSum||depSum||gwSum)?'<div class="rs">💵 현장 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay-gwSum-manGwSum)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
@@ -3426,7 +3448,7 @@ function renderDay(){
   else{
     // 사장 모드: 확정 매출 + 남은 예약의 예상 매출을 함께 표시
     const parts=[];
-    if(_pt.hasMan)parts.push(`💵 ${fmt(_pt.manTotal)}${_pt.bookRev?` (📋기록 ${fmt(_pt.bookRev)}${_pt.diff>0?`, 미기록 ${fmt(_pt.diff)}`:(_pt.diff<0?`, ⚠️기록초과 ${fmt(-_pt.diff)}`:', 일치 ✅')})`:''}`);
+    if(_pt.hasMan)parts.push(`💵 ${fmt(_pt.manTotal)}${_pt.bookOnsite?` (📋기록 ${fmt(_pt.bookOnsite)}${_pt.diff>0?`, 미기록 ${fmt(_pt.diff)}`:(_pt.diff<0?`, ⚠️기록초과 ${fmt(-_pt.diff)}`:', 일치 ✅')})`:''}`);
     else if(vis.length)parts.push(`${T('visitN')} ${vis.length} · ${fmt(rev)}`);
     if(expD)parts.push(`⏳ ${fmt(expD)}`);
     ps=parts.length?parts.join(' · '):(dayE.length?`${T('bookN')} ${dayE.length}`:'');
