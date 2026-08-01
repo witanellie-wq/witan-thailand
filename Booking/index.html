@@ -143,6 +143,8 @@
   .paysplit .ps-l{flex:1;font-size:12.5px;font-weight:600;color:var(--ink)}
   .paysplit .ps-l small{display:block;font-size:9.5px;color:var(--muted);font-weight:400}
   .paysplit input{flex:0 0 120px;text-align:right;font-weight:700;font-size:15px;color:var(--gold-d);padding:8px 10px}
+  .paysplit .ps-row.gw{background:#FFF8ED}
+  .paysplit .ps-row.gw .ps-l small b{color:#8a5a12}
   .paysplit .ps-sum{display:flex;justify-content:space-between;padding:8px 11px;background:var(--soft2);font-size:12.5px;font-weight:700;color:var(--wine-d)}
   .paysplit .ps-sum b{font-size:15px;color:var(--wine)}
   .revprev{background:var(--soft2);border:1.2px dashed var(--line);border-radius:4px;padding:9px 11px;margin-top:8px;font-size:12px;line-height:1.7;color:#40506a}
@@ -1116,6 +1118,8 @@
           <input id="r_cash" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
         <div class="ps-row"><span class="ps-l">💳 Credit card · บัตร<small>신용카드</small></span>
           <input id="r_card" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
+        <div class="ps-row gw"><span class="ps-l">🛍 GoWabi · โกวาบิ<small>수수료 <b id="r_gwrate">20</b>% 차감 · 익월 15일 정산</small></span>
+          <input id="r_gw" inputmode="numeric" placeholder="0" oninput="revPreview()"></div>
         <div class="ps-sum">합계 · รวม <b id="r_splitsum">฿0</b></div>
       </div>
     </div>
@@ -2273,11 +2277,19 @@ function setGowabiRate(){
   try{localStorage.setItem('hanahayan_gowabirate',String(n))}catch(e){}
   queueSync('settings');render();
 }
-function gowabiMonth(monthEntries){
+function manualGwOfMonth(y,m){
+  return (manualRev||[]).filter(r=>{
+    if(r.pay!=='GoWabi'||r.mode==='add')return false;
+    const p=String(r.date||'').split('-');return +p[0]===y&&+p[1]===m+1;
+  });
+}
+function gowabiMonth(monthEntries,y,m){
   const list=monthEntries.filter(e=>e.status==='방문'&&isGowabi(e));
-  const gross=list.reduce((s,e)=>s+Number(e.amount||0),0);
-  const settled=list.filter(e=>e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  return {n:list.length,gross,settled,pending:gross-settled,net:gowabiNet(gross),
+  const man=(y!=null)?manualGwOfMonth(y,m):[];
+  const gross=list.reduce((s,e)=>s+Number(e.amount||0),0)+man.reduce((s,r)=>s+r.amt,0);
+  const settled=list.filter(e=>e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0)
+              +man.filter(r=>r.gwPaid).reduce((s,r)=>s+r.amt,0);
+  return {n:list.length+man.length,gross,settled,pending:gross-settled,net:gowabiNet(gross),
           netPending:gowabiNet(gross-settled)};
 }
 // 정산일: 그 달 매출은 다음 달 15일에 입금
@@ -2290,12 +2302,13 @@ function gowabiOfMonth(y,m){
   });
 }
 function renderGowabiSection(monthEntries,y,m){
-  const g=gowabiMonth(monthEntries);                       // 이번 달 발생분
+  const g=gowabiMonth(monthEntries,y,m);                    // 이번 달 발생분 (예약 + 직접입력)
   const py=(m===0)?y-1:y, pm=(m===0)?11:m-1;               // 지난달 (이번 달 15일에 입금됨)
-  const prev=gowabiOfMonth(py,pm);
-  const prevGross=prev.reduce((s,e)=>s+Number(e.amount||0),0);
-  const prevPend=prev.filter(e=>!e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0);
-  if(!g.n&&!prev.length)return '';
+  const prev=gowabiOfMonth(py,pm), prevMan=manualGwOfMonth(py,pm);
+  const prevGross=prev.reduce((s,e)=>s+Number(e.amount||0),0)+prevMan.reduce((s,r)=>s+r.amt,0);
+  const prevPend=prev.filter(e=>!e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0)
+               +prevMan.filter(r=>!r.gwPaid).reduce((s,r)=>s+r.amt,0);
+  if(!g.n&&!prev.length&&!prevMan.length)return '';
   const po=gwPayoutDate(y,m);                              // 이번 달 매출 → 다음 달 15일
   const inIso=y+'-'+String(m+1).padStart(2,'0')+'-15';      // 이번 달 15일 = 지난달분 입금일
   const today=todayStr();
@@ -2311,7 +2324,7 @@ function renderGowabiSection(monthEntries,y,m){
     </div>`:''}
     <div class="gw-due ${late?'late':(prevPend?'':'ok')}" style="margin-top:${g.n?'8':'2'}px">
       📥 <b>이번 달 받을 돈</b> (${pm+1}월분 · ${inIso})
-      ${prev.length
+      ${(prev.length||prevMan.length)
         ? (prevPend
             ? ` · <b>${gowabiRate?fmt(gowabiNet(prevPend)):fmt(prevPend)}</b>${gowabiRate?` (정가 ${fmt(prevPend)})`:''} 대기`
             : ` · ✅ ${fmt(gowabiRate?gowabiNet(prevGross):prevGross)} 입금 완료`)
@@ -2728,7 +2741,8 @@ function renderTrend(){
 let _revPay='현금',_revMode='total';
 function openManualRev(){
   $('r_date').value=selDate||todayStr();
-  ['r_amt','r_cnt','r_memo','r_tr','r_cash','r_card'].forEach(id=>{if($(id))$(id).value='';});
+  ['r_amt','r_cnt','r_memo','r_tr','r_cash','r_card','r_gw'].forEach(id=>{if($(id))$(id).value='';});
+  if($('r_gwrate'))$('r_gwrate').textContent=String(gowabiRate||0);
   revSetPay('현금');revSetMode('total');
   $('revOverlay').classList.add('on');revPreview();
   renderRevList();
@@ -2744,7 +2758,7 @@ function revSetMode(m){
   revPreview();
 }
 const _revNum=id=>Math.round(parseFloat((($(id)&&$(id).value)||'').replace(/[^0-9.]/g,''))||0);
-function revSplitParts(){return [['이체',_revNum('r_tr')],['현금',_revNum('r_cash')],['카드',_revNum('r_card')]].filter(x=>x[1]>0);}
+function revSplitParts(){return [['이체',_revNum('r_tr')],['현금',_revNum('r_cash')],['카드',_revNum('r_card')],['GoWabi',_revNum('r_gw')]].filter(x=>x[1]>0);}
 // 선택한 방식으로 그날 매출이 얼마가 되는지 즉시 보여주기
 function revPreview(){
   const box=$('r_preview'); if(!box)return;
@@ -2758,12 +2772,15 @@ function revPreview(){
   // 하루 총 매출은 결제수단별 줄을 모두 합친 값이 그날 매출 (이미 넣은 줄에 이어서 누적)
   const newTotal=pt.manTotal+amt;
   const result=_revMode==='add'?(pt.total+amt):(newTotal+pt.manAdd);
-  const ico=p=>p==='이체'?'🏦':(p==='카드'?'💳':'💵');
+  const ico=p=>p==='이체'?'🏦':(p==='카드'?'💳':(p==='GoWabi'?'🛍':'💵'));
   box.innerHTML=`📋 ${d.slice(5)} 예약 기록 매출 <b>${fmt(pt.bookRev)}</b>`
     +(pt.hasMan?` · 💵 이미 입력됨 <b>${fmt(pt.manTotal)}</b>`:'')
     +(_revMode!=='add'&&parts.length?`<br>${parts.map(x=>ico(x[0])+x[0]+' '+fmt(x[1])).join(' + ')}${parts.length>1?' = <b>'+fmt(splitSum)+'</b>':''}`:'')
     +`<br>${_revMode==='add'?'➕ 예약 매출 + 입력액 (합산)':'📊 결제수단 합계가 그날 매출 (예약과 합산 안 함)'}`
     +`<br>→ 이 날 매출 <span class="rp-res">${fmt(result)}</span>`
+    +(()=>{const gw=_revMode==='add'?0:_revNum('r_gw');
+       if(!gw)return '';
+       return `<br><span style="color:#8a5a12">🛍 GoWabi ${fmt(gw)} 중 수수료 ${gowabiRate}% (${fmt(gw-gowabiNet(gw))}) 차감 → <b>실수령 ${fmt(gowabiNet(gw))}</b> · 익월 15일 입금 (현장 입금 아님)</span>`;})()
     +(_revMode!=='add'&&newTotal&&pt.bookRev?`<br><span style="font-size:11px;color:${newTotal>=pt.bookRev?'#8a6d1f':'#b5341f'}">${newTotal>=pt.bookRev?`📋 미기록 ${fmt(newTotal-pt.bookRev)}`:`⚠️ 기록이 ${fmt(pt.bookRev-newTotal)} 더 큼 — 금액 확인`}</span>`:'');
 }
 function revSetPay(p){
@@ -2783,7 +2800,7 @@ function addManualRev(){
     const parts=revSplitParts();
     if(!parts.length){alert('결제수단별 금액을 하나 이상 입력하세요 · กรอกอย่างน้อย 1 ช่อง');$('r_tr').focus();return}
     parts.forEach((x,i)=>manualRev.push({id:Date.now()+i,date:d,amt:x[1],pay:x[0],mode:'total',cnt:i===0?cnt:0,memo:i===0?memo:''}));
-    ['r_tr','r_cash','r_card'].forEach(id=>{if($(id))$(id).value='';});
+    ['r_tr','r_cash','r_card','r_gw'].forEach(id=>{if($(id))$(id).value='';});
   }
   saveManualRev();
   $('r_cnt').value='';$('r_memo').value='';
@@ -2794,6 +2811,11 @@ function delManualRev(id){
   const r=manualRev.find(x=>x.id==id); if(!r)return;
   if(!confirm(`🗑 ${r.date} ${fmt(r.amt)} (${r.pay})\nDelete? · ลบ? · 삭제할까요?`))return;
   manualRev=manualRev.filter(x=>x.id!=id);
+  saveManualRev();renderRevList();render();
+}
+function toggleManGw(id){
+  const r=(manualRev||[]).find(x=>x.id==id); if(!r)return;
+  r.gwPaid=!r.gwPaid;
   saveManualRev();renderRevList();render();
 }
 function saveManualRev(){
@@ -2840,15 +2862,17 @@ function renderRevList(){
   if(!rows.length){box.innerHTML='<div class="sl-empty">이 달 직접 입력 매출 없음 · ยังไม่มีรายการ</div>';return}
   const tot=rows.reduce((s,r)=>s+r.amt,0);
   const byPay={};rows.forEach(r=>{byPay[r.pay]=(byPay[r.pay]||0)+r.amt});
-  const icon=p=>p==='이체'?'🏦':(p==='카드'?'💳':'💵');
+  const icon=p=>p==='이체'?'🏦':(p==='카드'?'💳':(p==='GoWabi'?'🛍':'💵'));
   box.innerHTML=`<div class="sr-sum">${y}.${m+1} · <b>${rows.length}</b>건 · 합계 <b>${fmt(tot)}</b><br>
       ${Object.entries(byPay).map(([k,v])=>icon(k)+' '+k+' '+fmt(v)).join(' · ')}</div>`
     +rows.map(r=>{const pt=dayRevParts(r.date);
       const tag=r.mode==='add'?'<span style="color:#2a5b93">➕예약 외 수익금</span>':'<span style="color:#8a6d1f">📊하루 총 매출</span>';
       const cmp=(r.mode!=='add'&&pt.bookRev)
         ? `<br><span class="sl-ph">📋기록 ${fmt(pt.bookRev)} · ${pt.diff>0?`미기록 <b style="color:#8a6d1f">${fmt(pt.diff)}</b>`:(pt.diff<0?`<b style="color:#b5341f">⚠️기록이 ${fmt(-pt.diff)} 더 큼 — 확인</b>`:'<b style="color:#1c7a41">일치 ✅</b>')}</span>`:'';
+      const gwLine=r.pay==='GoWabi'
+        ? `<br><span class="sl-ph">수수료 ${gowabiRate}% → 실수령 <b>${fmt(gowabiNet(r.amt))}</b> · ${r.gwPaid?'✅ 정산됨':`<span style="color:#b5341f;cursor:pointer" onclick="toggleManGw(${r.id})">정산 대기 (탭하면 완료)</span>`}</span>`:'';
       return `<div class="sl-item">
-      <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay} ${tag}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}${cmp}</div>
+      <div class="sl-l"><b>${r.date.slice(5)}</b> ${icon(r.pay)} ${r.pay} ${tag}${r.cnt?' · 👥'+r.cnt:''}${r.memo?'<br><span class="sl-ph">'+esc(r.memo)+'</span>':''}${gwLine}${cmp}</div>
       <div class="sl-r"><b style="color:var(--wine);font-size:13px">${fmt(r.amt)}</b>
         <br><span style="color:#b33;cursor:pointer" onclick="delManualRev(${r.id})">🗑 삭제</span></div>
     </div>`}).join('');
@@ -3308,6 +3332,7 @@ function openDayReview(){
   const gwSum=gwDay.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const manDay=manualRevDay(day);
   const manSum=manDay.reduce((s,r)=>s+r.amt,0);
+  const manGwSum=manDay.filter(r=>r.pay==='GoWabi'&&r.mode!=='add').reduce((s,r)=>s+r.amt,0);
   const _rpt=dayRevParts(day);
   const depSum=depositsIn(list);
   $('printSheet').innerHTML=`
@@ -3344,7 +3369,7 @@ function openDayReview(){
       ${_rpt.hasMan?('<div class="rs'+(_rpt.diff<0?' warn':'')+'">🧮 대조: 📋기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 💵실입금 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.diff>0?'미기록 <b>'+fmt(_rpt.diff)+'</b>':(_rpt.diff<0?'⚠️기록이 <b>'+fmt(-_rpt.diff)+'</b> 더 큼 (확인)':'일치 ✅'))+'</div>'):''}
       ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
       ${gwSum?'<div class="rs">🛍 GoWabi <b>'+gwDay.length+'</b> · <b>'+fmt(gwSum)+'</b>'+(gowabiRate?' → 실수령 <b>'+fmt(gowabiNet(gwSum))+'</b>':'')+' (정산)</div>':''}
-      ${(preSum||memUsedDay||manSum||depSum||gwSum)?'<div class="rs">💵 현장 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay-gwSum)+preSum)+'</b></div>':''}
+      ${(preSum||memUsedDay||manSum||depSum||gwSum)?'<div class="rs">💵 현장 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay-gwSum-manGwSum)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
     ${preDay.length?'<div class="ps-note" style="margin-top:6px">💳 선결제 내역 · '+preDay.map(x=>esc(x.name)+' '+x.label+' '+fmt(x.amt)).join(' / ')+'</div>':''}
