@@ -3452,7 +3452,7 @@ function renderDay(){
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
       <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}</div>
       <div class="tb-menu">${esc(e.treat||e.bktreat||T('noMenu')||'—')}</div>
-      ${(e.status==='방문')?(isStaff()?'':`<div class="tb-pr">✅ ${fmt(e.amount)}</div>`):(isStaff()?'':(e.expAmt?`<div class="tb-pr">~${fmt(e.expAmt)}</div>`:''))}
+      ${(e.status==='방문')?`<div class="tb-pr">✅ ${fmt(e.amount)}</div>`:(e.expAmt?`<div class="tb-pr">~${fmt(e.expAmt)}</div>`:'')}
     </div>`;
   });
   // empty-tap layer per lane (to add at a time): clicking timeline adds at that time
@@ -3463,11 +3463,11 @@ function renderDay(){
   const inactiveEntries=[...placed.filter(p=>p.inactive).map(p=>p.e), ...notimed.filter(e=>!occupies(e))];
   const noshowHtml=inactiveEntries.map(em=>{
     const ic=em.status==='캔슬'?'❌':(em.status==='연기대기'?'⏸':'🚫');
-    const info=[em.time||null, esc(em.treat||em.bktreat||''), (!isStaff()&&em.expAmt)?'~'+fmt(em.expAmt):null, em.phone?esc(em.phone):null].filter(Boolean).join(' · ');
+    const info=[em.time||null, esc(em.treat||em.bktreat||''), em.expAmt?'~'+fmt(em.expAmt):null, em.phone?esc(em.phone):null].filter(Boolean).join(' · ');
     return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${dispName(em)}${prepaidIcon(em)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
   }).join('');
   const inactiveLabel = inactiveEntries.length?T('inactiveLbl'):'';
-  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${dispName(e)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?(isStaff()?'✅':fmt(e.amount)):T('bookedTag')+((!isStaff()&&e.expAmt)?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
+  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${dispName(e)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?('✅ '+fmt(e.amount)):T('bookedTag')+(e.expAmt?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
 
   list.innerHTML=`${conflictBanner}
     <div class="tl-headrow">${heads}</div>
@@ -4414,7 +4414,7 @@ function renderCheckin(){
     ${isStaff()?'':`<div class="cs"><div class="v">${fmt(rev)}</div><div class="l">${T('ckRev')}</div></div>`}`;
   if(!list.length){$('ckList').innerHTML=`<div class="empty">${T('ckEmpty')}</div>`;return;}
   $('ckList').innerHTML=list.map(e=>{
-    const meta=[e.treat||e.bktreat||'', parseInt(e.seats)>1?'👥'+e.seats:'', e.line?esc(e.line):'', e.phone?esc(e.phone):'', isStaff()?'':(e.status==='방문'?('💰'+fmt(e.amount||0)):(e.expAmt?'~'+fmt(e.expAmt):''))].filter(Boolean).join(' · ');
+    const meta=[e.treat||e.bktreat||'', parseInt(e.seats)>1?'👥'+e.seats:'', e.line?esc(e.line):'', e.phone?esc(e.phone):'', (e.status==='방문'?('💰'+fmt(e.amount||0)):(e.expAmt?'~'+fmt(e.expAmt):''))].filter(Boolean).join(' · ');
     const st=e.status;
     return `<div class="ckrow s${st}">
       <div class="ck-top">
@@ -4460,6 +4460,7 @@ function ckSet(id,status){
     if(!Number(e.amount)&&!activeCourseOf(e))e.amount=Number(e.expAmt)||Number(e.subtotal)||0;
     if((!e.items||!e.items.length)&&e.treat)e.items=[{treat:e.treat,amount:Number(e.amount)||0}];
     _ckEdit=String(id);              // 방문 처리하면 바로 시술·금액 입력창 열기
+    setTimeout(()=>{const a=$('cke_amt_'+id);if(a){a.focus();a.select();}},60);   // 기존 값 위에 덧붙여 입력되는 실수 방지
   }else if(_ckEdit==String(id))_ckEdit=null;
   e.status=status;
   save();renderCheckin();render();
@@ -4467,7 +4468,11 @@ function ckSet(id,status){
 }
 /* ✍️ 체크인에서 실제 시술·결제금액 입력 */
 let _ckEdit=null;
-function ckToggleEdit(id){_ckEdit=(_ckEdit==String(id))?null:String(id);renderCheckin();}
+function ckToggleEdit(id){
+  _ckEdit=(_ckEdit==String(id))?null:String(id);
+  renderCheckin();
+  if(_ckEdit)setTimeout(()=>{const a=$('cke_amt_'+id);if(a){a.focus();a.select();}},60);
+}
 // 이 손님이 쓸 수 있는 회차권 (잔여 있는 코스)
 function activeCourseOf(e){
   const q=normPh(e&&e.phone); if(!q||q.length<7)return null;
