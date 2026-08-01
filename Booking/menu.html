@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HANAHAYAN Clinic & Beauty · Menu v50</title>
+<title>HANAHAYAN Clinic & Beauty · Menu v51</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Prompt:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
     box-shadow:0 4px 14px rgba(17,29,54,.28);font-family:inherit}
   .pdfbtn:active{transform:scale(.97)}
   @media print{
-    .langbar,.pdfbtn{display:none!important}
+    .langbar,.pdfbtn,.topbar{display:none!important}
     body{background:#fff}
     .page{max-width:100%;padding:0}
     .benefits,.bn-row,.grp-wrap,.prog{break-inside:avoid;page-break-inside:avoid}
@@ -50,7 +50,17 @@
     .sec-head{break-after:avoid;page-break-after:avoid}
   }
   @page{margin:12mm}
-  .langbar{position:sticky;top:0;z-index:20;display:flex;gap:6px;justify-content:center;
+  .topbar{position:sticky;top:0;z-index:30;background:#fff;padding-bottom:6px;box-shadow:0 6px 14px -10px rgba(0,0,0,.25)}
+  .srchbar{display:flex;gap:6px;align-items:center;margin:0 auto;max-width:520px;padding:0 2px}
+  .srchbar input{flex:1;border:1.3px solid var(--line);border-radius:20px;padding:9px 14px;font-size:14px;
+    font-family:inherit;color:var(--ink);background:#fff;-webkit-appearance:none}
+  .srchbar input:focus{outline:none;border-color:var(--gold-d)}
+  .srchbar button{border:1.3px solid var(--line);background:#fff;color:var(--gold-d);border-radius:50%;
+    width:32px;height:32px;font-size:13px;cursor:pointer;flex:0 0 auto;font-family:inherit}
+  .srch-info{text-align:center;font-size:11.5px;color:var(--muted);margin-top:5px}
+  .srch-info b{color:var(--navy)}
+  .hit{background:#FFF3C4;border-radius:3px;padding:0 1px}
+  .langbar{position:static;z-index:20;display:flex;gap:6px;justify-content:center;
     padding:12px 0;background:linear-gradient(180deg,var(--bg) 70%,rgba(255,255,255,0));margin-bottom:4px}
   .langbtn{border:1.3px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;
     padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Prompt',sans-serif;font-weight:500;transition:.15s}
@@ -242,7 +252,7 @@
   /* ── A4 print: each section on its own page ── */
   @page{size:A4;margin:14mm 13mm}
   @media print{
-    .langbar{display:none!important}
+    .langbar,.topbar{display:none!important}
     .page{max-width:100%;padding:0}
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
     .hero{page-break-after:always;padding-top:60px}
@@ -254,7 +264,14 @@
 </head>
 <body>
 <div class="page">
-  <div id="langbar" class="langbar"></div>
+  <div id="topbar" class="topbar">
+    <div id="langbar" class="langbar"></div>
+    <div class="srchbar">
+      <input id="mSearch" type="search" oninput="menuSearch()" placeholder="🔍 Search menu…">
+      <button id="mSearchX" onclick="menuSearchClear()" style="display:none">✕</button>
+    </div>
+    <div id="mSearchInfo" class="srch-info" style="display:none"></div>
+  </div>
   <button class="pdfbtn" onclick="makePdf()" id="pdfbtn">⤓ PDF</button>
   <div id="menu"></div>
 </div>
@@ -422,17 +439,17 @@ SECTIONS=[
      
    ],
    groups:[
-     {label:{ko:'HIFU · 체험 🔥 정품 밀도 · 4.5mm SMAS (신규 · 월–금 · 1일 한정 · 양쪽 시술)',en:'HIFU · Trial 🔥 Full density · 4.5mm SMAS (new guests · Mon–Fri · limited/day · both sides)',th:'HIFU · ทดลอง 🔥 ความหนาแน่นเต็ม · 4.5มม. SMAS (ลูกค้าใหม่ · จ.–ศ. · จำกัดต่อวัน · ทำสองข้าง)',ja:'HIFU · 体験 🔥 正規密度 · 4.5mm SMAS (新規 · 月–金 · 1日限定 · 両側)',zh:'HIFU·体验 🔥 足密度·4.5mm SMAS(新客·周一至五·每日限量·双侧)'},items:[
-       {feature:1,star:'TRIAL',name:{ko:'포인트 체험 · 200샷',en:'Point Trial · 200 shots',th:'ทดลองจุดเดียว · 200 ช็อต',ja:'ポイント体験 · 200ショット',zh:'定点体验 · 200发'},dev:'ULFINE NEOSKIN · 4.5mm',price:'399',m:20,
-        meta:{ko:'턱각 또는 팔자(광대 밑) 중 1존 · 양쪽 각 100샷 집중 · 4.5mm SMAS 단일 심도',en:'jaw angle OR nasolabial (under-cheekbone) · 1 zone · 100 shots each side, concentrated · single 4.5 mm SMAS depth',th:'มุมกราม หรือ ร่องแก้ม (ใต้โหนกแก้ม) เลือก 1 จุด · ข้างละ 100 ช็อตแบบเข้มข้น · ระดับเดียว 4.5 มม. SMAS',ja:'エラ または ほうれい線(頬骨下)から1ゾーン · 両側各100ショット集中 · 4.5mm SMAS単一深度',zh:'下颌角 或 法令(颧骨下)选1区·每侧100发集中·4.5mm SMAS单一深度'},
+     {label:{ko:'HIFU · 체험 🔥 정품 밀도 · 4.5mm SMAS (<b>양쪽 시술 · 1존 ≈ 3×2cm</b> · 매일 · 재방문 가능)',en:'HIFU · Trial 🔥 Full density · 4.5mm SMAS (<b>both sides · 1 zone ≈ 3×2 cm</b> · every day · returning guests welcome)',th:'HIFU · ทดลอง 🔥 ความหนาแน่นเต็ม · 4.5มม. SMAS (<b>ทำสองข้าง · 1 โซน ≈ 3×2 ซม.</b> · ทุกวัน · ลูกค้าเก่าทำได้)',ja:'HIFU · 体験 🔥 正規密度 · 4.5mm SMAS (<b>両側 · 1ゾーン≈3×2cm</b> · 毎日 · 再来店可)',zh:'HIFU·体验 🔥 足密度·4.5mm SMAS(<b>双侧·1区≈3×2cm</b>·每日·老客可做)'},items:[
+       {feature:1,star:'TRIAL',name:{ko:'포인트 체험 · 200샷',en:'Point Trial · 200 shots',th:'ทดลองจุดเดียว · 200 ช็อต',ja:'ポイント体験 · 200ショット',zh:'定点体验 · 200发'},dev:'ULFINE NEOSKIN · 4.5mm',price:'399',m:30,
+        meta:{ko:'턱각 또는 팔자(광대 밑) 중 1존 (≈3×2cm) · <b>양쪽 시술</b> 각 100샷 집중 · 추가 요금 없음',en:'jaw angle OR nasolabial (under-cheekbone) · 1 zone (≈3×2 cm) · <b>both sides</b>, 100 shots each · no extra charge',th:'มุมกราม หรือ ร่องแก้ม (ใต้โหนกแก้ม) เลือก 1 จุด (≈3×2 ซม.) · <b>ทำ 2 ข้าง</b> ข้างละ 100 ช็อต · ไม่คิดเพิ่ม',ja:'エラ または ほうれい線(頬骨下)から1ゾーン · 両側各100ショット集中 · 4.5mm SMAS単一深度',zh:'下颌角 或 法令(颧骨下)选1区·每侧100发集中·4.5mm SMAS单一深度'},
         x:{ko:'가장 가볍게 하이푸를 확인하는 회차 · <b>좁은 한 포인트에 정품 밀도로 집중</b>해 당김을 체감 · 팔자 선택 시 주름 자리가 아니라 <b>내려온 볼을 광대 밑에서 당겨</b> 올립니다 · 다른 시술 받으실 때 +399로 붙일 수도 있어요',en:'The lightest way to feel HIFU · <b>full density concentrated on one small point</b> so you feel the pull · for the nasolabial choice we work <b>above the fold, under the cheekbone</b>, lifting the dropped cheek — not the crease itself · can also be added to another treatment for +฿399',th:'วิธีที่เบาที่สุดในการสัมผัส HIFU · <b>ยิงความหนาแน่นเต็มเน้นจุดเล็ก ๆ จุดเดียว</b> ให้รู้สึกถึงการดึง · ถ้าเลือกร่องแก้ม เราทำ <b>เหนือร่อง ใต้โหนกแก้ม</b> ยกแก้มที่หย่อนลงมา ไม่ใช่ตรงร่อง · เสริมกับทรีตเมนต์อื่นได้ +฿399',ja:'一番軽くHIFUを確かめる回 · <b>狭い一点に正規密度で集中</b>し引き上げを体感 · ほうれい線を選んだ場合はシワ自体ではなく<b>頬骨下で下がった頬を引き上げ</b>ます · 他の施術に+฿399で追加も可',zh:'最轻松体验HIFU的一次·<b>在一个小点上以足密度集中施打</b>感受提拉·选法令时打<b>颧骨下·褶皱上方</b>·提起下垂的脸颊·而非皱纹本身·也可+฿399加在其他护理上'}},
-       {star:'+200',name:{ko:'+ 400샷으로',en:'Step up to 400 shots',th:'เพิ่มเป็น 400 ช็อต',ja:'400ショットへ',zh:'升至400发'},dev:'4.5mm',price:'699',m:25,
+       {star:'+200',name:{ko:'+ 400샷으로',en:'Step up to 400 shots',th:'เพิ่มเป็น 400 ช็อต',ja:'400ショットへ',zh:'升至400发'},dev:'4.5mm',price:'699',m:35,
         meta:{ko:'귀밑 존 확장 · 양쪽 각 200샷 · +300만 더 하면 샷 2배',en:'preauricular zone expanded · 200 shots each side · +฿300 doubles the shots',th:'ขยายโซนใต้ใบหู · ข้างละ 200 ช็อต · เพิ่ม ฿300 ช็อตเป็น 2 เท่า',ja:'耳下ゾーン拡張 · 両側各200ショット · +฿300でショット2倍',zh:'耳下区扩展·每侧200发·加฿300发数翻倍'},
         x:{ko:'200샷보다 넓게 · 턱각을 넘어 귀밑 전체로 · <b>샷이 두 배라 당김이 확실히 넓게 걸립니다</b>',en:'Wider than 200 · past the jaw angle across the whole preauricular zone · <b>twice the shots, so the pull covers noticeably more</b>',th:'กว้างกว่า 200 ช็อต · เลยมุมกรามครอบทั้งใต้ใบหู · <b>ช็อต 2 เท่า การดึงกว้างขึ้นชัดเจน</b>',ja:'200ショットより広く · エラを越え耳下全体へ · <b>ショット2倍で引き上げが明確に広がる</b>',zh:'比200发更广·越过下颌角覆盖整个耳下区·<b>发数翻倍·提拉范围明显更广</b>'}},
-       {feature:1,star:'★ POPULAR',name:{ko:'+ 600샷으로',en:'Step up to 600 shots',th:'เพิ่มเป็น 600 ช็อต',ja:'600ショットへ',zh:'升至600发'},dev:'4.5mm',price:'990',m:30,
+       {feature:1,star:'★ POPULAR',name:{ko:'+ 600샷으로',en:'Step up to 600 shots',th:'เพิ่มเป็น 600 ช็อต',ja:'600ショットへ',zh:'升至600发'},dev:'4.5mm',price:'990',m:40,
         meta:{ko:'귀밑+턱선 · 양쪽 각 300샷 · 가장 많이 선택 · +291',en:'preauricular + jawline · 300 each side · most chosen · +฿291',th:'ใต้ใบหู+กรอบหน้า · ข้างละ 300 · เลือกมากที่สุด · +฿291',ja:'耳下+フェイスライン · 各300 · 一番人気 · +฿291',zh:'耳下+下颌线·每侧300发·最多人选·+฿291'},
         x:{ko:'귀밑에서 턱선까지 한 번에 · <b>체험 중 가장 인기</b> · 하안면 라인이 눈에 걸리는 실질 면적',en:'Jaw angle down the jawline in one go · <b>our most popular trial step</b> · enough area to see the lower-face line move',th:'ใต้ใบหูต่อกรอบหน้าในครั้งเดียว · <b>ขั้นทดลองยอดนิยม</b> · พื้นที่พอเห็นแนวใบหน้าล่างขยับ',ja:'耳下からフェイスラインまで一度に · <b>体験で一番人気</b> · 下顔面のラインが動く実面積',zh:'耳下到下颌线一次到位·<b>体验中最热门</b>·足以看到下面部线条变化'}},
-       {feature:1,star:'BEST VALUE',name:{ko:'+ 800샷으로 · 하안면',en:'Step up to 800 shots · Lower Face',th:'เพิ่มเป็น 800 ช็อต · ใบหน้าส่วนล่าง',ja:'800ショットへ · 下顔面',zh:'升至800发·下面部'},dev:'ULFINE NEOSKIN · 4.5mm',price:'1,290',m:35,
+       {feature:1,star:'BEST VALUE',name:{ko:'+ 800샷으로 · 하안면',en:'Step up to 800 shots · Lower Face',th:'เพิ่มเป็น 800 ช็อต · ใบหน้าส่วนล่าง',ja:'800ショットへ · 下顔面',zh:'升至800发·下面部'},dev:'ULFINE NEOSKIN · 4.5mm',price:'1,290',m:50,
         meta:{ko:'귀밑 → 턱선 → 광대밑 · 양쪽 각 400샷 · <b>샷당 최저가 · 가장 이득</b> · 체험 최대치',en:'jaw angle → jawline → under-cheekbone · 400 each side · <b>lowest per-shot · best value</b> · trial maximum',th:'ใต้ใบหู → กรอบหน้า → ใต้โหนกแก้ม · ข้างละ 400 · <b>ต่อช็อตถูกสุด · คุ้มสุด</b> · สูงสุดของทดลอง',ja:'耳下→フェイスライン→頬骨下 · 各400 · <b>ショット単価最安·一番お得</b> · 体験の最大',zh:'耳下→下颌线→颧骨下·每侧400发·<b>每发最低·最划算</b>·体验上限'},
         x:{ko:'체험으로 갈 수 있는 최대 면적 · 하안면 전체에 4.5mm 풀밀도 · <b>여기서 여러 층·더 넓은 면적을 원하시면 정규 메뉴(볼 4,000샷 4,900)로</b> · 정규 시술 예약 시 체험비 전액 차감',en:'The largest area we cover as a trial · full 4.5 mm density across the lower face · <b>to add depths or go wider, step up to the regular menu (Cheeks, 4,000 shots, ฿4,900)</b> · trial fee fully credited when you book the regular treatment',th:'พื้นที่มากที่สุดที่ทำแบบทดลองได้ · ความหนาแน่นเต็ม 4.5 มม. ทั่วใบหน้าส่วนล่าง · <b>อยากได้หลายระดับหรือกว้างขึ้น ขยับไปเมนูปกติ (แก้ม 4,000 ช็อต ฿4,900)</b> · จองเมนูปกติหักค่าทดลองเต็มจำนวน',ja:'体験で行ける最大面積 · 下顔面全体に4.5mmフル密度 · <b>多層·より広くは正規メニュー(頬4,000ショット฿4,900)へ</b> · 正規予約で体験料全額差引',zh:'体验可覆盖最大面积·下面部全区4.5mm足密度·<b>想要多层或更广请升级正规菜单(脸颊4,000发฿4,900)</b>·预约正规护理全额抵扣体验费'}},
      ]},
@@ -494,7 +511,7 @@ SECTIONS=[
        {name:{ko:'🤲 + 리프팅 림프마사지 20분',en:'🤲 + Lifting Lymph massage 20 min',th:'🤲 + นวดน้ำเหลืองยกกระชับ 20 นาที',ja:'🤲 + リフティングリンパ20分',zh:'🤲 + 提拉淋巴按摩20分'},dev:'',price:'490',addon:1,meta:{ko:'붓기·열감 드레이닝 · 턱선 정리 · 10분 290',en:'drains puffiness & heat · sharper jawline · 10 min ฿290',th:'ระบายบวม·ร้อน · เก็บกรอบหน้า · 10 นาที ฿290',ja:'むくみ·熱感ドレナージュ · フェイスライン · 10分฿290',zh:'引流浮肿·热感·收下颌线·10分฿290'}},
      ]},
    ],
-   noteHtml:{ko:'<b>HIFU는 샷 총량이 아니라 면적당 밀도가 결과를 만듭니다</b> · 모든 메뉴를 국제 표준 프로토콜과 같은 밀도(1.4mm 간격)로 시술합니다 · <b>체험(399→699→990→1,290)은 4.5mm 한 층을 좁은 면적에 정품 밀도로</b> — 200샷에서 시작해 400·600·800샷으로 · <b>총액은 200샷(399)이 최저, 샷당가는 800샷(1,290)이 최저</b> · 장비를 확인하는 회차입니다 · <b>효과(2,900~)부터 여러 심도가 들어가고, 찐(13,900~)은 1.5·3·4.5mm 전 층 풀커버입니다</b> · <b>층 애드온</b>으로 어떤 시술에나 층을 더할 수 있어요 (1.5mm 1,690 · 3mm 1,990 · 4.5mm 1,990 · 9mm 이중턱 1,990) — 층을 섞을수록 오래갑니다 · <b>마무리는 오늘 피부 증상으로 고르세요</b> — 건조·홍조·트러블·칙칙함·늘어짐·붓기별 물방울 초음파/고주파 애드온 (+390~590) · 결과는 1–2개월에 걸쳐 올라와 2–3개월에 자리잡습니다 · <b>체험 후 7일 내 정규 시술 예약 시 체험비 전액 차감</b>',en:'<b>HIFU results come from density per area, not total shot count</b> · every menu is delivered at the same density as the international standard protocol (1.4 mm spacing) · <b>the trials (฿399→699→990→1,290) are one 4.5 mm depth at full density on a small area</b> — 200 → 400 → 600 → 800 shots · <b>lowest total = 200 (฿399), lowest per-shot = 800 (฿1,290)</b> · <b>Results tier (฿2,900+) adds multiple depths, and The Real Thing (฿13,900+) covers all of 1.5 / 3 / 4.5 mm</b> · <b>depth add-ons</b> let you add a layer to any treatment (1.5 mm ฿1,690 · 3 mm ฿1,990 · 4.5 mm ฿1,990 · 9 mm double-chin ฿1,990) — more layers, longer-lasting · <b>pick your finisher by skin symptom today</b> — dryness, redness, breakouts, dullness, laxity or puffiness, each mapping to a waterdrop-ultrasound/RF add-on (+฿390–590) · results build over 1–2 months, settle at 2–3 · <b>trial fee fully credited when you book a regular treatment within 7 days</b>',th:'<b>ผลลัพธ์ HIFU มาจากความหนาแน่นต่อพื้นที่ ไม่ใช่จำนวนช็อตรวม</b> · ทุกเมนูยิงที่ความหนาแน่นเดียวกับโปรโตคอลมาตรฐานสากล (ระยะ 1.4 มม.) · <b>ทดลอง (399–999) ความหนาแน่นเท่ากัน แต่พื้นที่เล็กและมีระดับเดียว</b> เป็นการทดลองเครื่อง ไม่ใช่ยกทั้งใบหน้า · <b>ระดับเห็นผล (2,900+) เริ่มมีหลายระดับ และตัวจริง (13,900+) ครบทั้ง 1.5/3/4.5 มม.</b> · ผลลัพธ์ค่อยขึ้นใน 1–2 เดือน และคงที่ที่ 2–3 เดือน · <b>รายการเสริม</b> — LDM·ไครโอ·ไอออน นิยมปิดท้าย',ja:'<b>HIFUはショット総数ではなく面積あたりの密度が結果を決めます</b> · 全メニューを国際標準プロトコルと同じ密度(1.4mm間隔)で施術 · <b>体験(399〜999)は密度は同じで面積が小さく、深度も一つだけ</b> — 機器を確かめる回で、顔全体のリフトではありません · <b>効果(2,900〜)から複数深度、本気(13,900〜)は1.5·3·4.5mm全層フルカバー</b> · 結果は1〜2ヶ月かけて上がり2〜3ヶ月で定着 · <b>アドオン</b> — LDM·クライオ·イオントは鎮静仕上げに人気',zh:'<b>HIFU的效果来自单位面积密度·而非总发数</b>·所有菜单均按国际标准方案同等密度(间距1.4mm)施打·<b>体验(399~999)密度相同但面积小·且只有单一深度</b>·是体验仪器的场次·不是全脸提拉·<b>见效档(2,900起)开始多层深度·真章档(13,900起)1.5/3/4.5mm全层覆盖</b>·效果在1–2个月内累积·2–3个月稳定·<b>可加项</b>—LDM·冷疗·离子适合镇静收尾'}},
+   noteHtml:{ko:'<b>HIFU는 샷 총량이 아니라 면적당 밀도가 결과를 만듭니다</b> · 모든 메뉴를 국제 표준 프로토콜과 같은 밀도(1.4mm 간격)로 시술합니다 · <b>체험(399→699→990→1,290)은 4.5mm 한 층을 좁은 면적에 정품 밀도로</b> — 200샷에서 시작해 400·600·800샷으로 · <b>총액은 200샷(399)이 최저, 샷당가는 800샷(1,290)이 최저</b> · 장비를 확인하는 회차입니다 · <b>효과(2,900~)부터 여러 심도가 들어가고, 찐(13,900~)은 1.5·3·4.5mm 전 층 풀커버입니다</b> · <b>층 애드온</b>으로 어떤 시술에나 층을 더할 수 있어요 (1.5mm 1,690 · 3mm 1,990 · 4.5mm 1,990 · 9mm 이중턱 1,990) — 층을 섞을수록 오래갑니다 · <b>마무리는 오늘 피부 증상으로 고르세요</b> — 건조·홍조·트러블·칙칙함·늘어짐·붓기별 물방울 초음파/고주파 애드온 (+390~590) · 결과는 1–2개월에 걸쳐 올라와 2–3개월에 자리잡습니다 · <b>체험 후 7일 내 정규 시술 예약 시 체험비 전액 차감</b>',en:'<b>HIFU results come from density per area, not total shot count</b> · every menu is delivered at the same density as the international standard protocol (1.4 mm spacing) · <b>the trials (฿399→699→990→1,290) are one 4.5 mm depth at full density on a small area</b> — 200 → 400 → 600 → 800 shots · <b>lowest total = 200 (฿399), lowest per-shot = 800 (฿1,290)</b> · <b>Results tier (฿2,900+) adds multiple depths, and The Real Thing (฿13,900+) covers all of 1.5 / 3 / 4.5 mm</b> · <b>depth add-ons</b> let you add a layer to any treatment (1.5 mm ฿1,690 · 3 mm ฿1,990 · 4.5 mm ฿1,990 · 9 mm double-chin ฿1,990) — more layers, longer-lasting · <b>pick your finisher by skin symptom today</b> — dryness, redness, breakouts, dullness, laxity or puffiness, each mapping to a waterdrop-ultrasound/RF add-on (+฿390–590) · results build over 1–2 months, settle at 2–3 · <b>trial fee fully credited when you book a regular treatment within 7 days</b>',th:'<b>ผลลัพธ์ HIFU มาจากความหนาแน่นต่อพื้นที่ ไม่ใช่จำนวนช็อตรวม</b> · ทุกเมนูยิงที่ความหนาแน่นเดียวกับโปรโตคอลมาตรฐานสากล (ระยะ 1.4 มม.) · <b>ทดลอง (399–1,290) ความหนาแน่นเท่ากัน แต่พื้นที่เล็กและมีระดับเดียว</b> เป็นการทดลองเครื่อง ไม่ใช่ยกทั้งใบหน้า · <b>ระดับเห็นผล (2,900+) เริ่มมีหลายระดับ และตัวจริง (13,900+) ครบทั้ง 1.5/3/4.5 มม.</b> · ผลลัพธ์ค่อยขึ้นใน 1–2 เดือน และคงที่ที่ 2–3 เดือน · <b>รายการเสริม</b> — LDM·ไครโอ·ไอออน นิยมปิดท้าย',ja:'<b>HIFUはショット総数ではなく面積あたりの密度が結果を決めます</b> · 全メニューを国際標準プロトコルと同じ密度(1.4mm間隔)で施術 · <b>体験(399〜1,290)は密度は同じで面積が小さく、深度も一つだけ</b> — 機器を確かめる回で、顔全体のリフトではありません · <b>効果(2,900〜)から複数深度、本気(13,900〜)は1.5·3·4.5mm全層フルカバー</b> · 結果は1〜2ヶ月かけて上がり2〜3ヶ月で定着 · <b>アドオン</b> — LDM·クライオ·イオントは鎮静仕上げに人気',zh:'<b>HIFU的效果来自单位面积密度·而非总发数</b>·所有菜单均按国际标准方案同等密度(间距1.4mm)施打·<b>体验(399~999)密度相同但面积小·且只有单一深度</b>·是体验仪器的场次·不是全脸提拉·<b>见效档(2,900起)开始多层深度·真章档(13,900起)1.5/3/4.5mm全层覆盖</b>·效果在1–2个月内累积·2–3个月稳定·<b>可加项</b>—LDM·冷疗·离子适合镇静收尾'}},
 
   /* ── 03 페이스 콤보 ── */
   {no:'03',title:'Face Combos',
@@ -792,14 +809,14 @@ SECTIONS=[
   /* ── 08 두피 페인팅 ── */
   {no:'08',title:'Scalp Painting',
    sub:{ko:'두피 페인팅',en:'Scalp Painting',th:'เติมสีหนังศีรษะ',ja:'スカルプペイント',zh:'头皮补色'},
-   desc:{ko:'한국식 두피 페인팅 · 넓어진 가르마·정수리·빈 곳을 자연스럽게 커버 · 무통, 당일 완성 · 두피 스케일링 포함',en:'Korean scalp painting · natural cover for parting, crown & thin spots · painless, same-day · scalp scaling incl.',th:'เติมสีหนังศีรษะสไตล์เกาหลี · เติมแนวแสก·กลางหัว·จุดบางธรรมชาติ · ไม่เจ็บ เสร็จวันเดียว · รวมสเกลลิ่ง',ja:'韓国式スカルプペイント · 分け目·頭頂·薄い部分を自然にカバー · 無痛·当日 · スケーリング込み',zh:'韩式头皮补色·自然覆盖发缝·头顶·稀疏处·无痛·当天完成·含头皮清理'},
+   desc:{ko:'한국식 두피 페인팅 · 넓어진 가르마·정수리·빈 곳을 자연스럽게 커버 · 통증 적음, 1회 완성 · 지속 1~2년 · 두피 스케일링 포함',en:'Korean scalp painting · natural cover for parting, crown & thin spots · low discomfort, complete in one visit · lasts 1–2 years · scalp scaling incl.',th:'เติมสีหนังศีรษะสไตล์เกาหลี · เติมแนวแสก·กลางหัว·จุดบางธรรมชาติ · รู้สึกน้อย เสร็จใน 1 ครั้ง · อยู่ได้ 1–2 ปี · รวมสเกลลิ่ง',ja:'韓国式スカルプペイント · 分け目·頭頂·薄い部分を自然にカバー · 痛み少·1回で完成 · 1〜2年持続 · スケーリング込み',zh:'韩式头皮补色·自然覆盖发缝·头顶·稀疏处·痛感轻·1次完成·维持1-2年·含头皮清理'},
    items:[
    ],
    groups:[
-     {label:{ko:'가르마 (여성) · Parting',en:'Parting (Women)',th:'แนวแสก (หญิง)',ja:'分け目(女性)',zh:'发缝(女性)'},items:[
+     {label:{ko:'가르마 · Parting',en:'Parting',th:'แนวแสก',ja:'分け目',zh:'发缝'},items:[
        {feature:1,star:'POPULAR',name:{ko:'가르마 × 3',en:'Parting ×3',th:'แนวแสก ×3',ja:'分け目×3',zh:'发缝×3'},was:'฿14,900',mem:'11,900',price:'8,900',m:60,meta:{ko:'가르마 3회 · 회당 ฿2,967 · 스케일링 포함',en:'parting ×3 · ฿2,967 each · scaling incl.',th:'แนวแสก 3 ครั้ง · ฿2,967/ครั้ง · รวมสเกลลิ่ง',ja:'分け目3回 · ฿2,967/回 · スケーリング込',zh:'发缝3次·每次฿2,967·含清理'},
         x:{ko:'넓어진 가르마를 자연스럽게 채움 · 여성 1순위 · 3회로 색·밀도 안정',en:'Fills widening parting naturally · #1 for women · 3 sessions stabilize color & density',th:'เติมแนวแสกที่กว้างขึ้น · ยอดนิยมหญิง · 3 ครั้งให้สีคงที่',ja:'広がった分け目を自然に · 女性人気No.1 · 3回で安定',zh:'自然填补变宽发缝·女性首选·3次稳定'}},
-       {name:{ko:'가르마 라인 · 1회',en:'Parting Line · 1',th:'แนวแสก · 1 ครั้ง',ja:'分け目·1回',zh:'发缝·1次'},was:'฿6,900',mem:'5,900',price:'3,900',m:60,meta:{ko:'스케일링 포함 · 2~3회 권장',en:'scaling incl. · 2–3 recommended',th:'รวมสเกลลิ่ง · แนะนำ 2–3',ja:'スケーリング込 · 2〜3回推奨',zh:'含清理·建议2-3次'},
+       {name:{ko:'가르마 라인 · 1회',en:'Parting Line · 1',th:'แนวแสก · 1 ครั้ง',ja:'分け目·1回',zh:'发缝·1次'},was:'฿6,900',mem:'5,900',price:'3,900',m:60,meta:{ko:'스케일링 포함 · 1회 완성 · 무료 리터치 1회',en:'scaling incl. · complete in 1 · 1 free retouch',th:'รวมสเกลลิ่ง · เสร็จใน 1 ครั้ง · รีทัชฟรี 1 ครั้ง',ja:'スケーリング込 · 1回で完成 · リタッチ1回無料',zh:'含清理·1次完成·免费补色1次'},
         x:{ko:'가장 부담 없이 시작하는 여성 진입 케어',en:'The easiest entry for women',th:'เริ่มต้นง่ายที่สุดสำหรับผู้หญิง',ja:'一番始めやすい女性入門',zh:'女性最易入门'}},
        {name:{ko:'헤어라인 × 3',en:'Hairline ×3',th:'ไรผม ×3',ja:'生え際×3',zh:'发际线×3'},was:'฿16,900',mem:'13,900',price:'9,900',m:70,meta:{ko:'이마 라인 잔머리 · 회당 ฿3,300',en:'forehead hairline · ฿3,300 each',th:'ไรผมหน้าผาก · ฿3,300/ครั้ง',ja:'額の生え際 · ฿3,300/回',zh:'额部发际·每次฿3,300'},
         x:{ko:'이마 라인을 자연스럽게 · 얼굴 인상 보정',en:'Softens the forehead line naturally',th:'ปรับไรผมหน้าผากให้เป็นธรรมชาติ',ja:'額の生え際を自然に',zh:'自然修饰额部发际'}},
@@ -815,23 +832,25 @@ SECTIONS=[
      {label:{ko:'정수리 (남녀) · Crown',en:'Crown (Unisex)',th:'กลางหัว (ชาย·หญิง)',ja:'頭頂(男女)',zh:'头顶(男女)'},items:[
        {feature:1,star:'POPULAR',name:{ko:'정수리 × 3',en:'Crown ×3',th:'กลางหัว ×3',ja:'頭頂×3',zh:'头顶×3'},was:'฿16,900',mem:'13,900',price:'9,900',m:75,meta:{ko:'정수리 3회 · 회당 ฿3,300 · 스케일링 포함',en:'crown ×3 · ฿3,300 each · scaling incl.',th:'กลางหัว 3 ครั้ง · ฿3,300/ครั้ง',ja:'頭頂3回 · ฿3,300/回',zh:'头顶3次·每次฿3,300'},
         x:{ko:'정수리 빈 곳을 자연스럽게 채움 · 남녀 1순위 · 3회로 완성도·지속력 최상',en:'Fills crown thinning · #1 for men & women · 3 sessions for best finish',th:'เติมจุดบางกลางหัว · ยอดนิยม · 3 ครั้งผลลัพธ์สุด',ja:'頭頂の薄い部分を · 男女人気No.1 · 3回で最上',zh:'填补头顶稀疏·男女首选·3次最佳'}},
-       {name:{ko:'정수리 · 1회',en:'Crown · 1',th:'กลางหัว · 1 ครั้ง',ja:'頭頂·1回',zh:'头顶·1次'},was:'฿7,900',mem:'6,900',price:'4,900',m:75,meta:{ko:'스케일링 포함 · 2~3회 권장',en:'scaling incl. · 2–3 recommended',th:'รวมสเกลลิ่ง · แนะนำ 2–3',ja:'スケーリング込 · 2〜3回推奨',zh:'含清理·建议2-3次'},
+       {name:{ko:'정수리 · 1회',en:'Crown · 1',th:'กลางหัว · 1 ครั้ง',ja:'頭頂·1回',zh:'头顶·1次'},was:'฿7,900',mem:'6,900',price:'4,900',m:75,meta:{ko:'스케일링 포함 · 1회 완성 · 무료 리터치 1회',en:'scaling incl. · complete in 1 · 1 free retouch',th:'รวมสเกลลิ่ง · เสร็จใน 1 ครั้ง · รีทัชฟรี 1 ครั้ง',ja:'スケーリング込 · 1回で完成 · リタッチ1回無料',zh:'含清理·1次完成·免费补色1次'},
         x:{ko:'정수리 숱 없는 부분을 당일 커버',en:'Same-day cover for crown thinning',th:'ปกปิดจุดบางกลางหัวในวันเดียว',ja:'頭頂の薄毛を当日カバー',zh:'当天覆盖头顶稀疏'}},
        {name:{ko:'정수리 + 헤어라인 · 1회',en:'Crown + Hairline · 1',th:'กลางหัว + ไรผม · 1 ครั้ง',ja:'頭頂+生え際·1回',zh:'头顶+发际线·1次'},was:'฿13,900',mem:'9,900',price:'7,900',m:100,meta:{ko:'따로 하면 ฿9,800 → ฿7,900 · 스케일링 포함',en:'฿9,800 separately → ฿7,900 · scaling incl.',th:'แยกทำ ฿9,800 → ฿7,900 · รวมสเกลลิ่ง',ja:'別々฿9,800 → ฿7,900 · スケーリング込',zh:'分开฿9,800→฿7,900·含清理'},
         x:{ko:'정수리와 이마 라인을 하루에 · 남녀 공통 조합',en:'Crown and hairline in one visit · unisex combo',th:'กลางหัว+ไรผมในวันเดียว · ชาย·หญิง',ja:'頭頂と生え際を一日で · 男女共通',zh:'头顶+发际线一天完成·男女通用'}},
      ]},
-     {label:{ko:'남성 풀 스칼프 · Full Scalp',en:'Men Full Scalp',th:'ฟูลสแกลป์ (ชาย)',ja:'男性フルスカルプ',zh:'男士全头'},items:[
-       {feature:1,star:'POPULAR',name:{ko:'남성 풀 스칼프 × 3',en:'Men Full Scalp ×3',th:'ฟูลสแกลป์ชาย ×3',ja:'男性フル×3',zh:'男士全头×3'},was:'฿29,900',mem:'23,900',price:'18,000',m:120,meta:{ko:'정수리+헤어라인+빈 곳 전체 · 회당 ฿6,000',en:'crown + hairline + all · ฿6,000 each',th:'ทั้งหมด · ฿6,000/ครั้ง',ja:'全体 · ฿6,000/回',zh:'全部·每次฿6,000'},
-        x:{ko:'남성 전체 두피를 한 번에 자연 커버 · 3회로 완성',en:'Covers the whole male scalp · 3 sessions to complete',th:'ครอบคลุมหนังศีรษะชายทั้งหมด · 3 ครั้ง',ja:'男性の薄毛全体を · 3回で完成',zh:'覆盖男性全头·3次完成'}},
-       {name:{ko:'남성 풀 스칼프 · 1회',en:'Men Full Scalp · 1',th:'ฟูลสแกลป์ชาย · 1 ครั้ง',ja:'男性フル·1回',zh:'男士全头·1次'},was:'฿11,900',mem:'9,900',price:'6,900',m:120,meta:{ko:'전체 빈 곳 커버 · 스케일링 포함',en:'all thin areas · scaling incl.',th:'จุดบางทั้งหมด · รวมสเกลลิ่ง',ja:'薄い部分全体 · スケーリング込',zh:'全部稀疏·含清理'},
-        x:{ko:'남성 전체 두피 빈 곳을 한 번에',en:'The whole thinning male scalp in one visit',th:'หนังศีรษะชายที่บางทั้งหมดในครั้งเดียว',ja:'男性の薄毛全体を一度に',zh:'男性全头稀疏一次'}},
+     {label:{ko:'풀 스칼프 (남녀) · Full Scalp',en:'Full Scalp (Unisex)',th:'ฟูลสแกลป์ (ชาย·หญิง)',ja:'フルスカルプ(男女)',zh:'全头(男女)'},items:[
+       {feature:1,star:'POPULAR',name:{ko:'풀 스칼프 × 3',en:'Full Scalp ×3',th:'ฟูลสแกลป์ ×3',ja:'フルスカルプ×3',zh:'全头×3'},was:'฿29,900',mem:'23,900',price:'18,000',m:120,meta:{ko:'정수리+헤어라인+빈 곳 전체 · 회당 ฿6,000',en:'crown + hairline + all · ฿6,000 each',th:'ทั้งหมด · ฿6,000/ครั้ง',ja:'全体 · ฿6,000/回',zh:'全部·每次฿6,000'},
+        x:{ko:'전체 두피를 한 번에 자연 커버 · 남녀 모두 가능',en:'Covers the whole scalp naturally · for men & women',th:'ครอบคลุมหนังศีรษะทั้งหมด · ชายและหญิง',ja:'頭皮全体を自然にカバー · 男女とも可',zh:'自然覆盖全头·男女皆可'}},
+       {name:{ko:'풀 스칼프 · 1회',en:'Full Scalp · 1',th:'ฟูลสแกลป์ · 1 ครั้ง',ja:'フルスカルプ·1回',zh:'全头·1次'},was:'฿14,900',mem:'11,900',price:'9,900',m:120,meta:{ko:'전체 빈 곳 커버 · 스케일링 포함',en:'all thin areas · scaling incl.',th:'จุดบางทั้งหมด · รวมสเกลลิ่ง',ja:'薄い部分全体 · スケーリング込',zh:'全部稀疏·含清理'},
+        x:{ko:'전체 두피 빈 곳을 한 번에 · 1회로 완성',en:'The whole thinning scalp in one visit · complete in 1',th:'จุดบางทั้งหมดในครั้งเดียว · เสร็จใน 1 ครั้ง',ja:'薄毛全体を一度に · 1回で完成',zh:'全头稀疏一次完成'}},
      ]},
      {label:{ko:'리터치 · Retouch',en:'Retouch',th:'เติมสี',ja:'リタッチ',zh:'补色'},items:[
-       {name:{ko:'리터치',en:'Retouch',th:'เติมสี',ja:'リタッチ',zh:'补色'},was:'฿5,900',mem:'4,500',price:'3,500',meta:{ko:'색 빠짐 보강 (부위별 상담)',en:'color top-up (by area)',th:'เติมสีที่จางลง (ตามจุด)',ja:'色補充(部位別)',zh:'补色(按部位)'},
-        x:{ko:'주기적으로 색·밀도 자연스럽게 유지',en:'Keep color & density natural over time',th:'คงสี·ความหนาให้เป็นธรรมชาติ',ja:'色·密度を自然に維持',zh:'定期保持色·密度自然'}},
+       {feature:1,star:'FREE',name:{ko:'1차 리터치 · 무료',en:'First Retouch · Free',th:'รีทัชครั้งแรก · ฟรี',ja:'初回リタッチ · 無料',zh:'首次补色·免费'},price:'0',meta:{ko:'시술 후 3주~1달 · 모든 두피 시술에 포함',en:'3 wks–1 month after · included with every scalp treatment',th:'หลังทำ 3 สัปดาห์–1 เดือน · รวมในทุกทรีตเมนต์หนังศีรษะ',ja:'施術後3週〜1ヶ月 · すべての頭皮施術に込み',zh:'术后3周-1个月·所有头皮护理均含'},
+        x:{ko:'1회차에 채우고, 3주~1달 뒤 다시 오시면 <b>덜 채워진 곳을 무료로 메워 드립니다</b> · 추가 비용 없음 · 오시기 어려우면 안 오셔도 됩니다',en:'We fill it fully the first time, then <b>top up any thin spots free</b> when you return in 3 weeks–1 month · no extra cost · entirely optional',th:'ครั้งแรกทำให้เต็ม แล้วกลับมาอีก 3 สัปดาห์–1 เดือน <b>เราเติมจุดที่ยังไม่เต็มให้ฟรี</b> · ไม่มีค่าใช้จ่ายเพิ่ม · ไม่บังคับ',ja:'初回で満たし、3週〜1ヶ月後に<b>足りない部分を無料で補充</b> · 追加費用なし · 任意',zh:'首次填满·3周-1个月后回来<b>免费补足未满处</b>·无额外费用·非强制'}},
+       {name:{ko:'주기적 리터치',en:'Periodic Retouch',th:'เติมสีเป็นระยะ',ja:'定期リタッチ',zh:'定期补色'},was:'฿5,900',mem:'4,500',price:'3,500',meta:{ko:'무료 리터치 이후 · 색 빠짐 보강 (부위별 상담)',en:'after the free retouch · color top-up (by area)',th:'หลังรีทัชฟรี · เติมสีที่จางลง (ตามจุด)',ja:'無料リタッチ以降 · 色補充(部位別)',zh:'免费补色之后·补色(按部位)'},
+        x:{ko:'1~2년 지속 후 색이 옅어지면 · 주기적으로 색·밀도 자연스럽게 유지',en:'When color fades after 1–2 years · keeps color & density natural over time',th:'เมื่อสีจางลงหลัง 1–2 ปี · คงสี·ความหนาให้เป็นธรรมชาติ',ja:'1〜2年後に色が薄くなったら · 色·密度を自然に維持',zh:'1-2年后颜色变淡时·定期保持色·密度自然'}},
      ]},
    ],
-      noteHtml:{ko:'<b>두피 페인팅 = 당일 완성 자연 커버</b> · 두피 스케일링(딥클렌징) 포함 · 임시 커버로 주기적 리터치 권장',en:'<b>Same-day natural cover</b> · scalp scaling included · temporary cover, periodic retouch recommended',th:'<b>เติมสีเสร็จวันเดียว ดูธรรมชาติ</b> · รวมสเกลลิ่ง · เป็นการปกปิดชั่วคราว แนะนำเติมสีเป็นระยะ',ja:'<b>当日完成の自然カバー</b> · スケーリング込 · 一時的カバー、定期リタッチ推奨',zh:'<b>当天完成自然覆盖</b>·含头皮清理·临时覆盖·建议定期补色'}},
+      noteHtml:{ko:'<b>두피 페인팅 = 1회 완성 · 지속 1~2년</b> · 두피 스케일링(딥클렌징) 포함 · <b>시술 후 3주~1달 무료 리터치 1회 포함</b> · 이후 주기적 리터치 ฿3,500~',en:'<b>Complete in one visit · lasts 1–2 years</b> · scalp scaling (deep cleanse) included · <b>one free retouch 3 wks–1 month after</b> · periodic retouch from ฿3,500',th:'<b>เสร็จใน 1 ครั้ง · อยู่ได้ 1–2 ปี</b> · รวมสเกลลิ่งหนังศีรษะ · <b>รีทัชฟรี 1 ครั้ง หลังทำ 3 สัปดาห์–1 เดือน</b> · หลังจากนั้นเติมสีเป็นระยะเริ่ม ฿3,500',ja:'<b>1回で完成 · 1〜2年持続</b> · スケーリング込 · <b>施術後3週〜1ヶ月に無料リタッチ1回</b> · 以降の定期リタッチ ฿3,500〜',zh:'<b>1次完成·维持1-2年</b>·含头皮清理·<b>术后3周-1个月免费补色1次</b>·之后定期补色฿3,500起'}},
 
   /* ── 09 멤버십 ── */
   
@@ -894,10 +913,23 @@ function baHtml(it){
     <figure><img src="${it.ba.after}" loading="lazy" alt="after"><figcaption>${tx(L.after)}</figcaption></figure>
   </div>`;
 }
+// 5개 국어 문자열을 전부 모아 검색용 인덱스로 (표시 언어와 무관하게 찾히도록)
+function allTx(v,out){
+  out=out||[];
+  if(v==null)return out;
+  if(typeof v==='string'||typeof v==='number'){out.push(String(v));return out;}
+  if(Array.isArray(v)){v.forEach(x=>allTx(x,out));return out;}
+  if(typeof v==='object'){Object.values(v).forEach(x=>allTx(x,out));return out;}
+  return out;
+}
+function srchAttr(it){
+  const t=allTx([it.name,it.dev,it.x,it.meta,it.note,it.price,it.was,it.mem,it.label]).join(' ');
+  return ' data-s="'+String(t).replace(/"/g,'&quot;').toLowerCase()+'"';
+}
 function itemHtml(it){
   const fMeta = it.meta && tx(it.meta) ? tx(it.meta) : '';
   if(it.feature){
-    return `<div class="feature">
+    return `<div class="feature"${srchAttr(it)}>
       <div>
         <span class="star">${it.star}</span>
         <div class="f-name">${typeof it.name==='object'?tx(it.name):it.name}</div>
@@ -931,7 +963,7 @@ function itemHtml(it){
         <span class="t-promo"><span class="t-badge">${tx(UI.bigPromo)}</span><span class="t-big"><span class="b">฿</span>${it.price}</span></span>
       </div>`
     : `${it.was?`<span class="was">${it.was}</span>`:''}<span class="price"><span class="b">฿</span>${it.price}</span>${it.note?`<span class="price-note">${it.note}</span>`:''}`;
-  return `<div class="item">
+  return `<div class="item"${srchAttr(it)}>
     <div class="item-body">
       <div class="item-name">${typeof it.name==='object'?tx(it.name):it.name}${it.free?`<span class="badge">FREE</span>`:''}</div>
       ${it.dev?`<div class="item-dev">${typeof it.dev==='object'?tx(it.dev):it.dev}</div>`:''}
@@ -1330,10 +1362,58 @@ window.addEventListener('DOMContentLoaded',()=>{
   b.onclick=baToggleEdit; document.body.appendChild(b);
 });
 
-function setLang(l){LANG=l;localStorage.setItem('hnh_menu_lang',l);render();
+function setLang(l){
+  const y=window.scrollY;                       // 보고 있던 위치 기억
+  LANG=l;localStorage.setItem('hnh_menu_lang',l);render();
   const eb=document.getElementById('editBadge'); if(eb)eb.textContent=BA_EDIT?baT(BA_LABELS.editOff):baT(BA_LABELS.editOn);
-  window.scrollTo({top:0,behavior:'smooth'});}
+  menuSearch();                                  // 검색 중이면 결과 유지
+  window.scrollTo(0,y);                          // 원래 위치로 복원
+}
+/* ===================== 메뉴 검색 ===================== */
+const SRCH_PH={ko:'🔍 메뉴·가격 검색…',en:'🔍 Search menu…',th:'🔍 ค้นหาเมนู…',ja:'🔍 メニュー検索…',zh:'🔍 搜索菜单…'};
+const SRCH_RES={ko:n=>`<b>${n}</b>개 찾음 · 다른 언어 이름으로도 검색돼요`,
+  en:n=>`<b>${n}</b> found`,th:n=>`พบ <b>${n}</b> รายการ`,ja:n=>`<b>${n}</b>件`,zh:n=>`找到 <b>${n}</b> 项`};
+const SRCH_NONE={ko:'결과가 없어요',en:'No results',th:'ไม่พบรายการ',ja:'該当なし',zh:'无结果'};
+const SRCH_ROWS='.item,.feature,.tier,.prog,.grp,.bn-row';
+function menuSearchClear(){const i=document.getElementById('mSearch');if(i)i.value='';menuSearch();}
+function menuSearch(){
+  const inp=document.getElementById('mSearch'); if(!inp)return;
+  inp.placeholder=SRCH_PH[LANG]||SRCH_PH.en;
+  const q=inp.value.trim().toLowerCase();
+  const info=document.getElementById('mSearchInfo'), xb=document.getElementById('mSearchX');
+  if(xb)xb.style.display=q?'block':'none';
+  const root=document.getElementById('menu'); if(!root)return;
+  const rows=[...root.querySelectorAll(SRCH_ROWS)];
+  if(!q){
+    rows.forEach(r=>r.style.display='');
+    [...root.querySelectorAll('.section,.grp-wrap,.prog,.tiers,.sec-desc,.note,.foot,.benefits,.hero')].forEach(x=>x.style.display='');
+    if(info)info.style.display='none';
+    return;
+  }
+  let n=0;
+  rows.forEach(r=>{
+    const hit=((r.textContent||'')+' '+(r.getAttribute('data-s')||'')).toLowerCase().includes(q);
+    r.style.display=hit?'':'none';
+    if(hit)n++;
+  });
+  // 결과가 없는 섹션·묶음은 접기
+  [...root.querySelectorAll('.grp-wrap,.prog,.tiers')].forEach(w=>{
+    const any=[...w.querySelectorAll(SRCH_ROWS)].some(x=>x.style.display!=='none');
+    w.style.display=any?'':'none';
+  });
+  [...root.querySelectorAll('.section')].forEach(sec=>{
+    const any=[...sec.querySelectorAll(SRCH_ROWS)].some(x=>x.style.display!=='none');
+    sec.style.display=any?'':'none';
+    [...sec.querySelectorAll('.sec-desc,.note')].forEach(x=>x.style.display=any?'':'none');
+  });
+  [...root.querySelectorAll('.hero,.benefits,.foot')].forEach(x=>x.style.display='none');
+  if(info){
+    info.style.display='block';
+    info.innerHTML=n?((SRCH_RES[LANG]||SRCH_RES.en)(n)):(SRCH_NONE[LANG]||SRCH_NONE.en);
+  }
+}
 render();
+menuSearch();
 </script>
 </body>
 </html>
