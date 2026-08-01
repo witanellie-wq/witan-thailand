@@ -465,6 +465,7 @@
   .cklchip.done{background:#f0efe9;border-color:var(--line);color:var(--muted);cursor:default}
   .cklchip.mem{background:#F9F5EC;border-color:#C9D2E1;color:var(--gold-d);cursor:default}
   .cklchip.pay{background:var(--gold-d);border-color:var(--gold-d);color:#fff;font-weight:700}
+  .cklchip.newled{background:#fff;border-color:#C9D2E1;color:var(--gold-d);border-style:dashed;font-weight:700}
   .ccard.done{opacity:.6}
   .ccard .cc-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
   .ccard .cc-nm{font-weight:700;font-size:14px}
@@ -708,7 +709,7 @@
     <button class="btn gold owner-only" data-i18n="csv" onclick="exportCSV()">⬇ CSV</button>
     <button class="btn gold owner-only" onclick="exportCustomersXLSX()">👥 Customer Excel · ลูกค้า Excel</button>
   </div>
-  <div class="toolbar owner-only">
+  <div class="toolbar">
     <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 Customer Ledger · ทะเบียนลูกค้า (Course·Membership)</button>
   </div>
   <div class="toolbar owner-only">
@@ -3743,7 +3744,7 @@ function showCustMatch(){
   box.style.display='block';
 }
 function openCustMgr(){
-  customers=loadCusts();
+  if(!cloudOn)customers=loadCusts();   // 서버 연결 중엔 캐시로 덮어쓰지 않음 (원장이 사라지는 문제 방지)
   resetCustForm();
   custView('list');
   custFilterMode='all';
@@ -3950,7 +3951,7 @@ function renderLedSum(){
   $('ledSum').innerHTML=
     `<div class="ls"><div class="lv">${all.length}${T('pplU')}</div><div class="ll">${T('ledSumAll')}</div></div>
      <div class="ls"><div class="lv">${activeC}${T('pplU')} · ${remTot}${T('sesU')}</div><div class="ll">${T('ledSumCourse')}</div></div>
-     <div class="ls mem"><div class="lv">${activeM}${T('pplU')} · ${fmt(balTot)}</div><div class="ll">${T('ledSumMem')}</div></div>`;
+     <div class="ls mem"><div class="lv">${activeM}${T('pplU')}${isStaff()?'':' · '+fmt(balTot)}</div><div class="ll">${T('ledSumMem')}</div></div>`;
 }
 
 /* 예약 데이터 + 원장을 전화(없으면 이름) 기준으로 합쳐 전체 고객 목록 생성 */
@@ -4164,9 +4165,12 @@ function ckMove(d){ckDate=shiftDate(ckDate,d);renderCheckin();}
 function ckTogglePending(){ckMode=ckMode==='pending'?'day':'pending';renderCheckin();}
 function ckStatusBadge(s){const m={'예약':'#c9a84a','방문':'#2f8f5b','노쇼':'#c0392b','캔슬':'#999','연기대기':'#6a5df0'};const c=m[s]||'#999';return `<span class="ck-stbadge" style="background:${c}22;color:${c}">${T('s_'+s)||s}</span>`;}
 function ckLedgerChips(e){
-  const q=normPh(e.phone); if(!q||q.length<7)return '';
-  const hits=customers.filter(c=>normPh(c.phone)===q);
-  if(!hits.length)return '';
+  const q=normPh(e.phone);
+  const hits=q&&q.length>=7?customers.filter(c=>normPh(c.phone)===q):[];
+  if(!hits.length){
+    // 원장에 없는 손님 — 현장에서 멤버십·회차권을 끊으면 여기서 바로 등록
+    return `<div class="cklrow"><button class="cklchip newled" onclick="ckAddLedger('${e.id}')">💳 멤버십·회차권 등록 · เปิดสมาชิก/คอร์ส</button></div>`;
+  }
   let out='';
   hits.forEach(c=>{
     if(c.type==='course'){
@@ -4187,6 +4191,25 @@ function ckLedgerChips(e){
     }
   });
   return out?`<div class="cklrow">${out}</div>`:'';
+}
+// 체크인 → 고객 원장 등록 폼 열기 (이름·전화 자동 입력)
+function ckAddLedger(bid){
+  const e=data.find(x=>x.id==bid); if(!e)return;
+  closeCheckin();
+  openCustMgr();
+  setTimeout(()=>{
+    custView('form');
+    if($('c_name'))$('c_name').value=e.name||'';
+    if($('c_phone'))$('c_phone').value=e.phone||'';
+    if($('c_buy'))$('c_buy').value=e.date||todayStr();
+    const bt=String(e.treat||e.bktreat||'').trim();
+    if(bt&&$('c_treat')){
+      const opt=[...$('c_treat').options].find(o=>o.value===bt);
+      if(opt){$('c_treat').value=bt;}
+      else{$('c_treat').value='__custom__';if($('c_treatcustom')){$('c_treatcustom').style.display='block';$('c_treatcustom').value=bt;}}
+    }
+    if($('c_name'))$('c_name').focus();
+  },80);
 }
 function ckLedgerUse(id){
   const c=customers.find(x=>x.id==id);if(!c)return;
