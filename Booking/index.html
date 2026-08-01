@@ -177,6 +177,7 @@
   .tgt-pct{font-weight:800}
   .tgt-pct.ok{color:#1c7a41}.tgt-pct.mid{color:#8a6d1f}.tgt-pct.low{color:var(--muted)}
   .tgt-pace{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .gw-lbl{font-size:10.5px;font-weight:700;color:#8a5a12;margin:7px 0 5px}
   .gw-due{margin-top:8px;background:#FFF8E4;border:1.2px solid #EBD48A;border-radius:4px;padding:8px 10px;font-size:11.5px;color:#7a5f16;line-height:1.55}
   .gw-due.ok{background:#EAF6EF;border-color:#A9D8BC;color:#1c6b3f}
   .gw-due.late{background:#fbe9e9;border-color:#e3a9a9;color:#8e2a20}
@@ -2275,27 +2276,43 @@ function gowabiMonth(monthEntries){
 }
 // 정산일: 그 달 매출은 다음 달 15일에 입금
 function gwPayoutDate(y,m){const ny=(m===11)?y+1:y,nm=(m===11)?0:m+1;return {y:ny,m:nm,label:(nm+1)+'월 15일',iso:ny+'-'+String(nm+1).padStart(2,'0')+'-15'};}
+// 특정 달의 GoWabi 방문 건 모으기
+function gowabiOfMonth(y,m){
+  return data.filter(e=>{
+    if(e.status!=='방문'||!isGowabi(e))return false;
+    const p=String(e.date||'').split('-');return +p[0]===y&&+p[1]===m+1;
+  });
+}
 function renderGowabiSection(monthEntries,y,m){
-  const g=gowabiMonth(monthEntries);
-  if(!g.n)return '';
-  const po=gwPayoutDate(y,m);
+  const g=gowabiMonth(monthEntries);                       // 이번 달 발생분
+  const py=(m===0)?y-1:y, pm=(m===0)?11:m-1;               // 지난달 (이번 달 15일에 입금됨)
+  const prev=gowabiOfMonth(py,pm);
+  const prevGross=prev.reduce((s,e)=>s+Number(e.amount||0),0);
+  const prevPend=prev.filter(e=>!e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0);
+  if(!g.n&&!prev.length)return '';
+  const po=gwPayoutDate(y,m);                              // 이번 달 매출 → 다음 달 15일
+  const inIso=y+'-'+String(m+1).padStart(2,'0')+'-15';      // 이번 달 15일 = 지난달분 입금일
   const today=todayStr();
-  const due=today>=po.iso;                    // 정산일이 지났는가
-  const late=due&&g.pending>0;
+  const late=prevPend>0&&today>=inIso;
   return `<div class="fc-diff" style="display:block">
-    <div class="tgt-h"><span>🛍 GoWabi ${g.n}건 · เงินจาก GoWabi</span>
+    <div class="tgt-h"><span>🛍 GoWabi · เงินจาก GoWabi</span>
       <button type="button" onclick="setGowabiRate()">수수료 ${gowabiRate?gowabiRate+'%':'설정'}</button></div>
-    <div class="fc-g" style="margin-top:7px">
+    ${g.n?`<div class="gw-lbl">📤 이번 달 발생 (${g.n}건) — 매출은 이번 달, 돈은 다음 달</div>
+    <div class="fc-g">
       <div class="fc-c pend"><div class="fv">${fmt(g.gross)}</div><div class="fl">매출(정가)<br>ยอดเต็ม</div></div>
       <div class="fc-c done"><div class="fv">${gowabiRate?fmt(g.net):'—'}</div><div class="fl">실수령 예상<br>หลังหักคอม</div></div>
-      <div class="fc-c fore"><div class="fv">${fmt(g.pending)}</div><div class="fl">정산 대기<br>รอโอน</div></div>
+      <div class="fc-c fore"><div class="fv">${po.label}</div><div class="fl">정산 예정일<br>วันโอน</div></div>
+    </div>`:''}
+    <div class="gw-due ${late?'late':(prevPend?'':'ok')}" style="margin-top:${g.n?'8':'2'}px">
+      📥 <b>이번 달 받을 돈</b> (${pm+1}월분 · ${inIso})
+      ${prev.length
+        ? (prevPend
+            ? ` · <b>${gowabiRate?fmt(gowabiNet(prevPend)):fmt(prevPend)}</b>${gowabiRate?` (정가 ${fmt(prevPend)})`:''} 대기`
+            : ` · ✅ ${fmt(gowabiRate?gowabiNet(prevGross):prevGross)} 입금 완료`)
+        : ' · 없음'}
+      ${late?'<br><b>⚠️ 15일이 지났는데 미입금 — GoWabi 정산 확인</b>':''}
     </div>
-    <div class="gw-due ${late?'late':(due?'ok':'')}">
-      📅 <b>${po.label}</b> 정산 예정 · โอน ${po.iso}
-      ${g.pending?` · 받을 금액 <b>${gowabiRate?fmt(gowabiNet(g.pending)):fmt(g.pending)}</b>${gowabiRate?` (정가 ${fmt(g.pending)})`:''}`:' · ✅ 전액 정산 완료'}
-      ${late?'<br><b>⚠️ 정산일이 지났는데 대기 중인 건이 있어요 — GoWabi 입금 확인</b>':''}
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">※ 손님이 GoWabi에 결제 → 매장은 <b>다음 달 15일</b>에 수수료 차감 후 정산받습니다. <b>현장 입금(현금·이체·카드)에는 포함되지 않습니다.</b>${gowabiRate?'':' 수수료율을 설정하면 실수령액이 계산됩니다.'} 입금 확인되면 체크인 리스트에서 건별로 ‘정산 완료’를 눌러 주세요.</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">※ <b>매출은 시술한 달</b>에, <b>입금은 다음 달 15일</b>에 잡힙니다. 현장 입금(현금·이체·카드)과는 분리되며, 입금을 확인하면 체크인 리스트에서 건별로 ‘정산 완료’를 눌러 주세요.</div>
   </div>`;
 }
 /* 🎯 월 목표 매출 */
