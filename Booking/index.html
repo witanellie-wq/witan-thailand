@@ -156,6 +156,14 @@
   .staffload .sl-th{display:block;font-size:10px;opacity:.8;margin-top:2px}
   .anonnm{color:#7a8090;font-weight:700}
   .tl-block .anonnm{color:#dfe4ee}
+  /* 🧾 메뉴별 판매 */
+  .mnutbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  .mnutbl th{background:var(--soft);color:var(--wine-d);font-size:10px;padding:6px 4px;border-bottom:1px solid var(--line)}
+  .mnutbl td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--soft)}
+  .mnutbl td:first-child{text-align:left;font-weight:700;word-break:break-word}
+  .mnutbl tr.mnu-bar td{padding:0 4px 6px;border-bottom:none}
+  .mnutbl tr.mnu-bar i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#3D5178,#8FA0C4)}
+  .mnu-gw{display:inline-block;margin-left:4px;font-size:9.5px;font-weight:700;color:#8a5a12;background:#FFF3E0;border:1px solid #E8B96B;border-radius:3px;padding:0 4px}
   /* 🎯 목표 매출 */
   .tgt-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--wine-d)}
   .tgt-h button,.tgt-empty button,.tgt-next button{border:1px solid var(--line);background:#fff;color:var(--gold-d);border-radius:3px;
@@ -1046,6 +1054,17 @@
 </div>
 
 <!-- CHECK-IN LIST MODAL -->
+<!-- MENU SALES MODAL -->
+<div class="overlay" id="menuOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">🧾 What sold · ขายอะไรบ้าง · 메뉴별 판매</h2>
+      <button class="sheet-x" onclick="closeMenuSales()" aria-label="Close">✕</button></div>
+    <div class="sub">그 달에 실제로 나간 시술을 건수·매출 순으로 봅니다 · สรุปบริการที่ขายได้</div>
+    <div id="menuSalesBody"></div>
+    <button class="cancel" onclick="closeMenuSales()">닫기</button>
+  </div>
+</div>
+
 <!-- TREND / STATS MODAL -->
 <div class="overlay" id="trendOverlay">
   <div class="sheet">
@@ -1190,7 +1209,7 @@ let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
 let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
 let revTargets={};try{revTargets=JSON.parse(localStorage.getItem('hanahayan_revtargets')||'{}')||{}}catch(e){}
-let gowabiRate=Number(localStorage.getItem('hanahayan_gowabirate')||'0')||0;   // GoWabi 수수료 %
+let gowabiRate=(function(){const v=localStorage.getItem('hanahayan_gowabirate');return v==null?20:(Number(v)||0);})();  // GoWabi 수수료 % (기본 20)
 function toggleOffDate(name,dateStr){
   const arr=staffOffDates[name]||(staffOffDates[name]=[]);
   const i=arr.indexOf(dateStr);
@@ -2197,6 +2216,45 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,re
     ${renderReconSection(recon)}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
 }
+/* 🧾 메뉴별 판매 집계 — 그 달 방문 건의 시술 항목 기준 */
+function openMenuSales(){$('menuOverlay').classList.add('on');renderMenuSales();}
+function closeMenuSales(){$('menuOverlay').classList.remove('on');}
+function menuSalesFor(y,m){
+  const map={};
+  const add=(name,amt,gw)=>{
+    const k=String(name||'').trim()||'(메뉴 미기재)';
+    const o=map[k]||(map[k]={n:0,rev:0,gw:0,gwRev:0});
+    o.n++;o.rev+=Number(amt)||0;
+    if(gw){o.gw++;o.gwRev+=Number(amt)||0;}
+  };
+  data.forEach(e=>{
+    if(e.status!=='방문')return;
+    const p=String(e.date||'').split('-'); if(+p[0]!==y||+p[1]!==m+1)return;
+    const gw=isGowabi(e);
+    if(e.items&&e.items.length)e.items.forEach(it=>add(it.treat,it.amount,gw));
+    else add(e.treat||e.bktreat,e.amount,gw);
+  });
+  return Object.entries(map).map(([name,v])=>({name,...v})).sort((a,b)=>b.rev-a.rev||b.n-a.n);
+}
+function renderMenuSales(){
+  const box=$('menuSalesBody'); if(!box)return;
+  const y=cur.getFullYear(),m=cur.getMonth();
+  const rows=menuSalesFor(y,m);
+  if(!rows.length){box.innerHTML=`<div class="sl-empty">${y}.${m+1} · 판매 기록이 없어요 · ยังไม่มีข้อมูล</div>`;return}
+  const totN=rows.reduce((s,r)=>s+r.n,0), totRev=rows.reduce((s,r)=>s+r.rev,0);
+  const gwN=rows.reduce((s,r)=>s+r.gw,0), gwRev=rows.reduce((s,r)=>s+r.gwRev,0);
+  box.innerHTML=`<div class="sr-sum">${y}.${m+1} · 총 <b>${totN}</b>건 · <b>${fmt(totRev)}</b>
+      ${gwN?`<br>🛍 GoWabi ${gwN}건 ${fmt(gwRev)} → 실수령 ${fmt(gowabiNet(gwRev))} (수수료 ${gowabiRate}%)`:''}</div>
+    <table class="mnutbl"><thead><tr><th style="text-align:left">메뉴</th><th>건수</th><th>매출</th><th>비중</th><th>객단가</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr>
+      <td>${esc(r.name)}${r.gw?`<span class="mnu-gw">🛍${r.gw}</span>`:''}</td>
+      <td>${r.n}</td><td>${fmt(r.rev)}</td>
+      <td>${totRev?Math.round(r.rev/totRev*100):0}%</td>
+      <td>${fmt(r.n?Math.round(r.rev/r.n):0)}</td></tr>
+      <tr class="mnu-bar"><td colspan="5"><i style="width:${totRev?Math.max(1,Math.round(r.rev/totRev*100)):0}%"></i></td></tr>`).join('')}
+    </tbody></table>
+    <div style="font-size:10px;color:var(--muted);margin-top:7px;line-height:1.6">※ 방문 완료 건의 시술 항목 기준 · 한 예약에 여러 시술이면 각각 집계 · 🛍 = GoWabi 건수 (정가 기준, 실수령은 위 요약 참고)</div>`;
+}
 /* 🛍 GoWabi — 플랫폼이 결제받고 수수료를 뗀 뒤 나중에 정산해 주는 건 */
 function isGowabi(e){return !!(e&&(String(e.pay||'')==='GoWabi'||String(e.src||'').toLowerCase()==='gowabi'));}
 function gowabiNet(gross){return Math.round(gross*(100-(Number(gowabiRate)||0))/100);}
@@ -2342,7 +2400,7 @@ function renderStatBox(s){
         <div class="bar"><i style="width:${pc(v)}%;background:${grad}"></i></div>
       </div>`;
   $('statBox').innerHTML=`
-    <div class="stt">${T('statTitle')}<button type="button" class="trendbtn owner-only" onclick="openTrend()">📈 추이 보기 · แนวโน้ม</button></div>
+    <div class="stt">${T('statTitle')}<button type="button" class="trendbtn owner-only" onclick="openMenuSales()">🧾 메뉴별</button><button type="button" class="trendbtn owner-only" onclick="openTrend()">📈 추이</button></div>
     <div class="st-grid">
       <div class="st-cell book" onclick="showStatList('예약')"><div class="n">${s.booked}</div><div class="t">${T('stBook')}</div></div>
       <div class="st-cell visit" onclick="showStatList('방문')"><div class="n">${s.visitCount}</div><div class="t">${T('stVisit')}</div></div>
