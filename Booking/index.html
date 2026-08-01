@@ -169,6 +169,9 @@
   .tgt-pct{font-weight:800}
   .tgt-pct.ok{color:#1c7a41}.tgt-pct.mid{color:#8a6d1f}.tgt-pct.low{color:var(--muted)}
   .tgt-pace{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .gw-due{margin-top:8px;background:#FFF8E4;border:1.2px solid #EBD48A;border-radius:4px;padding:8px 10px;font-size:11.5px;color:#7a5f16;line-height:1.55}
+  .gw-due.ok{background:#EAF6EF;border-color:#A9D8BC;color:#1c6b3f}
+  .gw-due.late{background:#fbe9e9;border-color:#e3a9a9;color:#8e2a20}
   .tgt-empty{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
   .tgt-next{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:#4A5678;
     margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
@@ -468,6 +471,7 @@
   .cklchip.done{background:#f0efe9;border-color:var(--line);color:var(--muted);cursor:default}
   .cklchip.mem{background:#F9F5EC;border-color:#C9D2E1;color:var(--gold-d);cursor:default}
   .cklchip.pay{background:var(--gold-d);border-color:var(--gold-d);color:#fff;font-weight:700}
+  .cklchip.gw{background:#FFF3E0;border-color:#E8B96B;color:#8a5a12;font-weight:700}
   .cklchip.newled{background:#fff;border-color:#C9D2E1;color:var(--gold-d);border-style:dashed;font-weight:700}
   .ccard.done{opacity:.6}
   .ccard .cc-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -868,7 +872,7 @@
     </div>
 
     <div class="g2">
-      <div><label class="lab" data-i18n="mPay">결제</label><select id="m_pay" data-i18n-opt="opt_pay"><option value="현금">현금</option><option value="카드">카드</option><option value="이체">이체</option><option value="PromptPay">PromptPay</option><option value="LINE Pay">LINE Pay</option></select></div>
+      <div><label class="lab" data-i18n="mPay">결제</label><select id="m_pay" data-i18n-opt="opt_pay"><option value="현금">현금</option><option value="카드">카드</option><option value="이체">이체</option><option value="PromptPay">PromptPay</option><option value="LINE Pay">LINE Pay</option><option value="GoWabi">GoWabi (정산)</option></select></div>
       <div class="owner-only"><label class="lab">💰 선입금 ฿ · มัดจำ</label>
         <div style="display:flex;gap:6px">
           <input id="m_depamt" inputmode="numeric" placeholder="0" style="flex:1">
@@ -1186,6 +1190,7 @@ let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
 let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
 let revTargets={};try{revTargets=JSON.parse(localStorage.getItem('hanahayan_revtargets')||'{}')||{}}catch(e){}
+let gowabiRate=Number(localStorage.getItem('hanahayan_gowabirate')||'0')||0;   // GoWabi 수수료 %
 function toggleOffDate(name,dateStr){
   const arr=staffOffDates[name]||(staffOffDates[name]=[]);
   const i=arr.indexOf(dateStr);
@@ -1279,7 +1284,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1308,6 +1313,7 @@ async function fetchAll(){
   try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}
   if(smap.rev_targets&&typeof smap.rev_targets==='object')revTargets=smap.rev_targets;
   try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}
+  if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1360,6 +1366,7 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(smap.staff_offdates&&typeof smap.staff_offdates==='object'){staffOffDates=smap.staff_offdates;try{localStorage.setItem('hanahayan_staff_offdates',JSON.stringify(staffOffDates))}catch(e){}}
         if(Array.isArray(smap.manual_rev)){manualRev=smap.manual_rev;try{localStorage.setItem('hanahayan_manualrev',JSON.stringify(manualRev))}catch(e){}}
         if(smap.rev_targets&&typeof smap.rev_targets==='object'){revTargets=smap.rev_targets;try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}}
+        if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
@@ -2185,9 +2192,53 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,re
       <span>방문 건 예상가 ${fmt(doneExp)} → 실제 ${fmt(bookRev)}</span>
       <b class="${diff>0?'fc-up':(diff<0?'fc-down':'')}">${diff>0?'▲ +':(diff<0?'▼ −':'― ')}${fmt(Math.abs(diff))} · 달성률 ${rate}%</b>
     </div>`:''}
+    ${renderGowabiSection(monthEntries,cur.getFullYear(),cur.getMonth())}
     ${renderTargetSection(cur.getFullYear(),cur.getMonth(),actual,forecast)}
     ${renderReconSection(recon)}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
+}
+/* 🛍 GoWabi — 플랫폼이 결제받고 수수료를 뗀 뒤 나중에 정산해 주는 건 */
+function isGowabi(e){return !!(e&&(String(e.pay||'')==='GoWabi'||String(e.src||'').toLowerCase()==='gowabi'));}
+function gowabiNet(gross){return Math.round(gross*(100-(Number(gowabiRate)||0))/100);}
+function setGowabiRate(){
+  const v=prompt('🛍 GoWabi 수수료율 (%) · ค่าคอมมิชชั่น GoWabi\n예: 25 → 정산액은 매출의 75%\n(0 = 수수료 미설정)', gowabiRate||'');
+  if(v===null)return;
+  const n=Math.max(0,Math.min(90,parseFloat(String(v).replace(/[^0-9.]/g,''))||0));
+  gowabiRate=n;
+  try{localStorage.setItem('hanahayan_gowabirate',String(n))}catch(e){}
+  queueSync('settings');render();
+}
+function gowabiMonth(monthEntries){
+  const list=monthEntries.filter(e=>e.status==='방문'&&isGowabi(e));
+  const gross=list.reduce((s,e)=>s+Number(e.amount||0),0);
+  const settled=list.filter(e=>e.gwPaid).reduce((s,e)=>s+Number(e.amount||0),0);
+  return {n:list.length,gross,settled,pending:gross-settled,net:gowabiNet(gross),
+          netPending:gowabiNet(gross-settled)};
+}
+// 정산일: 그 달 매출은 다음 달 15일에 입금
+function gwPayoutDate(y,m){const ny=(m===11)?y+1:y,nm=(m===11)?0:m+1;return {y:ny,m:nm,label:(nm+1)+'월 15일',iso:ny+'-'+String(nm+1).padStart(2,'0')+'-15'};}
+function renderGowabiSection(monthEntries,y,m){
+  const g=gowabiMonth(monthEntries);
+  if(!g.n)return '';
+  const po=gwPayoutDate(y,m);
+  const today=todayStr();
+  const due=today>=po.iso;                    // 정산일이 지났는가
+  const late=due&&g.pending>0;
+  return `<div class="fc-diff" style="display:block">
+    <div class="tgt-h"><span>🛍 GoWabi ${g.n}건 · เงินจาก GoWabi</span>
+      <button type="button" onclick="setGowabiRate()">수수료 ${gowabiRate?gowabiRate+'%':'설정'}</button></div>
+    <div class="fc-g" style="margin-top:7px">
+      <div class="fc-c pend"><div class="fv">${fmt(g.gross)}</div><div class="fl">매출(정가)<br>ยอดเต็ม</div></div>
+      <div class="fc-c done"><div class="fv">${gowabiRate?fmt(g.net):'—'}</div><div class="fl">실수령 예상<br>หลังหักคอม</div></div>
+      <div class="fc-c fore"><div class="fv">${fmt(g.pending)}</div><div class="fl">정산 대기<br>รอโอน</div></div>
+    </div>
+    <div class="gw-due ${late?'late':(due?'ok':'')}">
+      📅 <b>${po.label}</b> 정산 예정 · โอน ${po.iso}
+      ${g.pending?` · 받을 금액 <b>${gowabiRate?fmt(gowabiNet(g.pending)):fmt(g.pending)}</b>${gowabiRate?` (정가 ${fmt(g.pending)})`:''}`:' · ✅ 전액 정산 완료'}
+      ${late?'<br><b>⚠️ 정산일이 지났는데 대기 중인 건이 있어요 — GoWabi 입금 확인</b>':''}
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">※ 손님이 GoWabi에 결제 → 매장은 <b>다음 달 15일</b>에 수수료 차감 후 정산받습니다. <b>현장 입금(현금·이체·카드)에는 포함되지 않습니다.</b>${gowabiRate?'':' 수수료율을 설정하면 실수령액이 계산됩니다.'} 입금 확인되면 체크인 리스트에서 건별로 ‘정산 완료’를 눌러 주세요.</div>
+  </div>`;
 }
 /* 🎯 월 목표 매출 */
 function monKey(y,m){return y+'-'+String(m+1).padStart(2,'0');}
@@ -3166,12 +3217,14 @@ function openDayReview(){
   const sumExp=list.filter(e=>e.status!=='캔슬').reduce((s,e)=>s+(Number(e.expAmt)||0),0);
   const sumPaid=vis.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const payMap={};
-  vis.forEach(e=>{const k=e.memPaid?'💳 สมาชิก멤버십':(e.pay||'기타');(payMap[k]=payMap[k]||{n:0,amt:0});payMap[k].n++;payMap[k].amt+=Number(e.amount)||0;});
+  vis.forEach(e=>{const k=e.memPaid?'💳 สมาชิก멤버십':(isGowabi(e)?'🛍 GoWabi(정산)':(e.pay||'기타'));(payMap[k]=payMap[k]||{n:0,amt:0});payMap[k].n++;payMap[k].amt+=Number(e.amount)||0;});
   const payChips=Object.entries(payMap).map(([k,v])=>'<div class="rs">'+esc(k)+' <b>'+v.n+'</b> · <b>'+fmt(v.amt)+'</b></div>').join('');
   // 그날 새로 받은 선결제(멤버십 충전·회차권 구매)와 멤버십 잔액 사용액
   const preDay=prepaidEvents(y,mo-1).filter(x=>x.d===day);
   const preSum=preDay.reduce((s,x)=>s+x.amt,0);
   const memUsedDay=vis.filter(e=>e.memPaid).reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const gwDay=vis.filter(isGowabi);
+  const gwSum=gwDay.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const manDay=manualRevDay(day);
   const manSum=manDay.reduce((s,r)=>s+r.amt,0);
   const _rpt=dayRevParts(day);
@@ -3209,7 +3262,8 @@ function openDayReview(){
       ${manDay.length?'<div class="rs">💵 직접 입력 <b>'+manDay.length+'</b> · <b>'+fmt(manSum)+'</b> ('+manDay.map(r=>r.pay+' '+fmt(r.amt)+(r.mode==='add'?' 별도':'')).join(', ')+')</div>':''}
       ${_rpt.hasMan?('<div class="rs'+(_rpt.diff<0?' warn':'')+'">🧮 대조: 📋기록 <b>'+fmt(_rpt.bookRev)+'</b> vs 💵실입금 <b>'+fmt(_rpt.manTotal)+'</b> → '+(_rpt.diff>0?'미기록 <b>'+fmt(_rpt.diff)+'</b>':(_rpt.diff<0?'⚠️기록이 <b>'+fmt(-_rpt.diff)+'</b> 더 큼 (확인)':'일치 ✅'))+'</div>'):''}
       ${depSum?'<div class="rs">💰 선입금 มัดจำ <b>'+fmt(depSum)+'</b></div>':''}
-      ${(preSum||memUsedDay||manSum||depSum)?'<div class="rs">💵 총 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay)+preSum)+'</b></div>':''}
+      ${gwSum?'<div class="rs">🛍 GoWabi <b>'+gwDay.length+'</b> · <b>'+fmt(gwSum)+'</b>'+(gowabiRate?' → 실수령 <b>'+fmt(gowabiNet(gwSum))+'</b>':'')+' (정산)</div>':''}
+      ${(preSum||memUsedDay||manSum||depSum||gwSum)?'<div class="rs">💵 현장 입금 เงินเข้าวันนี้ <b>'+fmt(Math.max(0,_rpt.total-memUsedDay-gwSum)+preSum)+'</b></div>':''}
       ${mismatch?'<div class="rs warn">⚠️ ราคาไม่ตรง 가격 불일치 '+mismatch+'건</div>':''}
     </div>
     ${preDay.length?'<div class="ps-note" style="margin-top:6px">💳 선결제 내역 · '+preDay.map(x=>esc(x.name)+' '+x.label+' '+fmt(x.amt)).join(' / ')+'</div>':''}
@@ -4168,11 +4222,18 @@ function ckMove(d){ckDate=shiftDate(ckDate,d);renderCheckin();}
 function ckTogglePending(){ckMode=ckMode==='pending'?'day':'pending';renderCheckin();}
 function ckStatusBadge(s){const m={'예약':'#c9a84a','방문':'#2f8f5b','노쇼':'#c0392b','캔슬':'#999','연기대기':'#6a5df0'};const c=m[s]||'#999';return `<span class="ck-stbadge" style="background:${c}22;color:${c}">${T('s_'+s)||s}</span>`;}
 function ckLedgerChips(e){
+  let gw='';
+  if(isGowabi(e)&&e.status==='방문'){
+    gw=e.gwPaid
+      ? `<span class="cklchip done">🛍 GoWabi 정산 완료 · โอนแล้ว</span>`
+      : `<button class="cklchip gw" onclick="ckGwSettle('${e.id}')">🛍 GoWabi 정산 대기${(!isStaff()&&gowabiRate)?' · 실수령 '+fmt(gowabiNet(Number(e.amount)||0)):''} → 완료 표시</button>`;
+    gw=`<div class="cklrow">${gw}</div>`;
+  }
   const q=normPh(e.phone);
   const hits=q&&q.length>=7?customers.filter(c=>normPh(c.phone)===q):[];
   if(!hits.length){
     // 원장에 없는 손님 — 현장에서 멤버십·회차권을 끊으면 여기서 바로 등록
-    return `<div class="cklrow"><button class="cklchip newled" onclick="ckAddLedger('${e.id}')">💳 멤버십·회차권 등록 · เปิดสมาชิก/คอร์ส</button></div>`;
+    return gw+`<div class="cklrow"><button class="cklchip newled" onclick="ckAddLedger('${e.id}')">💳 멤버십·회차권 등록 · เปิดสมาชิก/คอร์ส</button></div>`;
   }
   let out='';
   hits.forEach(c=>{
@@ -4193,7 +4254,14 @@ function ckLedgerChips(e){
       }
     }
   });
-  return out?`<div class="cklrow">${out}</div>`:'';
+  return gw+(out?`<div class="cklrow">${out}</div>`:'');
+}
+function ckGwSettle(id){
+  const e=data.find(x=>x.id==id);if(!e)return;
+  const g=Number(e.amount)||0;
+  if(!confirm(`🛍 GoWabi 정산 완료로 표시할까요? · โอนแล้ว?\n${e.name||''} · ${fmt(g)}${gowabiRate?` → 실수령 ${fmt(gowabiNet(g))}`:''}`))return;
+  e.gwPaid=true;e.gwPaidAt=nowStamp();
+  save();renderCheckin();render();
 }
 // 체크인 → 고객 원장 등록 폼 열기 (이름·전화 자동 입력)
 function ckAddLedger(bid){
