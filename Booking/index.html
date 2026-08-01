@@ -434,6 +434,18 @@
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:-18px;background:#fff;padding:6px 0 6px;margin:-6px 0 2px;z-index:6}
   .sheet-x{border:none;background:var(--soft);color:var(--gold-d);width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;flex:0 0 auto;line-height:1;font-family:inherit;font-weight:700}
   .sheet-x:active{background:var(--line)}
+  /* 📞 오늘 연락 필요 (직원 공지) */
+  .cknotice{background:#FFF8E4;border:1.4px solid #EBD48A;border-radius:5px;padding:9px 11px;margin-bottom:11px}
+  .cknotice .ckn-h{font-size:12px;font-weight:800;color:#7a5f16;margin-bottom:6px}
+  .cknotice .ckn-h b{color:#b5341f}
+  .cknotice .ckn-row{display:flex;gap:8px;align-items:center;justify-content:space-between;
+    background:#fff;border:1px solid #EBD48A;border-radius:4px;padding:7px 9px;margin-top:5px}
+  .cknotice .ckn-l{min-width:0;font-size:12.5px;color:var(--ink)}
+  .cknotice .ckn-tel{margin-left:6px;color:#1c6b3f;font-weight:700;text-decoration:none;white-space:nowrap}
+  .cknotice .ckn-no{margin-left:6px;color:#b5341f;font-weight:700;font-size:11px}
+  .cknotice .ckn-why{display:block;font-size:10.5px;color:#7a5f16;margin-top:2px;word-break:break-word}
+  .cknotice .ckn-go{flex:0 0 auto;border:1.2px solid var(--line);background:#fff;color:var(--gold-d);
+    border-radius:3px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
   /* ===== 체크인 리스트 ===== */
   .cknav{display:flex;align-items:center;gap:8px;margin:2px 0 12px}
   .cknav .btn{flex:0 0 auto;padding:8px 12px;font-size:12px}
@@ -588,6 +600,22 @@
   #printSheet .p-price{text-align:right}
   #printSheet .ps-foot{display:flex;justify-content:space-between;margin-top:7px;font-size:9.5px;color:#7a7466}
   #printSheet .ps-note{margin-top:5px;font-size:8.5px;color:#7a7466;line-height:1.5}
+  /* 종이 서식 (A4) */
+  #printSheet table.fmtbl{table-layout:fixed}
+  #printSheet .fmtbl td{height:8.4mm}
+  #printSheet .fmtbl td.fm-c{text-align:center}
+  #printSheet .fmtbl td.fm-start{color:#2b3550;font-weight:700}
+  #printSheet .fm-warn{margin-top:8px;border:1px solid #C9A84A;background:#FDF8EC;border-radius:3px;padding:6px 9px;font-size:10.5px;color:#7a5f16;line-height:1.5}
+  #printSheet .fm-warn span{display:block;font-size:9px;color:#9a8a5e}
+  #printSheet .fm-foot{display:flex;gap:6px;margin-top:7px}
+  #printSheet .fm-foot div{flex:1;border:1px solid #8a8272;border-radius:3px;padding:5px 8px;font-size:11px;font-weight:700;color:#2b3550}
+  #printSheet .fm-foot small{font-weight:400;color:#9a9484;font-size:8px}
+  #printSheet .fm-sign{display:block;text-align:right;margin-top:6px;color:#2b3550}
+  #printSheet .fm-cross{display:flex;gap:10px;margin-top:8px;align-items:flex-start}
+  #printSheet .fm-note{flex:1;font-size:8.5px;color:#7a7466;line-height:1.6}
+  #printSheet .fm-box{flex:0 0 62mm;border:1px solid #8a8272;border-radius:3px;padding:7px 9px;font-size:10px;color:#2b3550;line-height:1.9}
+  #printSheet .fm-box b{display:block;font-size:10.5px;margin-bottom:3px}
+  #printSheet .fm-box small{color:#9a9484;font-size:8px}
   /* daily review sheet */
   #printSheet .rv-wrap{overflow-x:auto}
   #printSheet .rv-wrap table{min-width:690px}
@@ -732,6 +760,7 @@
 
   <div class="toolbar">
     <button class="btn gold" style="background:var(--gold-d);border-color:var(--gold-d)" onclick="window.open('menu.html','_blank')">📖 Menu · เมนู · 메뉴판</button>
+    <button class="btn" onclick="openForms()">📄 서식 · แบบฟอร์ม</button>
   </div>
   <div class="toolbar">
     <button class="btn owner-only" data-i18n="discMgr" onclick="openDiscMgr()">⚙ 할인 관리</button>
@@ -1105,6 +1134,24 @@
   </div>
 </div>
 
+<!-- PAPER FORMS MODAL -->
+<div class="overlay" id="formsOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">📄 Paper forms · แบบฟอร์ม · 서식 인쇄</h2>
+      <button class="sheet-x" onclick="closeForms()" aria-label="Close">✕</button></div>
+    <div class="sub">A4로 출력해서 카운터에서 손으로 기록하는 서식입니다. 오늘 예약이 미리 채워집니다 · พิมพ์ A4 ใช้ที่เคาน์เตอร์</div>
+    <label class="lab">📅 Date · วันที่</label>
+    <input type="date" id="f_date">
+    <button class="addbtn" style="margin-top:10px" onclick="printVisitorForm()">🧾 방문자 기록부 · บันทึกลูกค้าเข้ารับบริการจริง</button>
+    <div class="hint">그날 예약이 시간순으로 채워지고, 실제 시술·결제액은 손으로 적습니다</div>
+    <label class="lab" style="margin-top:14px">💳 멤버십 회원 · สมาชิก</label>
+    <select id="f_member"></select>
+    <button class="addbtn" style="margin-top:8px;background:var(--gold-d);border-color:var(--gold-d)" onclick="printMemberForm()">💳 멤버십 기록부 · สมุดบันทึกสมาชิก</button>
+    <div class="hint">회원을 고르면 이름·전화·잔액이 채워지고, 사용 내역이 있으면 함께 인쇄됩니다</div>
+    <button class="cancel" onclick="closeForms()">닫기</button>
+  </div>
+</div>
+
 <!-- MANUAL REVENUE MODAL -->
 <div class="overlay" id="revOverlay">
   <div class="sheet">
@@ -1165,6 +1212,7 @@
       <div class="ckdate" id="ckDateLbl"></div>
       <button class="btn" data-i18n="ckNext" onclick="ckMove(1)">내일 ▶</button>
     </div>
+    <div id="ckNotice"></div>
     <div class="cksum" id="ckSum"></div>
     <button class="ckpendbtn" id="ckPendBtn" onclick="ckTogglePending()"></button>
     <div id="ckList"></div>
@@ -2232,6 +2280,129 @@ function renderForecast(monthEntries,actual,pendingExp,memUsed,pre,man,depRev,re
     ${renderTargetSection(cur.getFullYear(),cur.getMonth(),actual,forecast)}
     ${renderReconSection(recon)}
     ${renderPrepaidSection(actual,memUsed,pre)}`;
+}
+/* ============================================================
+   📄 종이 서식 (A4) — 방문자 기록부 · 멤버십 기록부
+   ============================================================ */
+function openForms(){
+  $('f_date').value=selDate||todayStr();
+  const sel=$('f_member');
+  if(sel){
+    const ms=(customers||[]).filter(c=>c.type==='membership')
+      .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+    sel.innerHTML='<option value="">— 빈 양식 (이름 직접 작성) —</option>'
+      +ms.map(c=>`<option value="${c.id}">${esc(c.name||'')}${c.phone?' · '+esc(c.phone):''} · 잔액 ${fmt(Number(c.balance)||0)}</option>`).join('');
+  }
+  $('formsOverlay').classList.add('on');
+}
+function closeForms(){$('formsOverlay').classList.remove('on');}
+const FHEAD=`<div class="ps-head">
+  <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>`;
+function printVisitorForm(){
+  const day=$('f_date').value||todayStr();
+  const [y,mo,dd]=day.split('-').map(Number);
+  const thDow=(I18N.dow.th||I18N.dow.ko)[new Date(y,mo-1,dd).getDay()];
+  const list=data.filter(e=>e.date===day&&e.status!=='캔슬'&&e.status!=='연기대기')
+    .sort((a,b)=>{const ta=t2m(a.time),tb=t2m(b.time);return (ta==null?1e9:ta)-(tb==null?1e9:tb);});
+  const N=Math.max(list.length+6,26);
+  let rows='';
+  for(let i=0;i<N;i++){
+    const e=list[i];
+    rows+=`<tr><td class="p-no">${i+1}</td>`
+      +`<td class="fm-c">${e?esc(e.time||''):''}</td>`
+      +`<td>${e?(String(e.name||'').trim()?esc(e.name):'🚶'):''}</td>`
+      +`<td>${e?esc(e.phone||''):''}</td>`
+      +`<td>${e?esc(e.treat||e.bktreat||''):''}</td>`
+      +`<td class="p-price"></td>`
+      +`<td class="fm-c">${e?'✓':''}</td>`
+      +`<td>${e&&Number(e.depAmt)&&!e.depRefund?('선결제 '+fmt(e.depAmt)):''}</td></tr>`;
+  }
+  $('printSheet').innerHTML=`${FHEAD}
+      <div class="ps-doc">บันทึกลูกค้าเข้ารับบริการจริง<small>Actual Visitor &amp; Payment Record · 방문자 기록부</small></div>
+    </div>
+    <div class="fm-warn">📌 กรุณาบันทึก “ลูกค้าที่มาจริง” ทุกคน พร้อม “ยอดชำระจริง” — ใบนี้ใช้เทียบกับการจองออนไลน์<br>
+      <span>Please record every actual visitor and the actual amount paid. This sheet is compared against online bookings.</span></div>
+    <div class="ps-meta">
+      <div class="m"><span class="k">วันที่<small>날짜</small></span>${y}. ${mo}. ${dd}</div>
+      <div class="m"><span class="k">วัน<small>요일</small></span>${thDow}</div>
+      <div class="m"><span class="k">ผู้บันทึก<small>기록자</small></span></div>
+    </div>
+    <table class="fmtbl"><thead><tr>
+      <th class="p-no">No.</th><th style="width:13mm">เวลา<small>Time</small></th>
+      <th>ชื่อลูกค้า<small>Customer name</small></th><th style="width:26mm">เบอร์โทร<small>Phone</small></th>
+      <th>บริการที่ทำจริง<small>Actual service</small></th>
+      <th style="width:22mm">ยอดชำระจริง ฿<small>Actual paid</small></th>
+      <th style="width:16mm">จอง / Walk-in<small>Booked ✓ / W</small></th>
+      <th style="width:24mm">หมายเหตุ<small>Note</small></th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <div class="fm-foot">
+      <div>รวมลูกค้า <small>Total visitors</small> ________</div>
+      <div>จองมา ✓ <small>Booked</small> ________</div>
+      <div>Walk-in W <small>ไม่ได้จอง</small> ________</div>
+      <div>ยอดขายรวม ฿ <small>Total sales</small> ________</div>
+    </div>
+    <div class="ps-note">※ ลูกค้าที่จองแล้วไม่มา เขียนชื่อ + วงเล็บ (ไม่มา / no-show) · อัปเซลที่หน้าร้าน ให้เขียนยอดที่จ่ายจริงไม่ใช่ราคาที่จอง<br>
+      If a booked customer does not show up, write the name + (no-show). For on-site upsells, write the final amount actually paid, not the booked price.
+      <span class="fm-sign">ลายเซ็นผู้ตรวจ · Verified by ______________________</span></div>`;
+  window.__sheetDay=day;
+  closeForms();$('sheetView').classList.add('on');
+}
+function printMemberForm(){
+  const id=$('f_member').value;
+  const c=(customers||[]).find(x=>String(x.id)===String(id))||null;
+  const uses=c?((c.history||[]).filter(h=>h.t).slice().reverse()):[];
+  const N=Math.max(uses.length+4,17);
+  let bal=c?Number(c.charged||0)+Number(c.bonus||0):0;
+  let rows=`<tr><td class="p-no">0</td><td></td><td class="fm-start">ยอดเริ่มต้น · Starting balance</td><td></td><td class="fm-c">—</td><td class="p-price">${c?fmt(bal):''}</td><td></td><td></td></tr>`;
+  for(let i=0;i<N;i++){
+    const h=uses[i];
+    let plus='',minus='';
+    if(h){
+      const amt=Number(h.amt||0)||Math.abs(Number(h.delta||0));
+      if((h.delta||0)>0||/충전|top-?up|เติม/i.test(h.note||''))plus=fmt(amt);
+      else if((h.delta||0)<0)minus=fmt(amt);
+    }
+    rows+=`<tr><td class="p-no">${i+1}</td>`
+      +`<td class="fm-c">${h?String(h.t||'').slice(0,10):''}</td>`
+      +`<td>${h?esc(String(h.note||'').slice(0,40)):''}</td>`
+      +`<td class="p-price">${plus}</td><td class="p-price">${minus}</td>`
+      +`<td class="p-price"></td><td></td><td></td></tr>`;
+  }
+  $('printSheet').innerHTML=`${FHEAD}
+      <div class="ps-doc">สมุดบันทึกสมาชิก (เมมเบอร์ชิพ)<small>Membership Balance Record · 멤버십 기록부</small></div>
+    </div>
+    <div class="ps-meta">
+      <div class="m"><span class="k">ชื่อสมาชิก<small>회원명</small></span>${c?esc(c.name||''):''}</div>
+      <div class="m"><span class="k">เบอร์โทร<small>전화</small></span>${c?esc(c.phone||''):''}</div>
+      <div class="m"><span class="k">ระดับ<small>등급</small></span>${c?esc(c.tier||''):''}</div>
+    </div>
+    <div class="ps-meta" style="border-top:none">
+      <div class="m"><span class="k">วันสมัคร<small>시작일</small></span>${c?esc(c.buyDate||''):''}</div>
+      <div class="m"><span class="k">ชาร์จ ฿<small>충전</small></span>${c?fmt(Number(c.charged)||0):''}</div>
+      <div class="m"><span class="k">โบนัส ฿<small>보너스</small></span>${c?fmt(Number(c.bonus)||0):''}</div>
+      <div class="m"><span class="k">ยอดคงเหลือ ฿<small>현재 잔액</small></span>${c?fmt(Number(c.balance)||0):''}</div>
+    </div>
+    <table class="fmtbl"><thead><tr>
+      <th class="p-no">No.</th><th style="width:22mm">วันที่<small>Date</small></th>
+      <th>บริการ / รายการ<small>Service / Item</small></th>
+      <th style="width:20mm">ชาร์จ +฿<small>Top-up</small></th>
+      <th style="width:20mm">ใช้ −฿<small>Used</small></th>
+      <th style="width:22mm">คงเหลือ ฿<small>Balance</small></th>
+      <th style="width:16mm">พนง.<small>Staff</small></th>
+      <th style="width:24mm">ลายเซ็นลูกค้า<small>Customer sign</small></th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <div class="fm-cross">
+      <div class="fm-note">※ ทุกครั้งที่ใช้/ชาร์จ ให้เขียน 1 บรรทัด แล้วเซ็นชื่อทุกครั้ง · แถวแรก = ยอดเริ่มต้น<br>
+        One line per use or top-up, update the running balance and have the customer sign. First row = starting balance.</div>
+      <div class="fm-box"><b>ตรวจเทียบกับระบบ · Online cross-check</b>
+        <div>ยอดในใบนี้ <small>Balance on this card</small> ฿ __________</div>
+        <div>ยอดในระบบ <small>Balance online</small> ฿ __________</div>
+        <div>ตรงกัน? <small>Match?</small> ☐ ใช่ ☐ ไม่</div>
+        <div>ผู้ตรวจ <small>Verified by</small> __________</div>
+      </div>
+    </div>`;
+  window.__sheetDay=($('f_date').value||todayStr());
+  closeForms();$('sheetView').classList.add('on');
 }
 /* 🧾 메뉴별 판매 집계 — 그 달 방문 건의 시술 항목 기준 */
 function openMenuSales(){$('menuOverlay').classList.add('on');renderMenuSales();}
@@ -4491,6 +4662,7 @@ function renderCheckin(){
     <div class="cs"><div class="v" style="color:#2f8f5b">${visited}</div><div class="l">${T('ckVisit')}</div></div>
     <div class="cs"><div class="v" style="color:#c0392b">${no}</div><div class="l">${T('ckNo')}</div></div>
     ${isStaff()?'':`<div class="cs"><div class="v">${fmt(rev)}</div><div class="l">${T('ckRev')}</div></div>`}`;
+  renderCkNotice(list);
   if(!list.length){$('ckList').innerHTML=`<div class="empty">${T('ckEmpty')}</div>`;return;}
   $('ckList').innerHTML=list.map(e=>{
     const meta=[e.treat||e.bktreat||'', parseInt(e.seats)>1?'👥'+e.seats:'', e.line?esc(e.line):'', e.phone?esc(e.phone):'', (e.status==='방문'?('💰'+fmt(e.amount||0)):(e.expAmt?'~'+fmt(e.expAmt):''))].filter(Boolean).join(' · ');
@@ -4515,6 +4687,34 @@ function renderCheckin(){
       </div>
     </div>`;
   }).join('');
+}
+/* 📞 오늘 연락해야 하는 예약 — 직원 공지 */
+const CALL_RE=/확인\s*필요|연락|재확인|미확정|대기|확정\s*대기|콜|call|ยืนยัน|โทร|ติดต่อ/i;
+function needsCall(e){
+  const r=[];
+  if(e.status!=='예약'&&e.status!=='연기대기')return r;
+  if(!String(e.phone||'').trim())r.push('📵 번호 없음 · ไม่มีเบอร์');
+  if(!String(e.time||'').trim())r.push('⏰ 시간 미정 · ยังไม่ระบุเวลา');
+  if(!String(e.treat||e.bktreat||'').trim())r.push('💆 시술 미정 · ยังไม่เลือกบริการ');
+  if(CALL_RE.test(String(e.memo||'')))r.push('📝 메모: 확인 필요 · ต้องยืนยัน');
+  if(e.status==='연기대기')r.push('⏸ 연기대기 · รอยืนยัน');
+  return r;
+}
+function renderCkNotice(list){
+  const box=$('ckNotice'); if(!box)return;
+  const hits=(list||[]).map(e=>({e,why:needsCall(e)})).filter(x=>x.why.length);
+  if(!hits.length){box.innerHTML='';return;}
+  box.innerHTML=`<div class="cknotice">
+    <div class="ckn-h">📞 오늘 연락 필요 · ต้องติดต่อวันนี้ <b>${hits.length}</b></div>
+    ${hits.map(({e,why})=>{
+      const ph=String(e.phone||'').trim();
+      return `<div class="ckn-row">
+        <div class="ckn-l"><b>${e.time?e.time+' ':''}${esc(String(e.name||'').trim()||'🚶 무기명')}</b>
+          ${ph?`<a class="ckn-tel" href="tel:${esc(ph.replace(/[^0-9+]/g,''))}">📞 ${esc(ph)}</a>`:'<span class="ckn-no">번호 없음</span>'}
+          <span class="ckn-why">${why.map(esc).join(' · ')}</span></div>
+        <button class="ckn-go" onclick="closeCheckin();openModal('${e.id}')">열기</button>
+      </div>`;}).join('')}
+  </div>`;
 }
 function renderPending(pendAll){
   pendAll.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
@@ -5087,6 +5287,7 @@ function bulkFillMissing(){
     if(b.src&&(!e.src||e.src==='기타')){e.src=b.src;n++;}
     set('treat',b.treat);set('bktreat',b.treat);set('visit',b.visit);
     if(b.price&&!Number(e.expAmt)){e.expAmt=b.price;n++;}
+    if(b.depAmt&&!Number(e.depAmt)){e.depAmt=Number(b.depAmt);e.depPay=e.depPay||'현금';n++;}
     if(b.dur&&(!e.dur||e.dur==='60')){e.dur=b.dur;n++;}
     if(b.seats&&(!e.seats||e.seats==='1')){e.seats=b.seats;n++;}
     if(!e.srcid&&e.phone){e.srcid=e.phone;n++;}
