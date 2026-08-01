@@ -479,6 +479,9 @@
   .ckedit .cke-conf.bad{display:block;background:#fbe9e9;border:1.4px solid #e3a9a9;color:#8e2a20}
   .ckedit .cke-conf b{font-size:15px;font-weight:800}
   .ckedit .cke-w{font-weight:700}
+  .ckedit .cke-dep{background:#FFF8E4;border:1.2px solid #EBD48A;border-radius:4px;padding:8px 10px;margin-bottom:7px;font-size:11.5px;color:#7a5f16;line-height:1.5}
+  .ckedit .cke-dep span{display:block;font-size:10px;opacity:.9;margin-top:3px}
+  .ckedit .cke-dep.full{background:#EAF6EF;border-color:#A9D8BC;color:#1c6b3f}
   .ckedit .cke-crs{display:block;background:#EAF2FB;border:1.2px solid #BCD3EE;border-radius:4px;padding:8px 10px;margin-bottom:7px;font-size:11.5px;color:#2a5b93;font-weight:700;cursor:pointer}
   .ckedit .cke-crs input{width:auto;margin-right:5px;vertical-align:-1px}
   .ckedit .cke-crs span{display:block;font-weight:500;font-size:10.5px;color:#40506a;margin-top:3px}
@@ -4563,10 +4566,14 @@ function ckEditPanel(e){
     +`<option value="__custom__"${known?'':' selected'}>✏️ 직접 입력 · กรอกเอง</option>`;
   const crs=activeCourseOf(e);
   const rem=crs?Math.max(0,(crs.total||0)-(crs.used||0)):0;
+  const dep=(!e.depRefund&&Number(e.depAmt)>0)?Number(e.depAmt):0;
+  const rest=dep?Math.max(0,(Number(e.expAmt)||0)-dep):0;   // 남은 수납액
   // 회차권 손님은 코스분이 이미 결제됨 → 추가 메뉴 금액만 입력 (기본 0)
   const amt=crs?(Number(e.amount)||0):(Number(e.amount)||Number(e.expAmt)||0);
   return `<div class="ckedit">
     <div class="cke-h">✍️ 실제 시술·결제금액 · บริการจริง/ยอดจ่ายจริง</div>
+    ${dep?`<div class="cke-dep${rest?'':' full'}">💰 선결제 <b>${fmt(dep)}</b> 이미 받음${rest?` → 오늘 받을 금액 <b>${fmt(rest)}</b>`:' → <b>오늘 수납 금지 · ห้ามเก็บเงิน</b>'}
+      <span>아래 칸에는 <b>시술 총액</b>을 넣으세요 (선결제 포함) · กรอกยอดรวม</span></div>`:''}
     ${crs?`<label class="cke-crs"><input type="checkbox" id="cke_crs_${e.id}" checked>
       🎟️ 회차권 1회 차감 · หักคอร์ส 1 ครั้ง <b>(${rem}/${crs.total} 남음)</b>
       <span>코스분은 이미 결제됨 — 아래엔 <b>추가 메뉴 금액만</b> 입력 · กรอกเฉพาะส่วนเพิ่ม</span></label>`:''}
@@ -4901,6 +4908,24 @@ function parseCardBlocks(t){
   });
   return out;
 }
+/* 💰 메모에서 선결제 금액 읽기
+   "선결제 완료" → 전액 / "선결제 300" → 300 / "มัดจำ 500" → 500 */
+function applyPrepaid(blocks){
+  const DONE=/(선결제|선입금|예약금|계약금|มัดจำ|จ่ายล่วงหน้า|deposit|prepaid|paid)\s*(?:은|는)?\s*(완료|완납|끝|됨|แล้ว|done|full)/i;
+  const AMT=/(?:선결제|선입금|예약금|계약금|มัดจำ|จ่ายล่วงหน้า|deposit|prepaid)\D{0,4}([\d,]{2,8})/i;
+  (blocks||[]).forEach(b=>{
+    const txt=[].concat(b.memo||[]).join(' ');
+    if(!txt)return;
+    if(b.depAmt)return;
+    const am=txt.match(AMT);
+    if(am){
+      const v=Math.round(+String(am[1]).replace(/,/g,''));
+      if(v>0){b.depAmt=v;b.depPay='현금';return;}
+    }
+    if(DONE.test(txt)&&Number(b.price)>0){b.depAmt=Math.round(Number(b.price));b.depPay='현금';b.depFull=true;}
+  });
+  return blocks;
+}
 function parseMultiBooking(t){
   const lines=t.split(/\n/).map(s=>s.trim());
   let date='';
@@ -4929,6 +4954,7 @@ function parseMultiBooking(t){
     const best=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
     if(best){date=best;guessed=false;}
     cards.forEach(c=>{c.memo=(c.memo||[]).filter(Boolean);});
+    applyPrepaid(cards);
     return {date,blocks:cards,guessed:!best,holds:[]};
   }
   const blocks=[];let cur=null;
@@ -5032,6 +5058,7 @@ function parseMultiBooking(t){
     if(/^(\d{4}-\d{2}-\d{2})/.test(body)){const d=body.match(/(\d{4}-\d{2}-\d{2})/);if(d)h.wantDate=d[1];}
     holds.push(h);
   });
+  applyPrepaid(blocks);
   return {date,blocks,guessed,holds};
 }
 function bulkSetDate(v){
@@ -5086,7 +5113,8 @@ function renderBulkPreview(P){
     +'<span style="font-size:11px;color:var(--muted)">'+esc(b.phone||'')
     +(b.src?' · '+b.src+(b.srcid?': '+esc(b.srcid):''):'')
     +(b.treat?' · '+esc(b.treat):'')+(b.price?' · ฿'+b.price.toLocaleString():'')
-    +(b.dur?' · '+b.dur+'min':'')+(b.seats?' · 👥'+b.seats:'')+(b.visit?' · '+b.visit:'')+'</span>'
+    +(b.dur?' · '+b.dur+'min':'')+(b.seats?' · 👥'+b.seats:'')+(b.visit?' · '+b.visit:'')
+    +(b.depAmt?' · <b style="color:#1c7a41">💰선결제 '+Number(b.depAmt).toLocaleString()+(b.depFull?' (완납)':'')+'</b>':'')+'</span>'
     +(dups[i]?'':'<div class="bpick">'
       +'<button class="bpb'+(b.status==='예약'?' on':'')+'" onclick="bulkSetStatus('+i+',\'예약\',this)">📌 예약 จอง</button>'
       +'<button class="bpb v'+(b.status==='방문'?' on':'')+'" onclick="bulkSetStatus('+i+',\'방문\',this)">✅ 방문 มาแล้ว</button>'
@@ -5124,7 +5152,8 @@ function bulkAddParsed(){
     data.push({id:Date.now()+i,date:P.date,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
       seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
-      expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:''});
+      expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:'',
+      depAmt:Number(b.depAmt)||0,depPay:b.depPay||'현금',depRefund:false});
     added++;
   });
   // ⏸ 미확정 → 연기대기 등록 (같은 이름·전화가 이미 대기 중이면 건너뜀)
@@ -5155,7 +5184,7 @@ function parsePasteImport(){
   let p;
   if(multi.blocks.length===1){
     const b=multi.blocks[0];
-    p={date:multi.date,time:b.time,name:b.name,phone:b.phone,src:b.src,srcid:b.srcid,line:b.line,treat:b.treat,price:b.price,dur:b.dur,visit:b.visit,note:(b.memo||[]).join(' · ')};
+    p={date:multi.date,time:b.time,name:b.name,phone:b.phone,src:b.src,srcid:b.srcid,line:b.line,treat:b.treat,price:b.price,dur:b.dur,visit:b.visit,note:(b.memo||[]).join(' · '),depAmt:b.depAmt,depFull:b.depFull};
   }else{
     p=parseBookingText(t);
   }
@@ -5203,6 +5232,7 @@ function parsePasteImport(){
   if(p.src)$('m_src').value=p.src;
   if(p.srcid)$('m_srcid').value=p.srcid;
   if(p.visit&&$('m_visit'))$('m_visit').value=p.visit;
+  if(p.depAmt&&$('m_depamt')){$('m_depamt').value=p.depAmt;$('m_deppay').value='현금';}
   if(p.treat){$('m_bktreat').value='__custom__'; if(typeof onBktreatSel==='function')onBktreatSel('__custom__'); $('m_bktreatcustom').value=p.treat;}
   if(p.price!=null && $('m_bkamt'))$('m_bkamt').value=p.price;
   const memoParts=[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean);
