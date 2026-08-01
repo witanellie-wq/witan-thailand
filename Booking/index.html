@@ -928,7 +928,7 @@
       <div class="owner-only"><label class="lab">💰 선입금 ฿ · มัดจำ</label>
         <div style="display:flex;gap:6px">
           <input id="m_depamt" inputmode="numeric" placeholder="0" style="flex:1">
-          <select id="m_deppay" style="flex:0 0 84px"><option value="현금">현금</option><option value="이체">이체</option><option value="카드">카드</option></select>
+          <select id="m_deppay" style="flex:0 0 84px"><option value="이체">이체</option><option value="현금">현금</option><option value="카드">카드</option></select>
         </div>
         <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:5px">
           <input type="checkbox" id="m_deprefund" style="width:auto"> 환불함 · คืนเงินแล้ว (매출 제외)</label>
@@ -3733,7 +3733,7 @@ function openModal(id){
     $('m_date').value=e.date;
     $('m_dur').value=e.dur||'60';updateEndTime();
     $('m_line').value=e.line||'';$('m_pay').value=e.pay||'현금';$('m_visit').value=e.visit||'신규';$('m_memo').value=e.memo||'';setStaff(e.staff);
-    $('m_depamt').value=e.depAmt||'';$('m_deppay').value=e.depPay||'현금';$('m_deprefund').checked=!!e.depRefund;
+    $('m_depamt').value=e.depAmt||'';$('m_deppay').value=e.depPay||'이체';$('m_deprefund').checked=!!e.depRefund;
     renderMemoTrans();
     $('m_src').value=e.src||'LINE';$('m_srcid').value=e.srcid||'';
     $('m_nat').value=e.nat||'태국';$('m_natc').value=e.natc||'한국 🇰🇷';onNat();
@@ -3762,7 +3762,7 @@ function openModal(id){
     $('rebookBtn').style.display='none';
     $('phMatch').style.display='none';$('phMatch').innerHTML='';
     ['m_name','m_time','m_phone','m_line','m_itemamt','m_memo','m_srcid','m_discval','m_care','m_service','m_companion','m_depamt'].forEach(i=>$(i).value='');
-    $('m_deppay').value='현금';$('m_deprefund').checked=false;
+    $('m_deppay').value='이체';$('m_deprefund').checked=false;
     renderMemoTrans();
     $('m_seats').value='1';$('m_dur').value='60';$('m_end').value='';
     $('m_date').value=selDate;
@@ -5120,9 +5120,9 @@ function applyPrepaid(blocks){
     const am=txt.match(AMT);
     if(am){
       const v=Math.round(+String(am[1]).replace(/,/g,''));
-      if(v>0){b.depAmt=v;b.depPay='현금';return;}
+      if(v>0){b.depAmt=v;b.depPay='이체';return;}
     }
-    if(DONE.test(txt)&&Number(b.price)>0){b.depAmt=Math.round(Number(b.price));b.depPay='현금';b.depFull=true;}
+    if(DONE.test(txt)&&Number(b.price)>0){b.depAmt=Math.round(Number(b.price));b.depPay='이체';b.depFull=true;}
   });
   return blocks;
 }
@@ -5287,7 +5287,7 @@ function bulkFillMissing(){
     if(b.src&&(!e.src||e.src==='기타')){e.src=b.src;n++;}
     set('treat',b.treat);set('bktreat',b.treat);set('visit',b.visit);
     if(b.price&&!Number(e.expAmt)){e.expAmt=b.price;n++;}
-    if(b.depAmt&&!Number(e.depAmt)){e.depAmt=Number(b.depAmt);e.depPay=e.depPay||'현금';n++;}
+    if(b.depAmt&&!Number(e.depAmt)){e.depAmt=Number(b.depAmt);e.depPay=e.depPay||'이체';n++;}
     if(b.dur&&(!e.dur||e.dur==='60')){e.dur=b.dur;n++;}
     if(b.seats&&(!e.seats||e.seats==='1')){e.seats=b.seats;n++;}
     if(!e.srcid&&e.phone){e.srcid=e.phone;n++;}
@@ -5354,7 +5354,7 @@ function bulkAddParsed(){
       seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
       expAmt:b.price||0,pay:'현금',staff:'',visit:b.visit||'신규',memo:(b.memo||[]).join(' · '),care:'',service:'',
-      depAmt:Number(b.depAmt)||0,depPay:b.depPay||'현금',depRefund:false});
+      depAmt:Number(b.depAmt)||0,depPay:b.depPay||'이체',depRefund:false});
     added++;
   });
   // ⏸ 미확정 → 연기대기 등록 (같은 이름·전화가 이미 대기 중이면 건너뜀)
@@ -5433,7 +5433,7 @@ function parsePasteImport(){
   if(p.src)$('m_src').value=p.src;
   if(p.srcid)$('m_srcid').value=p.srcid;
   if(p.visit&&$('m_visit'))$('m_visit').value=p.visit;
-  if(p.depAmt&&$('m_depamt')){$('m_depamt').value=p.depAmt;$('m_deppay').value='현금';}
+  if(p.depAmt&&$('m_depamt')){$('m_depamt').value=p.depAmt;$('m_deppay').value='이체';}
   if(p.treat){$('m_bktreat').value='__custom__'; if(typeof onBktreatSel==='function')onBktreatSel('__custom__'); $('m_bktreatcustom').value=p.treat;}
   if(p.price!=null && $('m_bkamt'))$('m_bkamt').value=p.price;
   const memoParts=[p.note,p.branch?('Branch '+p.branch):''].filter(Boolean);
