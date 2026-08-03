@@ -2331,9 +2331,9 @@ function openForms(){
 function closeForms(){$('formsOverlay').classList.remove('on');}
 // 인쇄 서식은 태국어·영어만 — 한국어 기록을 변환
 function fmNote(txt){
-  const th=translateMemo(txt,1), en=translateMemo(txt,2);
-  const base=(th||en||txt);
-  return String(base).replace(/\s{2,}/g,' ').slice(0,44);
+  const th=translateMemo(txt,1);
+  const base=th||translateMemo(txt,2)||txt;
+  return String(base).replace(/\s{2,}/g,' ').slice(0,60);
 }
 const FHEAD=`<div class="ps-head">
   <div><div class="ps-eyebrow">Clinic · Sukhumvit 23</div><div class="ps-word">HANAHAYAN</div></div>`;
@@ -2351,10 +2351,10 @@ function printVisitorForm(){
       +`<td class="fm-c">${e?esc(e.time||''):''}</td>`
       +`<td>${e?(String(e.name||'').trim()?esc(e.name):'🚶'):''}</td>`
       +`<td>${e?esc(e.phone||''):''}</td>`
-      +`<td>${e?esc(e.treat||e.bktreat||''):''}</td>`
+      +`<td>${e?esc(fmNote(e.treat||e.bktreat||'')):''}</td>`
       +`<td class="p-price"></td>`
       +`<td class="fm-c">${e?'✓':''}</td>`
-      +`<td>${e&&Number(e.depAmt)&&!e.depRefund?('มัดจำ '+fmt(e.depAmt)+'<br><small>Deposit</small>'):''}</td></tr>`;
+      +`<td>${e?[(Number(e.depAmt)&&!e.depRefund)?('มัดจำ '+fmt(e.depAmt)):'',esc(fmNote(String(e.memo||'').slice(0,40)))].filter(Boolean).join('<br>'):''}</td></tr>`;
   }
   $('printSheet').innerHTML=`${FHEAD}
       <div class="ps-doc">บันทึกลูกค้าเข้ารับบริการจริง<small>Actual Visitor &amp; Payment Record</small></div>
@@ -3149,6 +3149,23 @@ const MEMO_DICT=[
   ['영어','ภาษาอังกฤษ','English'],['한국어','ภาษาเกาหลี','Korean'],['태국어','ภาษาไทย','Thai'],['일본어','ภาษาญี่ปุ่น','Japanese'],
   ['통역','ล่าม','interpreter'],
   // 기타
+  // 시술·부위 용어
+  ['코스 차감','หักคอร์ส','course deducted'],['회차 차감','หักคอร์ส','session deducted'],
+  ['회권','ครั้ง (คอร์ส)','session pack'],['마지막','สุดท้าย','last'],['각','แต่ละ','each'],
+  ['양쪽','สองข้าง','both sides'],['한쪽','ข้างเดียว','one side'],['첫','แรก','first'],
+  ['오전','เช้า','morning'],['오후','บ่าย','afternoon'],['당일','วันนั้น','same day'],
+  ['현장','ที่ร้าน','on site'],['선택','เลือก','choose'],['결정','ตัดสินใจ','decide'],
+  ['발송','ส่งแล้ว','sent'],['완료','เสร็จแล้ว','done'],['링크','ลิงก์','link'],['후기','รีวิว','review'],
+  ['차감','หัก','deduct'],['회차','ครั้ง','session'],['코스','คอร์ส','course'],['샷','ช็อต','shots'],
+  ['풀세트','เซ็ตเต็ม','full set'],['전체세트','เซ็ตเต็ม','full set'],['세트','เซ็ต','set'],['콤보','คอมโบ','combo'],
+  ['얼굴 전체','ทั้งหน้า','full face'],['전체','ทั้งหมด','all'],['얼굴','ใบหน้า','face'],
+  ['앞목','คอหน้า','front neck'],['뒷목','คอหลัง','back neck'],['목','คอ','neck'],
+  ['턱밑','ใต้คาง','under chin'],['턱','คาง','chin'],['팔자','ร่องแก้ม','nasolabial'],
+  ['볼','แก้ม','cheeks'],['이마','หน้าผาก','forehead'],['눈가','รอบดวงตา','eye area'],
+  ['허벅지','ต้นขา','thighs'],['복부','หน้าท้อง','abdomen'],['팔','แขน','arms'],['등','หลัง','back'],
+  ['두피','หนังศีรษะ','scalp'],['크림','ครีม','cream'],['마스크','มาส์ก','mask'],['앰플','แอมพูล','ampoule'],
+  ['세럼','เซรั่ม','serum'],['여드름 자국','รอยสิว','acne marks'],['자국','รอย','marks'],
+  ['미기재','ไม่ได้ระบุ','not stated'],['증정','แถม','free gift'],['추가','เพิ่ม','add'],
   ['결제 차감','หักชำระ','payment deducted'],['체크인 차감','หักตอนเช็คอิน','deducted at check-in'],
   ['붙여넣기 충전','เติมเงิน','top-up'],['붙여넣기 등록','ลงทะเบียน','registered'],['붙여넣기 추가','เพิ่มคอร์ส','sessions added'],
   ['잔액','คงเหลือ','balance'],['충전','เติมเงิน','top-up'],['사용','ใช้','used'],['등록','ลงทะเบียน','registered'],
