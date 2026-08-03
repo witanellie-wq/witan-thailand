@@ -5413,9 +5413,9 @@ function renderBulkPreview(P){
       +'<div style="font-size:10px;color:var(--muted);margin-top:3px">※ 시간·날짜 없이 대기 목록에 저장 → 확정되면 체크인 리스트 ▸ 연기대기에서 날짜 지정 · ไม่นับยอดขาย</div></div>';
   }
   const newN=dups.filter(x=>!x).length, dupN=dups.filter(Boolean).length;
-  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">➕ Add '+newN+' bookings'+(holds.length?' + ⏸'+holds.length:'')+' · เพิ่มคิวทั้งหมด</button>';
-  if(dupN)html+='<button class="save" style="width:100%;margin-top:7px;background:linear-gradient(150deg,#8C7647,#6e5c36)" onclick="bulkFillMissing()">🔄 Fill missing info in '+dupN+' existing · เติมข้อมูลที่ขาด · 기존 '+dupN+'건 빈칸 채우기</button>'
-    +'<div style="font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5">※ 빈 항목만 채우고 이미 입력된 값은 그대로 둡니다 · เติมเฉพาะช่องว่าง</div>';
+  html+='<button class="save" style="width:100%;margin-top:10px" onclick="bulkAddParsed()">✅ 한 번에 처리 · บันทึกทั้งหมด'
+    +(newN?' · 새 예약 '+newN:'')+(dupN?' · 기존 보완 '+dupN:'')+(holds.length?' · ⏸'+holds.length:'')+'</button>'
+    +'<div style="font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5">※ 새 예약은 등록하고, 이미 있는 예약은 <b>빈칸만 채웁니다</b> (입력된 값은 그대로) · เพิ่มคิวใหม่ + เติมช่องว่างของคิวเดิม</div>';
   $('pastePreview').style.display='block';
   $('pastePreview').innerHTML=html;
 }
@@ -5429,9 +5429,27 @@ function bulkSetStatus(i,st,btn){
 function bulkAddParsed(){
   const P=_bulkParsed;if(!P)return;
   let added=0,skipped=0;
+  let filled=0,fields=0;
   P.blocks.forEach((b,i)=>{
     const bd=b.date||P.date;
-    if(bulkFindExisting(bd,b)){skipped++;return;}
+    const ex=bulkFindExisting(bd,b);
+    if(ex){
+      // 기존 예약: 비어 있는 칸만 채움 (입력된 값은 그대로)
+      let n=0;
+      // 값이 실제로 달라질 때만 채우고 센다 (같은 값 재기록 방지)
+      const put=(k,v)=>{if(v==null||v===''||String(ex[k])===String(v))return;ex[k]=v;n++;};
+      const setEmpty=(k,v)=>{if(ex[k]==null||ex[k]===''||ex[k]===0)put(k,v);};
+      setEmpty('phone',b.phone);setEmpty('srcid',b.srcid);setEmpty('line',b.line);
+      if(b.src&&(!ex.src||ex.src==='기타'))put('src',b.src);
+      setEmpty('treat',b.treat);setEmpty('bktreat',b.treat);setEmpty('visit',b.visit);setEmpty('time',b.time);
+      if(b.price&&!Number(ex.expAmt))put('expAmt',b.price);
+      if(b.dur&&(!ex.dur||ex.dur==='60'))put('dur',b.dur);
+      if(b.seats&&(!ex.seats||ex.seats==='1'))put('seats',b.seats);
+      if(b.depAmt&&!Number(ex.depAmt)){put('depAmt',Number(b.depAmt));if(!ex.depPay)ex.depPay='이체';}
+      if(!ex.srcid&&ex.phone)put('srcid',ex.phone);
+      if(n){filled++;fields+=n;}else skipped++;
+      return;
+    }
     data.push({id:Date.now()+i,date:bd,status:b.status||'예약',name:b.name||'',time:b.time||'',phone:b.phone||'',
       seats:b.seats||'1',companion:'',dur:b.dur||'60',line:b.line||'',src:b.src||'기타',srcid:b.srcid||b.phone||'',cap:'',
       nat:'태국',natc:'',gender:'',items:[],treat:b.treat||'',bktreat:b.treat||'',subtotal:0,discount:0,discname:'',disctype:'',discval:0,adjust:0,amount:0,
@@ -5455,9 +5473,10 @@ function bulkAddParsed(){
   _bulkParsed=null;
   selDate=P.date;cur=new Date(P.date+'T00:00');cur.setDate(1);
   closePasteImport();render();
-  alert('➕ Added '+added+' bookings · เพิ่ม '+added+' คิว'
+  alert('➕ 새 예약 '+added+'건 · เพิ่ม '+added+' คิว'
+    +(filled?'\n🔄 기존 '+filled+'건 보완 (빈칸 '+fields+'개) · เติมข้อมูล '+filled:'')
     +(held?'\n⏸ 연기대기 '+held+'건 · รอยืนยัน '+held:'')
-    +(skipped?'\n(skipped '+skipped+' duplicates · ข้าม '+skipped+')':''));
+    +(skipped?'\n✓ 변경 없음 '+skipped+'건 · ไม่มีการเปลี่ยนแปลง':''));
 }
 function parsePasteImport(){
   const t=$('pasteBox').value.trim();
