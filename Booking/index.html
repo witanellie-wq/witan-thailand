@@ -492,6 +492,29 @@
   .rm-acts .mark{background:#EAF6EE;border-color:#B7DCC4;color:#20613c}
   .rm-acts .mark.on{background:#2f8f5b;border-color:#2f8f5b;color:#fff}
   .rm-noph{font-size:11px;font-weight:700;color:#b5341f;margin-top:6px}
+  .phm-ns{margin-top:6px;background:#FFF3E8;border:1px solid #EFC79C;border-radius:4px;
+    padding:6px 8px;font-size:11px;font-weight:800;color:#8a4a13;line-height:1.5}
+  .phm-ns.hard{background:#FDECEA;border-color:#E9A79E;color:#a32b1c}
+  .phm-ns span{display:block;font-weight:600;font-size:10.5px;margin-top:2px;color:inherit;opacity:.85}
+  /* 🚫 노쇼 관리 */
+  .ns-badge{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:9px;font-size:10px;font-weight:800;
+    background:#FFF3E8;border:1px solid #EFC79C;color:#8a4a13;white-space:nowrap;vertical-align:middle}
+  .ns-badge.hard{background:#FDECEA;border-color:#E9A79E;color:#a32b1c}
+  .ns-badge.soft{background:#F1F4F8;border-color:#CBD5E1;color:#4a5768}
+  .ns-badge.ok{background:#F2F5F2;border-color:#D6DED6;color:#6d7a6d;font-weight:700}
+  #nsRangeBar .btn.on{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
+  .ns-sec{margin-bottom:14px}
+  .ns-sec .ns-h{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:2px}
+  .ns-sec .ns-h b{color:#a32b1c}
+  .ns-sec .ns-d{font-size:11px;color:var(--mut);line-height:1.5;margin-bottom:7px}
+  .ns-sec.hard .ns-h{color:#a32b1c}
+  .ns-sec.ok .ns-h b{color:#2f8f5b}
+  .ns-mini{border:1px solid var(--line);border-radius:4px;padding:6px 9px;margin-bottom:5px;background:#FAFAF7}
+  .ns-mini b{font-size:12.5px;color:var(--ink)}
+  .ns-mini span{display:block;font-size:10.5px;color:var(--mut);margin-top:1px;word-break:break-word}
+  .rm-row.okd{background:#F2F8FF;border-color:#B9D3EC}
+  .rm-acts .ok{background:#EAF2FB;border-color:#B9D3EC;color:#1d4e79}
+  .rm-acts .ok.on{background:#1d6fb8;border-color:#1d6fb8;color:#fff}
   /* ===== 체크인 리스트 ===== */
   .cknav{display:flex;align-items:center;gap:8px;margin:2px 0 12px}
   .cknav .btn{flex:0 0 auto;padding:8px 12px;font-size:12px}
@@ -813,6 +836,9 @@
     <button class="btn" data-i18n="stMgr" onclick="openStaffMgr()">👩‍⚕️ 담당자 관리</button>
     <button class="btn gold owner-only" data-i18n="csv" onclick="exportCSV()">⬇ CSV</button>
     <button class="btn gold owner-only" onclick="exportCustomersXLSX()">👥 Customer Excel · ลูกค้า Excel</button>
+  </div>
+  <div class="toolbar">
+    <button class="btn" style="background:#FFF3E8;border-color:#EFC79C;color:#8a4a13;font-weight:800" onclick="openNoshow()">🚫 노쇼 관리 · ไม่มาตามนัด</button>
   </div>
   <div class="toolbar">
     <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 Customer Ledger · ทะเบียนลูกค้า (Course·Membership)</button>
@@ -1270,6 +1296,31 @@
   </div>
 </div>
 
+<div class="overlay" id="noshowOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">🚫 노쇼 관리 · ลูกค้าไม่มาตามนัด</h2>
+      <button class="sheet-x" onclick="closeNoshow()" aria-label="Close">✕</button></div>
+    <div class="sub">노쇼 이력은 계속 남습니다. 이후에 오셨거나 재예약하신 분은 따로 분리해 두었어요.</div>
+    <div class="toolbar" id="nsRangeBar" style="margin-bottom:10px">
+      <button class="btn" data-d="90" onclick="nsSetRange(90)">최근 3개월</button>
+      <button class="btn" data-d="180" onclick="nsSetRange(180)">6개월</button>
+      <button class="btn" data-d="3650" onclick="nsSetRange(3650)">전체</button>
+    </div>
+    <div class="rm-sum" id="nsSum"></div>
+    <details class="rm-tpl owner-only">
+      <summary>✏️ 재예약 권유 문구 · แก้ข้อความ</summary>
+      <textarea id="nsTpl" rows="7"></textarea>
+      <div class="rm-vars">{name} 이름 · {date} 노쇼 날짜 · {treat} 예약했던 시술</div>
+      <div class="rm-tplacts">
+        <button class="btn" onclick="nsSaveTpl()">💾 저장 · บันทึก</button>
+        <button class="btn" onclick="nsResetTpl()">↩ 기본값</button>
+      </div>
+    </details>
+    <div id="nsList"></div>
+    <button class="cancel" onclick="closeNoshow()">닫기</button>
+  </div>
+</div>
+
 <div class="overlay" id="remindOverlay">
   <div class="sheet">
     <div class="sheet-hd"><h2 style="margin-bottom:0">🔔 예약 알림 보내기 · แจ้งเตือนนัดหมาย</h2>
@@ -1346,13 +1397,22 @@ let cloudOn=false;                       // 로그인 + 서버 데이터 로드 
 let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
 let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
+const NOSHOW_DEFAULT=`สวัสดีค่ะ คุณ{name} 🌸
+เราไม่ได้เจอกันในนัดวันที่ {date} ค่ะ หวังว่าทุกอย่างเรียบร้อยนะคะ
+หากสะดวก ทางเรายินดีจองเวลาใหม่ให้ค่ะ
+แจ้งวันและเวลาที่สะดวกกลับมาได้เลยนะคะ
+HANAHAYAN Clinic · สุขุมวิท 23 🙏`;
+let noshowTpl=(function(){const v=localStorage.getItem('hanahayan_noshowtpl');return v==null?NOSHOW_DEFAULT:v;})();
+let noshowFollow={};try{noshowFollow=JSON.parse(localStorage.getItem('hanahayan_noshowfollow')||'{}')||{}}catch(e){}
 const REMIND_DEFAULT=`สวัสดีค่ะ คุณ{name} 🌸
 ยืนยันนัดหมายที่ HANAHAYAN Clinic ค่ะ
 📅 พรุ่งนี้ {date} เวลา {time} น.
 💆 {treat}
 📍 สุขุมวิท 23 (BTS อโศก)
-หากต้องการเลื่อนหรือยกเลิก รบกวนแจ้งล่วงหน้าค่ะ
-ขอบคุณค่ะ 🙏`;
+
+✨ มาตรงเวลา รับแอมพูลฟรี 1 ขวดค่ะ
+🙏 รบกวนตอบกลับ "ยืนยัน" ด้วยนะคะ
+หากไม่สะดวก แจ้งเลื่อนได้เลยค่ะ ไม่มีค่าใช้จ่าย`;
 let revTargets={};try{revTargets=JSON.parse(localStorage.getItem('hanahayan_revtargets')||'{}')||{}}catch(e){}
 let remindTpl=(function(){const v=localStorage.getItem('hanahayan_remindtpl');return v==null?REMIND_DEFAULT:v;})();  // 전날 알림 문자 템플릿
 let gowabiRate=(function(){const v=localStorage.getItem('hanahayan_gowabirate');return v==null?20:(Number(v)||0);})();  // GoWabi 수수료 % (기본 20)
@@ -1449,7 +1509,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate},{key:'remind_tpl',value:remindTpl}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate},{key:'remind_tpl',value:remindTpl},{key:'noshow_tpl',value:noshowTpl},{key:'noshow_follow',value:noshowFollow}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1480,6 +1540,9 @@ async function fetchAll(){
   try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}
   if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
   if(typeof smap.remind_tpl==='string'&&smap.remind_tpl.trim()){remindTpl=smap.remind_tpl;try{localStorage.setItem('hanahayan_remindtpl',remindTpl)}catch(e){}}
+  if(typeof smap.noshow_tpl==='string'&&smap.noshow_tpl.trim()){noshowTpl=smap.noshow_tpl;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}}
+  if(smap.noshow_follow&&typeof smap.noshow_follow==='object')noshowFollow=smap.noshow_follow;
+  try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
   cloudOn=true;
@@ -1534,6 +1597,8 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(smap.rev_targets&&typeof smap.rev_targets==='object'){revTargets=smap.rev_targets;try{localStorage.setItem('hanahayan_revtargets',JSON.stringify(revTargets))}catch(e){}}
         if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
         if(typeof smap.remind_tpl==='string'&&smap.remind_tpl.trim()){remindTpl=smap.remind_tpl;try{localStorage.setItem('hanahayan_remindtpl',remindTpl)}catch(e){}}
+        if(typeof smap.noshow_tpl==='string'&&smap.noshow_tpl.trim()){noshowTpl=smap.noshow_tpl;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}}
+        if(smap.noshow_follow&&typeof smap.noshow_follow==='object'){noshowFollow=smap.noshow_follow;try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
       }
@@ -1612,6 +1677,14 @@ function autoBkPrice(t){const v=BKPRICE[t];if(v!==undefined&&v>0)document.getEle
 /* ===== 전화번호 기존 고객 자동 조회 ===== */
 const normPh=v=>String(v||'').replace(/[^0-9]/g,'');
 let _phT=null;
+// 예약을 받는 순간 노쇼 이력을 알려준다 — 상습이면 선결제 요청
+function nsWarnHtml(ref){
+  const h=nsHistory(ref);
+  if(!h.n||h.state==='recovered')return '';
+  if(h.n>=2)return `<div class="phm-ns hard">⚠️ 노쇼 ${h.n}회 (마지막 ${esc(h.lastNo)}) — <b>선결제를 요청하세요</b><br>
+    <span>"รบกวนมัดจำก่อนนะคะ" · 이력 있는 분에게만 받으면 신규 손님은 줄지 않습니다</span></div>`;
+  return `<div class="phm-ns">🚫 노쇼 ${h.n}회 (마지막 ${esc(h.lastNo)}) — 전날 알림 문자를 꼭 보내세요</div>`;
+}
 function phoneLookupDeb(){clearTimeout(_phT);_phT=setTimeout(phoneLookup,350);}
 function phoneLookup(){
   const box=document.getElementById('phMatch');
@@ -1635,7 +1708,7 @@ function phoneLookup(){
     <div class="phm-h"><span>${T('phFound')}: ${latest.name||''}</span>
       <button type="button" class="phm-load" onclick="loadCustomer()">${T('phLoad')}</button></div>
     <div class="phm-sum">${T('phVisit')} ${vis.length}${isStaff()?'':' · '+T('phTotal')+' '+fmt(tot)}${nsC?' · 🚫'+nsC:''}${ccC?' · ❌'+ccC:''}${latest.date?' · '+T('phLast')+' '+latest.date:''}</div>
-    <div class="phm-hist">${histRows}</div></div>`+ledHtml;
+    <div class="phm-hist">${histRows}</div>${nsWarnHtml(latest)}</div>`+ledHtml;
   box.style.display='block';
   box.dataset.ref=latest.id;
 }
@@ -3801,7 +3874,7 @@ function renderDay(){
     const cls=['tl-block',e.status==='예약'?'pending':'',p.conflict?'conflict':''].join(' ');
     blocks+=`<div class="${cls}${h<58?' short':''}" style="top:${top}px;height:${h}px;left:${left};width:${w}" onclick="openModal('${e.id}')">
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
-      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}</div>
+      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}${nsBadge(e)}</div>
       <div class="tb-menu">${esc(e.treat||e.bktreat||T('noMenu')||'—')}</div>
       ${(e.status==='방문')?`<div class="tb-pr">✅ ${fmt(e.amount)}</div>`:(e.expAmt?`<div class="tb-pr">~${fmt(e.expAmt)}</div>`:'')}
     </div>`;
@@ -4799,7 +4872,7 @@ function renderCheckin(){
     const st=e.status;
     return `<div class="ckrow s${st}">
       <div class="ck-top">
-        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}</div>
+        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}${nsBadge(e)}</div>
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
       <div class="ck-meta">${meta||'—'}</div>
@@ -4846,6 +4919,162 @@ function renderCkNotice(list){
       </div>`;}).join('')}
   </div>`;
 }
+/* ══ 🚫 노쇼 관리 — 재예약 권유 · 상습 노쇼 선결제 ══ */
+let nsRange=180;                       // 집계 기간(일)
+/* 이 손님의 노쇼 이력.
+   마지막 노쇼 이후에 실제로 방문했으면 '회복', 재예약만 했으면 '재예약'.
+   이력 자체는 항상 볼 수 있게 남기되, 회복된 손님은 경고색으로 띄우지 않는다. */
+function nsHistory(e){
+  const key=custKey(e&&e.phone,e&&e.name);
+  if(!key||key==='nm:')return {n:0,visits:0,state:'none'};
+  let n=0,visits=0,lastNo='',lastVisit='',lastBook='';
+  data.forEach(x=>{
+    if(custKey(x.phone,x.name)!==key)return;
+    const d=String(x.date||'');
+    if(x.status==='노쇼'){n++;if(d>lastNo)lastNo=d;}
+    else if(x.status==='방문'){visits++;if(d>lastVisit)lastVisit=d;}
+    else if(x.status==='예약'||x.status==='연기대기'){if(d>lastBook)lastBook=d;}   // 지금 보고 있는 예약도 '재예약'으로 인정
+  });
+  let state='open';
+  if(!n)state='none';
+  else if(lastVisit&&lastVisit>lastNo)state='recovered';   // 이후 제시간에 옴 → 상관없음
+  else if(lastBook&&lastBook>lastNo)state='rebooked';      // 재예약은 했음 → 지켜보기
+  return {n,visits,lastNo,lastVisit,lastBook,state,open:state==='open'};
+}
+// 이력은 항상 보이되, 회복된 손님은 회색으로
+function nsBadge(e){
+  const h=nsHistory(e);
+  if(!h.n)return '';
+  if(h.state==='recovered')
+    return `<span class="ns-badge ok" title="이후 방문함 — 문제 없음">🚫 노쇼 ${h.n}회 · 이후 방문</span>`;
+  if(h.state==='rebooked')
+    return `<span class="ns-badge soft" title="재예약함 — 지켜보기">🚫 노쇼 ${h.n}회 · 재예약함</span>`;
+  const hard=h.n>=2;
+  return `<span class="ns-badge${hard?' hard':''}" title="${hard?'상습 노쇼 — 선결제 요청 권장':'노쇼 이력'}">${hard?'⚠️':'🚫'} 노쇼 ${h.n}회${hard?' · 선결제 권장':''}</span>`;
+}
+function openNoshow(){$('noshowOverlay').classList.add('on');renderNoshow();}
+function closeNoshow(){$('noshowOverlay').classList.remove('on');}
+function nsSetRange(d){nsRange=d;renderNoshow();}
+function nsMsg(c){
+  const last=c.lastNo||'';
+  const[y,mo,dd]=String(last).split('-').map(Number);
+  return String(noshowTpl||NOSHOW_DEFAULT)
+    .replace(/\{name\}/g,String(c.name||'').trim()||'ลูกค้า')
+    .replace(/\{date\}/g,(mo&&dd)?(dd+'/'+mo):last)
+    .replace(/\{treat\}/g,c.lastTreat?fmNote(c.lastTreat):'—')
+    .replace(/\n{3,}/g,'\n\n').trim();
+}
+// 기간 안에 노쇼가 있는 손님 집계
+function nsBuild(){
+  const from=shiftDate(todayStr(),-nsRange);
+  const map={};
+  data.forEach(e=>{
+    if(e.status!=='노쇼'||!e.date||e.date<from)return;
+    const key=custKey(e.phone,e.name);
+    if(!key||key==='nm:')return;
+    if(!map[key])map[key]={key,name:(e.name||'').trim(),phone:e.phone||'',line:e.line||'',src:e.src||'',srcid:e.srcid||'',
+      no:0,lost:0,lastNo:'',lastTreat:'',visits:0,lastVisit:'',lastBook:'',state:'open'};
+    const c=map[key];
+    if(!c.name&&e.name)c.name=String(e.name).trim();
+    if(!c.phone&&e.phone)c.phone=e.phone;
+    if(!c.line&&e.line)c.line=e.line;
+    if(!c.srcid&&e.srcid){c.srcid=e.srcid;c.src=e.src||c.src;}
+    c.no++;
+    c.lost+=Number(e.expAmt)||Number(e.subtotal)||0;
+    if(e.date>c.lastNo){c.lastNo=e.date;c.lastTreat=e.treat||e.bktreat||'';}
+  });
+  // 방문·재예약 이력은 기간과 무관하게 — 회복 여부를 판단해야 하므로
+  data.forEach(e=>{
+    const c=map[custKey(e.phone,e.name)]; if(!c)return;
+    const d=String(e.date||'');
+    if(e.status==='방문'){c.visits++;if(d>c.lastVisit)c.lastVisit=d;}
+    else if(e.status==='예약'||e.status==='연기대기'){if(d>c.lastBook)c.lastBook=d;}
+  });
+  Object.values(map).forEach(c=>{
+    c.state=(c.lastVisit&&c.lastVisit>c.lastNo)?'recovered'
+           :(c.lastBook&&c.lastBook>c.lastNo)?'rebooked':'open';
+  });
+  return Object.values(map).sort((a,b)=>(b.no-a.no)||b.lastNo.localeCompare(a.lastNo));
+}
+function renderNoshow(){
+  const tp=$('nsTpl'); if(tp&&document.activeElement!==tp)tp.value=noshowTpl||NOSHOW_DEFAULT;
+  document.querySelectorAll('#nsRangeBar .btn').forEach(b=>b.classList.toggle('on',+b.dataset.d===nsRange));
+  const all=nsBuild();
+  const open=all.filter(c=>c.state==='open');
+  const repeat=open.filter(c=>c.no>=2), once=open.filter(c=>c.no<2);
+  const rebooked=all.filter(c=>c.state==='rebooked');
+  const done=all.filter(c=>c.state==='recovered');
+  const noCnt=all.reduce((s,c)=>s+c.no,0);
+  const lost=open.reduce((s,c)=>s+c.lost,0);
+  $('nsSum').innerHTML=`<span>노쇼 ${noCnt}건 · ${all.length}명</span>`
+    +(open.length?`<span class="todo">📞 연락 필요 ${open.length}명</span>`:'')
+    +(repeat.length?`<span class="todo">⚠️ 상습 ${repeat.length}명 — 선결제</span>`:'')
+    +(done.length?`<span class="done">✅ 이후 방문 ${done.length}명</span>`:'')
+    +(isStaff()||!lost?'':`<span class="todo">💸 놓친 예상매출 ${fmt(lost)}</span>`);
+  if(!all.length){$('nsList').innerHTML='<div class="empty">이 기간엔 노쇼가 없어요 · ไม่มีลูกค้าไม่มาตามนัด 🎉</div>';return;}
+  const sec=(title,desc,arr,cls)=>arr.length?`<div class="ns-sec ${cls}"><div class="ns-h">${title} <b>${arr.length}</b></div>
+    <div class="ns-d">${desc}</div>${arr.map(nsRow).join('')}</div>`:'';
+  $('nsList').innerHTML=
+    sec('⚠️ 상습 노쇼 · ไม่มาตามนัดซ้ำ','다음 예약을 받을 때 <b>선결제를 요청</b>하세요. 전원에게 받으면 신규가 줄지만, 이력 있는 분에게만 받으면 부작용이 없습니다.',repeat,'hard')
+   +sec('🚫 1회 노쇼 · ไม่มา 1 ครั้ง','대부분 사정이 있었던 분들입니다. <b>재예약을 권유</b>하면 꽤 돌아옵니다.',once,'soft')
+   +(rebooked.length?`<div class="ns-sec soft"><div class="ns-h">📅 재예약함 <b>${rebooked.length}</b></div>
+      <div class="ns-d">다시 예약을 잡은 분들입니다. 연락은 필요 없고, 그날 <b>알림 문자만 꼭</b> 보내세요.</div>
+      ${rebooked.map(nsMini).join('')}</div>`:'')
+   +(done.length?`<div class="ns-sec ok"><div class="ns-h">✅ 이후 방문함 — 상관없음 <b>${done.length}</b></div>
+      <div class="ns-d">노쇼 뒤에 제시간에 오신 분들입니다. 기록만 남기고 따로 관리하지 않습니다.</div>
+      ${done.map(nsMini).join('')}</div>`:'');
+}
+function nsRow(c){
+  const ph=String(c.phone||'').trim(),intl=rmIntl(ph);
+  const msg=nsMsg(c),enc=encodeURIComponent(msg);
+  const done=!!noshowFollow[c.key];
+  const meta=[`노쇼 ${c.no}회`,c.visits?`방문 ${c.visits}회`:'첫 예약에서 노쇼',
+    c.lastNo?`마지막 노쇼 ${c.lastNo}`:'',c.lastTreat||'',ph||'📵 번호 없음'].filter(Boolean).join(' · ');
+  let acts=`<button class="copy" onclick="nsCopy('${c.key}')">📋 복사</button>`;
+  if(ph){
+    acts+=`<a class="sms" href="sms:${esc(intl)}${/(iPhone|iPad|Mac)/i.test(navigator.userAgent)?'&':'?'}body=${enc}">💬 문자</a>`
+      +`<a href="tel:${esc(intl)}">📞 전화</a>`;
+  }
+  if(c.srcid&&(String(c.src||'').toLowerCase().includes('facebook')||String(c.src||'').toUpperCase()==='FB'))
+    acts+=`<a href="https://m.me/${esc(String(c.srcid).replace(/^@/,''))}" target="_blank" rel="noopener">💬 FB</a>`;
+  acts+=`<button class="mark${done?' on':''}" onclick="nsToggleFollow('${c.key}')">${done?'✅ 연락함 '+esc(noshowFollow[c.key]):'연락함 표시'}</button>`;
+  return `<div class="rm-row${done?' sent':''}">
+    <div class="rm-top"><div style="min-width:0">
+      <div class="rm-nm">${esc(c.name||'🚶 무기명')}${c.no>=2?'<span class="ns-badge hard">⚠️ 선결제 권장</span>':''}</div>
+      <div class="rm-meta">${esc(meta)}</div></div></div>
+    <div class="rm-msg">${esc(msg)}</div>
+    ${ph?'':'<div class="rm-noph">📵 번호가 없어요 — LINE/FB로 연락하거나 번호를 먼저 채워주세요</div>'}
+    <div class="rm-acts">${acts}</div>
+  </div>`;
+}
+// 회복·재예약 손님은 이력만 한 줄로
+function nsMini(c){
+  const ph=String(c.phone||'').trim();
+  const tail=c.state==='recovered'?`이후 방문 ${c.lastVisit}`:`재예약 ${c.lastBook}`;
+  return `<div class="ns-mini"><b>${esc(c.name||'🚶 무기명')}</b>
+    <span>노쇼 ${c.no}회 · 마지막 ${esc(c.lastNo)} → ${esc(tail)}${ph?' · '+esc(ph):''}</span></div>`;
+}
+function nsCopy(key){
+  const c=nsBuild().find(x=>x.key===key); if(!c)return;
+  rmClip(nsMsg(c),'문자를 복사했어요');
+}
+function nsToggleFollow(key){
+  if(noshowFollow[key])delete noshowFollow[key];
+  else noshowFollow[key]=todayStr();
+  try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}
+  queueSync('settings');renderNoshow();
+}
+function nsSaveTpl(){
+  const v=$('nsTpl').value.trim();
+  if(!v){toast('문구가 비어 있어요');return;}
+  noshowTpl=v;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}
+  queueSync('settings');renderNoshow();toast('문구를 저장했어요 (모든 기기 동기화)');
+}
+function nsResetTpl(){
+  noshowTpl=NOSHOW_DEFAULT;$('nsTpl').value=NOSHOW_DEFAULT;
+  try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}
+  queueSync('settings');renderNoshow();toast('기본 문구로 되돌렸어요');
+}
 /* 간단 토스트 */
 let _toastT=null;
 function toast(msg){
@@ -4890,14 +5119,18 @@ function renderRemind(){
   $('rmDateLbl').innerHTML=`${mo}/${dd} (${dw})`+(isTom?'<div style="font-size:10.5px;font-weight:700;color:#2f7d6b;margin-top:2px">내일 · พรุ่งนี้</div>':'');
   const list=rmList();
   const sent=list.filter(e=>e.remindSent===rmDate).length;
+  const okd=list.filter(e=>e.remindOk===rmDate).length;
+  const noAns=list.filter(e=>e.remindSent===rmDate&&e.remindOk!==rmDate).length;
   const noph=list.filter(e=>!String(e.phone||'').trim()).length;
   $('rmSum').innerHTML=`<span>예약 ${list.length}</span>`
     +`<span class="done">✅ 보냄 ${sent}</span>`
-    +`<span class="todo">🔔 남음 ${Math.max(0,list.length-sent)}</span>`
+    +`<span class="done">👍 확인 ${okd}</span>`
+    +(noAns?`<span class="todo">📞 무응답 ${noAns} — 전화</span>`:'')
+    +`<span class="todo">🔔 미발송 ${Math.max(0,list.length-sent)}</span>`
     +(noph?`<span class="todo">📵 번호 없음 ${noph}</span>`:'');
   if(!list.length){$('rmList').innerHTML='<div class="empty">이 날짜엔 보낼 예약이 없어요 · ไม่มีนัดหมาย</div>';return;}
   $('rmList').innerHTML=list.map(e=>{
-    const done=e.remindSent===rmDate;
+    const done=e.remindSent===rmDate, okd=e.remindOk===rmDate;
     const ph=String(e.phone||'').trim(),intl=rmIntl(ph);
     const msg=rmMsg(e);
     const enc=encodeURIComponent(msg);
@@ -4911,10 +5144,11 @@ function renderRemind(){
     if(String(e.src||'').toLowerCase().includes('facebook')||String(e.src||'').toUpperCase()==='FB'){
       if(e.srcid)acts+=`<a href="https://m.me/${esc(String(e.srcid).replace(/^@/,''))}" target="_blank" rel="noopener">💬 FB</a>`;
     }
-    acts+=`<button class="mark${done?' on':''}" onclick="rmToggleSent('${e.id}')">${done?'✅ 보냄':'보냄 표시'}</button>`;
-    return `<div class="rm-row${done?' sent':''}">
+    acts+=`<button class="mark${done?' on':''}" onclick="rmToggleSent('${e.id}')">${done?'✅ 보냄':'보냄 표시'}</button>`
+      +`<button class="ok${okd?' on':''}" onclick="rmToggleOk('${e.id}')">${okd?'👍 확인됨':'👍 답장 옴'}</button>`;
+    return `<div class="rm-row${okd?' okd':(done?' sent':'')}">
       <div class="rm-top"><div style="min-width:0">
-        <div class="rm-nm"><i>${e.time?esc(e.time):'—'}</i>${esc(String(e.name||'').trim()||'🚶 무기명')}</div>
+        <div class="rm-nm"><i>${e.time?esc(e.time):'—'}</i>${esc(String(e.name||'').trim()||'🚶 무기명')}${nsBadge(e)}</div>
         <div class="rm-meta">${esc(meta)}</div></div></div>
       <div class="rm-msg">${esc(msg)}</div>
       ${ph?'':'<div class="rm-noph">📵 번호가 없어요 — LINE/FB로 보내거나 번호를 먼저 입력하세요</div>'}
@@ -4947,6 +5181,12 @@ function rmClipFallback(txt,done){
 function rmToggleSent(id){
   const e=data.find(x=>String(x.id)===String(id)); if(!e)return;
   e.remindSent=(e.remindSent===rmDate)?'':rmDate;
+  save();renderRemind();
+}
+function rmToggleOk(id){
+  const e=data.find(x=>String(x.id)===String(id)); if(!e)return;
+  if(e.remindOk===rmDate)e.remindOk='';
+  else{e.remindOk=rmDate;if(e.remindSent!==rmDate)e.remindSent=rmDate;}   // 답장이 왔다면 보낸 것
   save();renderRemind();
 }
 function rmSaveTpl(){
