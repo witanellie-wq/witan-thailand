@@ -496,6 +496,36 @@
     padding:6px 8px;font-size:11px;font-weight:800;color:#8a4a13;line-height:1.5}
   .phm-ns.hard{background:#FDECEA;border-color:#E9A79E;color:#a32b1c}
   .phm-ns span{display:block;font-weight:600;font-size:10.5px;margin-top:2px;color:inherit;opacity:.85}
+  /* 체크인 행: 전화·노쇼 경고 */
+  .ck-ph{margin-top:3px;font-size:12.5px;font-weight:800}
+  .ck-ph a{color:#1c6b3f;text-decoration:none}
+  .ck-ph .no{color:#b5341f;font-weight:800;font-size:11.5px}
+  .ck-nsw{margin-top:5px;background:#FFF3E8;border:1px solid #EFC79C;border-radius:4px;
+    padding:5px 8px;font-size:11px;font-weight:700;color:#8a4a13;word-break:break-word}
+  .ck-nsw.hard{background:#FDECEA;border-color:#E9A79E;color:#a32b1c}
+  /* 💰 선결제 미리 요청 */
+  .ckprepay{background:#FDF6EC;border:1.4px solid #E8C79A;border-radius:5px;padding:9px 11px;margin-bottom:11px}
+  .ckp-h{font-size:12px;font-weight:800;color:#8a4a13;margin-bottom:3px}
+  .ckp-h b{color:#a32b1c}
+  .ckp-h span{font-weight:700;color:#a32b1c}
+  .ckp-d{font-size:10.5px;color:#7a5f16;line-height:1.55;margin-bottom:7px}
+  .ckp-row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+    background:#fff;border:1px solid #E8C79A;border-radius:4px;padding:7px 9px;margin-top:5px}
+  .ckp-row.asked{background:#F6FBF7;border-color:#B7DCC4}
+  .ckp-l{min-width:0;flex:1 1 130px}
+  .ckp-l b{font-size:12.5px;color:var(--ink)}
+  .ckp-when{display:block;font-size:11px;font-weight:700;color:#8a4a13;margin-top:1px}
+  .ckp-why{display:block;font-size:10.5px;color:var(--mut);margin-top:1px;word-break:break-word}
+  .ckp-acts{display:flex;gap:5px;flex:0 0 auto;flex-wrap:wrap}
+  .ckp-acts a,.ckp-acts button{border:1.2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:3px;padding:6px 9px;font-size:11px;font-weight:700;cursor:pointer;
+    font-family:inherit;text-decoration:none;white-space:nowrap}
+  .ckp-acts .copy{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
+  .ckp-acts .sms{background:#2f7d6b;border-color:#2f7d6b;color:#fff}
+  .ckp-acts .mark.on{background:#2f8f5b;border-color:#2f8f5b;color:#fff}
+  .ckp-amt{margin-top:8px;font-size:11.5px;font-weight:700;color:var(--ink)}
+  .ckp-amt input{width:90px;margin-left:5px;font-family:inherit;font-size:12.5px;
+    border:1.2px solid var(--line);border-radius:4px;padding:5px 7px}
   /* 🚫 노쇼 관리 */
   .ns-badge{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:9px;font-size:10px;font-weight:800;
     background:#FFF3E8;border:1px solid #EFC79C;color:#8a4a13;white-space:nowrap;vertical-align:middle}
@@ -1284,6 +1314,7 @@
       <div class="ckdate" id="ckDateLbl"></div>
       <button class="btn" data-i18n="ckNext" onclick="ckMove(1)">내일 ▶</button>
     </div>
+    <div id="ckPrepay"></div>
     <div id="ckNotice"></div>
     <div class="cksum" id="ckSum"></div>
     <button class="ckpendbtn" id="ckPendBtn" onclick="ckTogglePending()"></button>
@@ -1397,6 +1428,18 @@ let cloudOn=false;                       // 로그인 + 서버 데이터 로드 
 let bedsVal=parseInt(localStorage.getItem('hanahayan_beds')||'2')||2;
 let staffOffDates={};try{staffOffDates=JSON.parse(localStorage.getItem('hanahayan_staff_offdates')||'{}')||{}}catch(e){}
 let manualRev=[];try{manualRev=JSON.parse(localStorage.getItem('hanahayan_manualrev')||'[]')||[]}catch(e){}
+const PREPAY_DEFAULT=`สวัสดีค่ะ คุณ{name} 🌸
+ยืนยันนัดวันที่ {date} เวลา {time} น. ที่ HANAHAYAN Clinic ค่ะ
+💆 {treat}
+
+เนื่องจากมีนัดที่ไม่ได้เข้ารับบริการก่อนหน้านี้
+รบกวนชำระมัดจำ ฿{dep} เพื่อยืนยันการจองค่ะ
+🏦 โอนเข้าบัญชี: (ธนาคาร / เลขที่บัญชี)
+มัดจำนี้หักจากค่าบริการในวันนั้นค่ะ
+
+โอนแล้วรบกวนส่งสลิปกลับมานะคะ ขอบคุณค่ะ 🙏`;
+let prepayTpl=(function(){const v=localStorage.getItem('hanahayan_prepaytpl');return v==null?PREPAY_DEFAULT:v;})();
+let prepayAmt=(function(){const v=localStorage.getItem('hanahayan_prepayamt');return v==null?500:(Number(v)||0);})();
 const NOSHOW_DEFAULT=`สวัสดีค่ะ คุณ{name} 🌸
 เราไม่ได้เจอกันในนัดวันที่ {date} ค่ะ หวังว่าทุกอย่างเรียบร้อยนะคะ
 หากสะดวก ทางเรายินดีจองเวลาใหม่ให้ค่ะ
@@ -1509,7 +1552,7 @@ async function pushStaff(){
 }
 async function pushSettings(){
   _dirty.settings=false;
-  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate},{key:'remind_tpl',value:remindTpl},{key:'noshow_tpl',value:noshowTpl},{key:'noshow_follow',value:noshowFollow}];
+  const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate},{key:'remind_tpl',value:remindTpl},{key:'noshow_tpl',value:noshowTpl},{key:'noshow_follow',value:noshowFollow},{key:'prepay_tpl',value:prepayTpl},{key:'prepay_amt',value:prepayAmt}];
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1541,6 +1584,8 @@ async function fetchAll(){
   if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
   if(typeof smap.remind_tpl==='string'&&smap.remind_tpl.trim()){remindTpl=smap.remind_tpl;try{localStorage.setItem('hanahayan_remindtpl',remindTpl)}catch(e){}}
   if(typeof smap.noshow_tpl==='string'&&smap.noshow_tpl.trim()){noshowTpl=smap.noshow_tpl;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}}
+  if(typeof smap.prepay_tpl==='string'&&smap.prepay_tpl.trim()){prepayTpl=smap.prepay_tpl;try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl)}catch(e){}}
+  if(smap.prepay_amt!=null){prepayAmt=Number(smap.prepay_amt)||0;try{localStorage.setItem('hanahayan_prepayamt',String(prepayAmt))}catch(e){}}
   if(smap.noshow_follow&&typeof smap.noshow_follow==='object')noshowFollow=smap.noshow_follow;
   try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
@@ -1598,6 +1643,8 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(smap.gowabi_rate!=null){gowabiRate=Number(smap.gowabi_rate)||0;try{localStorage.setItem('hanahayan_gowabirate',String(gowabiRate))}catch(e){}}
         if(typeof smap.remind_tpl==='string'&&smap.remind_tpl.trim()){remindTpl=smap.remind_tpl;try{localStorage.setItem('hanahayan_remindtpl',remindTpl)}catch(e){}}
         if(typeof smap.noshow_tpl==='string'&&smap.noshow_tpl.trim()){noshowTpl=smap.noshow_tpl;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}}
+        if(typeof smap.prepay_tpl==='string'&&smap.prepay_tpl.trim()){prepayTpl=smap.prepay_tpl;try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl)}catch(e){}}
+        if(smap.prepay_amt!=null){prepayAmt=Number(smap.prepay_amt)||0;try{localStorage.setItem('hanahayan_prepayamt',String(prepayAmt))}catch(e){}}
         if(smap.noshow_follow&&typeof smap.noshow_follow==='object'){noshowFollow=smap.noshow_follow;try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
@@ -4866,15 +4913,22 @@ function renderCheckin(){
     <div class="cs"><div class="v" style="color:#c0392b">${no}</div><div class="l">${T('ckNo')}</div></div>
     ${isStaff()?'':`<div class="cs"><div class="v">${fmt(rev)}</div><div class="l">${T('ckRev')}</div></div>`}`;
   renderCkNotice(list);
+  renderCkPrepay();
   if(!list.length){$('ckList').innerHTML=`<div class="empty">${T('ckEmpty')}</div>`;return;}
   $('ckList').innerHTML=list.map(e=>{
-    const meta=[e.treat||e.bktreat||'', parseInt(e.seats)>1?'👥'+e.seats:'', e.line?esc(e.line):'', e.phone?esc(e.phone):'', (e.status==='방문'?('💰'+fmt(e.amount||0)):(e.expAmt?'~'+fmt(e.expAmt):''))].filter(Boolean).join(' · ');
+    const meta=[e.treat||e.bktreat||'', parseInt(e.seats)>1?'👥'+e.seats:'', e.line?esc(e.line):'', (e.status==='방문'?('💰'+fmt(e.amount||0)):(e.expAmt?'~'+fmt(e.expAmt):''))].filter(Boolean).join(' · ');
     const st=e.status;
+    const ph=String(e.phone||'').trim();
+    const h=nsHistory(e);
     return `<div class="ckrow s${st}">
       <div class="ck-top">
-        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${e.phone?'':'<span title="No phone · ไม่มีเบอร์ · 전화번호 없음" style="margin-left:4px">📵</span>'}${prepaidIcon(e)}${ckStatusBadge(st)}${nsBadge(e)}</div>
+        <div style="min-width:0"><span class="ck-nm">${e.gender?genIcon(e.gender):''} ${dispName(e)}</span>${prepaidIcon(e)}${ckStatusBadge(st)}${nsBadge(e)}</div>
         <div class="ck-tm">${e.time?e.time:T('ckMin')}</div>
       </div>
+      <div class="ck-ph">${ph
+        ?`<a href="tel:${esc(rmIntl(ph))}">📞 ${esc(ph)}</a>`
+        :'<span class="no">📵 전화번호 없음 · ไม่มีเบอร์ — 오늘 꼭 받아주세요</span>'}</div>
+      ${(h.n&&h.state!=='recovered')?`<div class="ck-nsw${h.n>=2?' hard':''}">${h.n>=2?'⚠️':'🚫'} 노쇼 ${h.n}회 (마지막 ${esc(h.lastNo)})${h.n>=2?' — <b>다음 예약은 선결제로</b>':''}</div>`:''}
       <div class="ck-meta">${meta||'—'}</div>
       ${e.memo?`<div class="ck-meta" style="color:#40506a">📝 ${esc(e.memo)}</div>`:''}
       ${(()=>{const th=translateMemo(e.memo,1);return th?`<div class="memo-th">🌐 ${esc(th)}</div>`:''})()}
@@ -4890,6 +4944,89 @@ function renderCheckin(){
       </div>
     </div>`;
   }).join('');
+}
+/* 💰 앞으로 올 예약 중 노쇼 이력자 → 미리 선결제 요청
+   (당일 오전엔 이미 늦으므로, 매일 여는 이 화면에서 '앞날'을 미리 잡아준다) */
+function prepayMsg(e){
+  const[y,mo,dd]=String(e.date||'').split('-').map(Number);
+  const tr=String(e.treat||e.bktreat||'').trim();
+  return String(prepayTpl||PREPAY_DEFAULT)
+    .replace(/\{name\}/g,String(e.name||'').trim()||'ลูกค้า')
+    .replace(/\{date\}/g,(mo&&dd)?(dd+'/'+mo):(e.date||''))
+    .replace(/\{time\}/g,String(e.time||'').trim()||'—')
+    .replace(/\{treat\}/g,tr?fmNote(tr):'—')
+    .replace(/\{dep\}/g,Number(prepayAmt||0).toLocaleString())
+    .replace(/\n{3,}/g,'\n\n').trim();
+}
+function prepayTargets(){
+  const from=shiftDate(todayStr(),1), to=shiftDate(todayStr(),14);   // 오늘은 이미 늦음 — 내일부터
+  return data.filter(e=>{
+    if(e.status!=='예약'&&e.status!=='연기대기')return false;
+    if(!e.date||e.date<from||e.date>to)return false;
+    if(Number(e.depAmt)>0&&!e.depRefund)return false;      // 이미 선결제 받음
+    const h=nsHistory(e);
+    return h.n>0&&h.state!=='recovered';
+  }).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+}
+function renderCkPrepay(){
+  const box=$('ckPrepay'); if(!box)return;
+  const list=prepayTargets();
+  if(!list.length){box.innerHTML='';return;}
+  const todo=list.filter(e=>!e.prepayAsked).length;
+  box.innerHTML=`<div class="ckprepay">
+    <div class="ckp-h">💰 선결제 받을 예약 · ขอมัดจำ <b>${list.length}</b>${todo?` <span>(요청 안 함 ${todo})</span>`:''}</div>
+    <div class="ckp-d">노쇼 이력이 있는 앞으로의 예약입니다. <b>당일 오전엔 이미 늦으니</b> 지금 미리 문자를 보내세요.
+      선결제가 들어오면 예약 수정창의 <b>선결제 금액</b>에 적어주세요 — 그러면 여기서 사라집니다.</div>
+    ${list.map(e=>{
+      const ph=String(e.phone||'').trim(),intl=rmIntl(ph);
+      const h=nsHistory(e);
+      const enc=encodeURIComponent(prepayMsg(e));
+      const asked=!!e.prepayAsked;
+      const dleft=Math.round((new Date(e.date+'T00:00')-new Date(todayStr()+'T00:00'))/86400000);
+      return `<div class="ckp-row${asked?' asked':''}">
+        <div class="ckp-l">
+          <b>${esc(String(e.name||'').trim()||'🚶 무기명')}</b>
+          <span class="ckp-when">${esc(e.date)}${e.time?' '+esc(e.time):''} · ${dleft===1?'내일':'D-'+dleft}</span>
+          <span class="ckp-why">${h.n>=2?'⚠️':'🚫'} 노쇼 ${h.n}회 · 마지막 ${esc(h.lastNo)}${ph?' · '+esc(ph):' · 📵 번호 없음'}</span>
+        </div>
+        <div class="ckp-acts">
+          <button class="copy" onclick="ckpCopy('${e.id}')">📋</button>
+          ${ph?`<a class="sms" href="sms:${esc(intl)}${/(iPhone|iPad|Mac)/i.test(navigator.userAgent)?'&':'?'}body=${enc}">💬</a><a href="tel:${esc(intl)}">📞</a>`:''}
+          <button class="mark${asked?' on':''}" onclick="ckpAsked('${e.id}')">${asked?'✅ 요청함':'요청함'}</button>
+        </div>
+      </div>`;}).join('')}
+    <details class="rm-tpl owner-only" style="margin:8px 0 0">
+      <summary>✏️ 선결제 요청 문구·금액 · แก้ข้อความ</summary>
+      <div class="ckp-amt">선결제 금액 ฿<input id="ckpAmt" inputmode="numeric" value="${Number(prepayAmt)||0}"></div>
+      <textarea id="ckpTpl" rows="9">${esc(prepayTpl||PREPAY_DEFAULT)}</textarea>
+      <div class="rm-vars">{name} · {date} · {time} · {treat} · {dep} 선결제 금액<br>🏦 계좌번호를 한 번만 적어두시면 계속 쓰입니다</div>
+      <div class="rm-tplacts">
+        <button class="btn" onclick="ckpSaveTpl()">💾 저장</button>
+        <button class="btn" onclick="ckpResetTpl()">↩ 기본값</button>
+      </div>
+    </details>
+  </div>`;
+}
+function ckpCopy(id){
+  const e=data.find(x=>String(x.id)===String(id)); if(!e)return;
+  rmClip(prepayMsg(e),'선결제 요청 문자를 복사했어요');
+}
+function ckpAsked(id){
+  const e=data.find(x=>String(x.id)===String(id)); if(!e)return;
+  e.prepayAsked=e.prepayAsked?'':todayStr();
+  save();renderCheckin();
+}
+function ckpSaveTpl(){
+  const v=$('ckpTpl').value.trim();
+  if(!v){toast('문구가 비어 있어요');return;}
+  prepayTpl=v;prepayAmt=Math.max(0,parseInt($('ckpAmt').value)||0);
+  try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl);localStorage.setItem('hanahayan_prepayamt',String(prepayAmt))}catch(e){}
+  queueSync('settings');renderCheckin();toast('저장했어요 (모든 기기 동기화)');
+}
+function ckpResetTpl(){
+  prepayTpl=PREPAY_DEFAULT;
+  try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl)}catch(e){}
+  queueSync('settings');renderCheckin();toast('기본 문구로 되돌렸어요');
 }
 /* 📞 오늘 연락해야 하는 예약 — 직원 공지 */
 const CALL_RE=/확인\s*필요|연락|재확인|미확정|대기|확정\s*대기|콜|call|ยืนยัน|โทร|ติดต่อ/i;
