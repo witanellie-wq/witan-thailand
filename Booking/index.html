@@ -3217,6 +3217,14 @@ function addManualRev(){
   }else{
     const parts=revSplitParts();
     if(!parts.length){alert('결제수단별 금액을 하나 이상 입력하세요 · กรอกอย่างน้อย 1 ช่อง');$('r_tr').focus();return}
+    // 같은 날 실입금(총액)이 이미 있으면 합산하지 않고 교체 — 이중 계상 방지
+    const prev=manualRev.filter(r=>r.date===d&&r.mode!=='add');
+    if(prev.length){
+      const ps=prev.map(r=>`${r.pay} ${fmt(r.amt)}`).join(' · ');
+      if(!confirm(`${d} 실입금이 이미 있어요: ${ps}\n\n새 값으로 교체할까요? (취소 = 입력 안 함)\nแทนที่ยอดเดิม? · Replace existing total?`))return;
+      const ids=new Set(prev.map(r=>r.id));
+      manualRev=manualRev.filter(r=>!ids.has(r.id));
+    }
     parts.forEach((x,i)=>manualRev.push({id:Date.now()+i,date:d,amt:x[1],pay:x[0],mode:'total',cnt:i===0?cnt:0,memo:i===0?memo:''}));
     ['r_tr','r_cash','r_card','r_gw'].forEach(id=>{if($(id))$(id).value='';});
   }
