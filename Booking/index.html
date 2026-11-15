@@ -869,6 +869,7 @@
   </div>
   <div class="toolbar">
     <button class="btn" style="background:#FFF3E8;border-color:#EFC79C;color:#8a4a13;font-weight:800" onclick="openNoshow()">🚫 노쇼 관리 · ไม่มาตามนัด</button>
+    <button class="btn" style="background:#3d2c12;border-color:#3d2c12;color:#F3D9A4;font-weight:800" onclick="openTat()">🖋 문신 예약·정산 · งานสัก</button>
   </div>
   <div class="toolbar">
     <button class="btn gold" style="background:var(--wine);border-color:var(--wine)" onclick="openCustMgr()">👤 Customer Ledger · ทะเบียนลูกค้า (Course·Membership)</button>
@@ -1036,6 +1037,24 @@
           <input type="checkbox" id="m_deprefund" style="width:auto"> 환불함 · คืนเงินแล้ว (매출 제외)</label>
       </div>
       <div><label class="lab" data-i18n="mVisit">방문</label><select id="m_visit" data-i18n-opt="opt_visit"><option value="신규">신규</option><option value="재방문">재방문</option></select></div>
+    </div>
+    <div class="tatbox" id="tatBox">
+      <label class="tatchk"><input type="checkbox" id="m_tat" onchange="tatToggle();tatStatusUI()"> 🖋 문신 예약 · จองงานสัก <span class="tatsub">문신사 직접 시술 · ช่างสัก</span></label>
+      <div id="tatFields" style="display:none">
+        <div class="tatrow"><span class="tatlab">문신사 · ช่างสัก</span><div class="chips" id="m_tatartist"></div></div>
+        <div class="tatrow"><span class="tatlab">고객 경로 · ลูกค้ามาจาก</span><div class="chips" id="m_tatch">
+          <span class="chip" data-v="HANAHAYAN" onclick="tatPick('m_tatch',this)">HANAHAYAN</span>
+          <span class="chip" data-v="GoWabi" onclick="tatPick('m_tatch',this)">GoWabi</span>
+          <span class="chip" data-v="Artist" onclick="tatPick('m_tatch',this)">문신사 고객 · ลูกค้าช่าง</span></div></div>
+        <div class="g2" style="margin-top:8px">
+          <div><label class="lab">시작가 ฿ · ราคาเริ่มต้น</label><input id="m_tatprice" inputmode="numeric" placeholder="3900" oninput="tatAutoDep()"></div>
+          <div><label class="lab">예약금 ฿ (25% 자동) · มัดจำ</label><input id="m_tatdep" inputmode="numeric" placeholder="975" oninput="this.dataset.manual='1'"></div>
+        </div>
+        <label class="tatpaid" id="tatPaidLbl"><input type="checkbox" id="m_tatdepok" onchange="tatPaidUI()"> 💰 예약금 받음 → 예약 확정 · ได้รับมัดจำแล้ว</label>
+        <div class="tathint">예약금 받기 전에는 ⏳가예약으로 표시돼요. 방문하면 상태를 ✅방문으로 바꾸고 총액(예약금 포함)을 입력하세요.</div>
+        <div id="m_tatnsrow" style="display:none;margin-top:8px"><label class="lab">노쇼 — 문신사는 왔나요? · ช่างมาไหม</label>
+          <select id="m_tatcame"><option value="1">왔음 · มา</option><option value="0">안 왔음 · ไม่มา</option></select></div>
+      </div>
     </div>
     <label class="lab" data-i18n="mStaff">담당 (여러 명 선택 가능)</label>
     <div id="staffCount" style="font-size:10.5px;color:var(--gold-d);font-weight:700;margin:-2px 0 3px"></div>
@@ -1553,6 +1572,7 @@ async function pushStaff(){
 async function pushSettings(){
   _dirty.settings=false;
   const rows=[{key:'beds',value:bedsVal},{key:'discounts',value:discounts},{key:'staff_offdates',value:staffOffDates},{key:'manual_rev',value:manualRev},{key:'rev_targets',value:revTargets},{key:'gowabi_rate',value:gowabiRate},{key:'remind_tpl',value:remindTpl},{key:'noshow_tpl',value:noshowTpl},{key:'noshow_follow',value:noshowFollow},{key:'prepay_tpl',value:prepayTpl},{key:'prepay_amt',value:prepayAmt}];
+  if(typeof tatCfg!=='undefined')rows.push({key:'tattoo_cfg',value:tatCfg});
   const pin=localStorage.getItem('hanahayan_ownerpin');
   if(pin)rows.push({key:'ownerpin',value:pin}); // 사장 모드 PIN을 모든 기기에 동기화
   const {error}=await sb.from('settings').upsert(rows);
@@ -1603,6 +1623,7 @@ async function fetchAll(){
   if(typeof smap.prepay_tpl==='string'&&smap.prepay_tpl.trim()){prepayTpl=smap.prepay_tpl;try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl)}catch(e){}}
   if(smap.prepay_amt!=null){prepayAmt=Number(smap.prepay_amt)||0;try{localStorage.setItem('hanahayan_prepayamt',String(prepayAmt))}catch(e){}}
   if(smap.noshow_follow&&typeof smap.noshow_follow==='object')noshowFollow=smap.noshow_follow;
+  if(smap.tattoo_cfg&&typeof smap.tattoo_cfg==='object'&&typeof tatSetCfg==='function')tatSetCfg(smap.tattoo_cfg);
   try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}
   const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
   cacheAll();
@@ -1661,6 +1682,7 @@ function onRemoteMeta(){ // staff/settings는 작으니 통째로 다시 읽기 
         if(typeof smap.noshow_tpl==='string'&&smap.noshow_tpl.trim()){noshowTpl=smap.noshow_tpl;try{localStorage.setItem('hanahayan_noshowtpl',noshowTpl)}catch(e){}}
         if(typeof smap.prepay_tpl==='string'&&smap.prepay_tpl.trim()){prepayTpl=smap.prepay_tpl;try{localStorage.setItem('hanahayan_prepaytpl',prepayTpl)}catch(e){}}
         if(smap.prepay_amt!=null){prepayAmt=Number(smap.prepay_amt)||0;try{localStorage.setItem('hanahayan_prepayamt',String(prepayAmt))}catch(e){}}
+        if(smap.tattoo_cfg&&typeof smap.tattoo_cfg==='object'&&typeof tatSetCfg==='function')tatSetCfg(smap.tattoo_cfg);
         if(smap.noshow_follow&&typeof smap.noshow_follow==='object'){noshowFollow=smap.noshow_follow;try{localStorage.setItem('hanahayan_noshowfollow',JSON.stringify(noshowFollow))}catch(e){}}
         if(document.getElementById('staffOverlay')&&document.getElementById('staffOverlay').classList.contains('on')&&typeof renderStaffMgr==='function')renderStaffMgr();
         const bs=document.getElementById('bedSel');if(bs)bs.value=String(bedsVal);
@@ -1673,6 +1695,7 @@ function refreshUI(){
   render();
   if($('custOverlay')&&$('custOverlay').classList.contains('on')){renderLedSum();renderCustList();}
   if($('checkinOverlay')&&$('checkinOverlay').classList.contains('on'))renderCheckin();
+  if($('tatOverlay')&&$('tatOverlay').classList.contains('on')&&typeof renderTat==='function')renderTat();
 }
 /* ── 로그인 게이트 ── */
 function showGate(cfgMissing){
@@ -2219,6 +2242,7 @@ function applyStatusUI(){
   const s=getStatus();
   $('payBlock').style.display = s==='방문' ? 'block':'none';
   $('bookBlock').style.display = s==='방문' ? 'none':'block';
+  if(typeof tatStatusUI==='function')tatStatusUI();
 }
 function getStatus(){const a=document.querySelector('#m_status .chip.on');return a?a.dataset.s:'예약'}
 // 담당(테라피스트) 관리 — 목록 저장 + 칩 렌더
@@ -3945,7 +3969,7 @@ function renderDay(){
     const cls=['tl-block',e.status==='예약'?'pending':'',p.conflict?'conflict':''].join(' ');
     blocks+=`<div class="${cls}${h<58?' short':''}" style="top:${top}px;height:${h}px;left:${left};width:${w}" onclick="openModal('${e.id}')">
       <div class="tb-t">${e.time}–${m2t(bkEnd(e))}${p.conflict?' ⚠️':''}</div>
-      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}${nsBadge(e)}</div>
+      <div class="tb-n">${e.gender?genIcon(e.gender):''} ${dispName(e)}${parseInt(e.seats)>1?' 👥'+e.seats:''}${e.phone?'':' 📵'}${e.converted?' 🔄':''}${prepaidIcon(e)}${nsBadge(e)}${typeof tatBadge==='function'?tatBadge(e):''}</div>
       <div class="tb-menu">${esc(e.treat||e.bktreat||T('noMenu')||'—')}</div>
       ${(e.status==='방문')?`<div class="tb-pr">✅ ${fmt(e.amount)}</div>`:(e.expAmt?`<div class="tb-pr">~${fmt(e.expAmt)}</div>`:'')}
     </div>`;
@@ -3959,10 +3983,10 @@ function renderDay(){
   const noshowHtml=inactiveEntries.map(em=>{
     const ic=em.status==='캔슬'?'❌':(em.status==='연기대기'?'⏸':'🚫');
     const info=[em.time||null, esc(em.treat||em.bktreat||''), em.expAmt?'~'+fmt(em.expAmt):null, em.phone?esc(em.phone):null].filter(Boolean).join(' · ');
-    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${dispName(em)}${prepaidIcon(em)}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
+    return `<div class="bcard noshow" onclick="openModal('${em.id}')"><div class="bnm">${ic} ${dispName(em)}${prepaidIcon(em)}${typeof tatBadge==='function'?tatBadge(em):''}</div><div class="bmeta">${T('s_'+em.status)} · ${info}</div></div>`;
   }).join('');
   const inactiveLabel = inactiveEntries.length?T('inactiveLbl'):'';
-  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${dispName(e)}${prepaidIcon(e)}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?('✅ '+fmt(e.amount)):T('bookedTag')+(e.expAmt?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
+  const notimeHtml=notimed.filter(e=>occupies(e)).map(e=>`<div class="bcard" onclick="openModal('${e.id}')"><div class="bnm">⏱ ${dispName(e)}${prepaidIcon(e)}${typeof tatBadge==='function'?tatBadge(e):''}</div><div class="bmeta">${T('notime')} · ${esc(e.treat||e.bktreat||'')} · ${e.status==='방문'?('✅ '+fmt(e.amount)):T('bookedTag')+(e.expAmt?' ~'+fmt(e.expAmt):'')}</div></div>`).join('');
 
   list.innerHTML=`${conflictBanner}
     <div class="tl-headrow">${heads}</div>
@@ -4055,6 +4079,7 @@ function openModal(id){
   applyStatusUI();
   const[y,m,d]=selDate.split('-');
   $('mDateSub').textContent=`${y}-${m}-${d}`;
+  if(typeof tatFillModal==='function')tatFillModal(id?data.find(x=>x.id==id):null);
   ov.classList.add('on');
 }
 function setStatus(s){document.querySelectorAll('#m_status .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s))}
@@ -4119,6 +4144,7 @@ function saveBooking(){
     pay:$('m_pay').value,staff:getStaff(),visit:$('m_visit').value,
     depAmt:parseFloat(($('m_depamt').value||'').replace(/[^0-9.]/g,''))||0,depPay:$('m_deppay').value,depRefund:!!$('m_deprefund').checked,
     memo:$('m_memo').value.trim(),care:$('m_care').value.trim(),service:$('m_service').value.trim()};
+  if(typeof tatCollect==='function'&&!tatCollect(obj,editId?data.find(x=>x.id==editId):null))return false;
   // 💳 멤버십 잔액 결제 (모달에서 예약해둔 경우 저장 시점에 확정 금액으로 차감)
   if(_memPayPlan){
     const mc=customers.find(x=>x.id==_memPayPlan.cid);
@@ -6179,5 +6205,391 @@ bootCloud();    // 로그인 확인 후 서버 데이터로 교체 + 실시간 �
     <button class="cancel" data-i18n="mClose" onclick="closePasteImport()">닫기</button>
   </div>
 </div>
+<!-- 🖋 TATTOO — 문신 예약·예약금·정산 -->
+<style>
+  .tatbox{border:1.4px dashed #C9B48A;background:#FBF8F1;border-radius:4px;padding:9px 11px;margin:4px 0 10px}
+  .tatchk{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:#5b4520;cursor:pointer}
+  .tatchk input{width:18px;height:18px;margin:0}
+  .tatsub{font-weight:500;font-size:11px;color:var(--muted)}
+  .tatrow{margin-top:8px}
+  .tatlab{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  .tatpaid{display:flex;align-items:center;gap:8px;margin-top:9px;padding:9px 10px;border-radius:4px;background:#fff;
+    border:1.4px solid #EFC79C;font-weight:800;font-size:13px;color:#8a4a13;cursor:pointer}
+  .tatpaid input{width:18px;height:18px;margin:0}
+  .tatpaid.on{background:#EAF6EE;border-color:#B7DCC4;color:#20613c}
+  .tathint{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .tatbdg{display:inline-block;font-size:10px;font-weight:800;padding:1px 5px;border-radius:3px;background:#3d2c12;color:#F3D9A4;margin-left:3px;vertical-align:1px}
+  .tatbdg.pend{background:#FFE7C7;color:#8a4a13}
+  .tat-tabs{display:flex;gap:6px;margin:4px 0 10px;flex-wrap:wrap}
+  .tat-tabs .chip{flex:1;text-align:center;font-weight:700}
+  .tat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+  .tat-card{background:#fff;border:1.3px solid var(--line);border-radius:4px;padding:9px 10px}
+  .tat-card h4{font-size:13px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+  .tat-card .kv{display:flex;justify-content:space-between;font-size:11.5px;line-height:1.75}
+  .tat-card .kv b{font-weight:800}
+  .tat-card .kv.pay b{color:#8a4a13}
+  .tat-card .kv.hana b{color:var(--wine)}
+  .tat-card .copy{margin-top:7px;width:100%;font-size:11.5px;padding:7px}
+  .tat-sec{font-size:12px;font-weight:800;color:var(--wine);margin:14px 0 6px;display:flex;align-items:center;gap:6px}
+  .tat-sec .n{background:var(--soft);border-radius:10px;padding:0 7px;font-size:11px;color:var(--muted)}
+  .tat-row{background:#fff;border:1.3px solid var(--line);border-left:4px solid var(--line);border-radius:4px;padding:9px 10px;margin-bottom:7px}
+  .tat-row.pending{border-left-color:#E8A65A}
+  .tat-row.confirmed{border-left-color:var(--wine)}
+  .tat-row.visited{border-left-color:#2f8f5b}
+  .tat-row.settled{border-left-color:#9aa3b2;opacity:.82}
+  .tat-row.noshow,.tat-row.cancel{border-left-color:#c0392b}
+  .tat-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;cursor:pointer}
+  .tat-nm{font-weight:800;font-size:13.5px}
+  .tat-meta{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+  .tat-st{font-size:11px;font-weight:800;padding:3px 7px;border-radius:3px;white-space:nowrap}
+  .tat-st.pending{background:#FFF3E8;color:#8a4a13}
+  .tat-st.confirmed{background:#E9EDF5;color:var(--wine)}
+  .tat-st.visited{background:#EAF6EE;color:#20613c}
+  .tat-st.settled{background:var(--soft);color:var(--muted)}
+  .tat-st.noshow,.tat-st.cancel{background:#fdf3f3;color:#b5341f}
+  .tat-money{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;margin-top:6px}
+  .tat-money b{font-weight:800}
+  .tat-acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .tat-acts .btn{flex:1 1 auto;padding:8px 9px;font-size:12px;font-weight:700;min-width:96px}
+  .tat-acts .btn.go{background:#2f8f5b;border-color:#2f8f5b;color:#fff}
+  .tat-acts .btn.dep{background:#E8A65A;border-color:#E8A65A;color:#fff}
+  .tat-acts .btn.on{background:#EAF6EE;border-color:#B7DCC4;color:#20613c}
+  .tat-visit{background:var(--soft2);border:1.3px solid var(--line);border-radius:4px;padding:9px;margin-top:8px}
+  .tat-visit .g2{margin-bottom:6px}
+  .tat-visit .bal{font-size:12.5px;font-weight:800;color:#20613c;margin:2px 0 8px}
+  .tat-empty{font-size:12px;color:var(--muted);text-align:center;padding:16px 0}
+  .tat-cfg{border:1.3px solid var(--line);border-radius:4px;padding:9px 11px;margin:12px 0;background:var(--soft2)}
+  .tat-cfg summary{font-size:12.5px;font-weight:800;cursor:pointer;color:var(--wine)}
+  .tat-cfg .g2{margin-top:8px}
+  .tat-cfg .note{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
+  .tat-cfg .warn{color:#b5341f;font-weight:700}
+  .tat-flow{font-size:11px;color:var(--muted);background:var(--soft2);border-radius:4px;padding:7px 9px;margin-bottom:10px;line-height:1.6}
+  body.staff .tat-owner{display:none!important}
+</style>
+
+<div class="overlay" id="tatOverlay">
+  <div class="sheet">
+    <div class="sheet-hd"><h2 style="margin-bottom:0">🖋 문신 예약·정산 · งานสัก</h2>
+      <button class="sheet-x" onclick="closeTat()" aria-label="Close">✕</button></div>
+    <div class="tat-flow">① 예약 (가예약 ⏳) → ② 예약금 25% 받음 (확정 🔒) → ③ 전날 알림 🔔 → ④ 방문 + 최종 금액 ✅ → <span class="tat-owner">⑤ 문신사 정산 💸</span></div>
+    <div class="cknav">
+      <button class="btn" onclick="tatMove(-1)">◀</button>
+      <div class="ckdate" id="tatMonthLbl"></div>
+      <button class="btn" onclick="tatMove(1)">▶</button>
+    </div>
+    <div class="tat-tabs" id="tatTabs"></div>
+    <div class="tat-cards" id="tatCards"></div>
+    <div id="tatList"></div>
+    <details class="tat-cfg tat-owner" id="tatCfgBox">
+      <summary>⚙️ 정산 비율 설정 · ตั้งค่าส่วนแบ่ง</summary>
+      <div id="tatCfgForm"></div>
+    </details>
+    <button class="addbtn" style="margin-top:6px" onclick="tatNew()">+ 문신 예약 추가 · เพิ่มคิวสัก</button>
+    <button class="cancel" onclick="closeTat()">닫기</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   🖋 문신 예약 · 예약금 · 정산
+   - 문신 예약은 일반 예약(bookings)과 같은 행에 e.tat 정보를 붙여 저장 → 캘린더·체크인·알림에 그대로 보임
+   - e.tat = {artist, ch, price, dep, depOk, depAt, rem, came, settled, settledAt}
+   - 매출(amount)은 손님이 낸 총액(예약금 포함). 문신사 지급액은 정산 탭에서 계산
+   ============================================================ */
+const TAT_DEFAULT={artists:['Ton','Nuchy'],depPct:25,vat:7,pct:{HANAHAYAN:50,GoWabi:50,Artist:60},ret:0,retMonths:3,
+  start:{Ton:'2026-11-15',Nuchy:'2026-11-15'},nsKeep:30};
+const TAT_CH={HANAHAYAN:'HANAHAYAN',GoWabi:'GoWabi',Artist:'문신사 고객 · ลูกค้าช่าง'};
+let tatCfg=(function(){try{const v=JSON.parse(localStorage.getItem('hanahayan_tatcfg')||'null');if(v&&typeof v==='object')return tatMerge(v);}catch(e){}return tatMerge({});})();
+let tatMonth=todayStr().slice(0,7), tatFilter='all', _tatVisit=null;
+function tatMerge(v){
+  const d=JSON.parse(JSON.stringify(TAT_DEFAULT));
+  const o=Object.assign(d,v||{});
+  o.pct=Object.assign({},TAT_DEFAULT.pct,(v&&v.pct)||{});
+  o.start=Object.assign({},TAT_DEFAULT.start,(v&&v.start)||{});
+  if(!Array.isArray(o.artists)||!o.artists.length)o.artists=TAT_DEFAULT.artists.slice();
+  return o;
+}
+function tatSetCfg(v){tatCfg=tatMerge(v);try{localStorage.setItem('hanahayan_tatcfg',JSON.stringify(tatCfg))}catch(e){}}
+function tatSaveCfg(){try{localStorage.setItem('hanahayan_tatcfg',JSON.stringify(tatCfg))}catch(e){}queueSync('settings');}
+function tatNum(v){return Math.round(parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,''))||0)}
+function isTat(e){return !!(e&&e.tat&&e.tat.artist);}
+function tatStage(e){
+  const t=e.tat||{};
+  if(e.status==='캔슬')return 'cancel';
+  if(e.status==='노쇼')return t.settled?'settled':'noshow';
+  if(e.status==='방문')return t.settled?'settled':'visited';
+  if(e.status==='연기대기')return 'pending';
+  return t.depOk?'confirmed':'pending';
+}
+const TAT_STAGE={pending:'⏳ 가예약 · รอมัดจำ',confirmed:'🔒 확정 · ยืนยัน',visited:'✅ 방문 · มาแล้ว',settled:'💸 정산완료 · จ่ายช่างแล้ว',noshow:'🚫 노쇼 · ไม่มา',cancel:'❌ 캔슬 · ยกเลิก'};
+function tatBadge(e){
+  if(!isTat(e))return '';
+  const st=tatStage(e);
+  return `<span class="tatbdg${st==='pending'?' pend':''}">🖋${esc(e.tat.artist)}${st==='pending'?' ⏳':''}</span>`;
+}
+function tatAddMonths(ds,n){const[y,m,d]=ds.split('-').map(Number);const dt=new Date(y,m-1+n,d);return ymd(dt.getFullYear(),dt.getMonth(),dt.getDate());}
+/* 정산 계산 */
+function tatCalc(e){
+  const t=e.tat||{}, c=tatCfg;
+  const dep=t.depOk?Number(t.dep||0):0;
+  const r={dep,gross:0,bal:0,vat:0,fee:0,base:0,pct:0,share:0,retain:0,payout:0,hana:0,inRet:false,kind:''};
+  if(e.status==='방문'){
+    r.kind='visit';
+    r.gross=Number(e.amount||0);
+    r.bal=Math.max(0,r.gross-dep);
+    r.vat=c.vat>0?r.gross*c.vat/(100+c.vat):0;
+    r.fee=t.ch==='GoWabi'?r.gross*(Number(gowabiRate)||0)/100:0;
+    r.base=r.gross-r.vat-r.fee;
+    r.pct=Number((c.pct||{})[t.ch||'HANAHAYAN'])||0;
+    r.share=r.base*r.pct/100;
+    const st=(c.start||{})[t.artist];
+    r.inRet=!!(st&&c.ret>0&&e.date>=st&&e.date<tatAddMonths(st,Number(c.retMonths)||3));
+    r.retain=r.inRet?r.share*c.ret/100:0;
+    r.payout=r.share-r.retain;
+    r.hana=r.gross-r.vat-r.fee-r.payout;
+  }else if(e.status==='노쇼'&&dep>0){
+    r.kind='noshow';
+    r.gross=dep;
+    r.payout=t.came===false?0:dep*(100-(Number(c.nsKeep)||0))/100;
+    r.hana=dep-r.payout;
+  }
+  ['gross','bal','vat','fee','base','share','retain','payout','hana'].forEach(k=>r[k]=Math.round(r[k]));
+  return r;
+}
+/* ── 예약 모달 연동 ── */
+function tatPick(grp,el){document.querySelectorAll('#'+grp+' .chip').forEach(c=>c.classList.toggle('on',c===el));}
+function tatPicked(grp){const c=document.querySelector('#'+grp+' .chip.on');return c?c.dataset.v:'';}
+function tatRenderArtistChips(sel){
+  $('m_tatartist').innerHTML=tatCfg.artists.map(a=>`<span class="chip${a===sel?' on':''}" data-v="${esc(a)}" onclick="tatPick('m_tatartist',this)">🖋 ${esc(a)}</span>`).join('');
+}
+function tatToggle(){
+  const on=$('m_tat').checked;
+  $('tatFields').style.display=on?'block':'none';
+  if(on){
+    if(!tatPicked('m_tatartist')){const f=document.querySelector('#m_tatartist .chip');if(f)tatPick('m_tatartist',f);}
+    if(!tatPicked('m_tatch'))tatPick('m_tatch',document.querySelector('#m_tatch .chip'));
+    tatAutoDep();
+  }
+}
+function tatAutoDep(){
+  if($('m_tatdep').dataset.manual==='1')return;
+  const p=tatNum($('m_tatprice').value);
+  $('m_tatdep').value=p?Math.round(p*(Number(tatCfg.depPct)||25)/100):'';
+}
+function tatPaidUI(){$('tatPaidLbl').classList.toggle('on',$('m_tatdepok').checked);}
+function tatStatusUI(){const r=$('m_tatnsrow');if(r)r.style.display=(getStatus()==='노쇼'&&$('m_tat').checked)?'block':'none';}
+function tatFillModal(e){
+  const t=(e&&e.tat)||null;
+  $('m_tat').checked=!!t;
+  tatRenderArtistChips(t?t.artist:'');
+  document.querySelectorAll('#m_tatch .chip').forEach(c=>c.classList.toggle('on',!!t&&c.dataset.v===(t.ch||'HANAHAYAN')));
+  $('m_tatprice').value=t&&t.price?t.price:'';
+  $('m_tatdep').value=t&&t.dep?t.dep:'';
+  $('m_tatdep').dataset.manual=t&&t.dep?'1':'';
+  $('m_tatdepok').checked=!!(t&&t.depOk);
+  $('m_tatcame').value=(t&&t.came===false)?'0':'1';
+  $('tatFields').style.display=t?'block':'none';
+  tatPaidUI();tatStatusUI();
+}
+/* saveBooking 에서 호출: obj 에 tat 정보를 반영 */
+function tatCollect(obj,prev){
+  if(!$('m_tat').checked){if(prev&&prev.tat)obj.tat=null;return true;}
+  const artist=tatPicked('m_tatartist');
+  if(!artist){alert('문신사를 선택해 주세요 · เลือกช่างสัก');return false;}
+  const pt=(prev&&prev.tat)||{};
+  const price=tatNum($('m_tatprice').value), dep=tatNum($('m_tatdep').value), depOk=$('m_tatdepok').checked;
+  obj.tat={...pt,artist,ch:tatPicked('m_tatch')||'HANAHAYAN',price,dep,depOk,
+    depAt:depOk?(pt.depAt||todayStr()):'',came:$('m_tatcame').value!=='0'};
+  if(depOk&&dep>0){obj.depAmt=dep;obj.depPay=obj.depPay||'이체';}
+  else if(!depOk){obj.depAmt=0;}
+  if(price)obj.expAmt=price;  // 예상매출 = 문신 시작가
+  return true;
+}
+/* ── 문신 탭 ── */
+function openTat(){tatMonth=(selDate||todayStr()).slice(0,7);_tatVisit=null;$('tatOverlay').classList.add('on');renderTat();}
+function closeTat(){$('tatOverlay').classList.remove('on');}
+function tatMove(n){const[y,m]=tatMonth.split('-').map(Number);const d=new Date(y,m-1+n,1);tatMonth=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');_tatVisit=null;renderTat();}
+function tatSetFilter(f){tatFilter=f;renderTat();}
+function tatNew(){closeTat();openModal(null);setTimeout(()=>{$('m_tat').checked=true;$('m_bkamt').value='';tatToggle();},40);}
+function tatOpen(id){closeTat();openModal(id);}
+function tatList(){return data.filter(e=>isTat(e)&&String(e.date||'').slice(0,7)===tatMonth&&(tatFilter==='all'||e.tat.artist===tatFilter))
+  .sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));}
+function tatSum(list){
+  const s={n:list.length,pend:0,conf:0,vis:0,ns:0,gross:0,payout:0,hana:0,unpaid:0,held:0};
+  list.forEach(e=>{
+    const st=tatStage(e),c=tatCalc(e);
+    if(st==='pending')s.pend++;
+    if(st==='confirmed'){s.conf++;s.held+=c.dep;}
+    if(e.status==='방문')s.vis++;
+    if(e.status==='노쇼')s.ns++;
+    s.gross+=c.gross;s.payout+=c.payout;s.hana+=c.hana;
+    if((c.kind)&&!e.tat.settled)s.unpaid+=c.payout;
+  });
+  return s;
+}
+function renderTat(){
+  const[y,m]=tatMonth.split('-');
+  $('tatMonthLbl').textContent=`${y}년 ${Number(m)}월 · ${Number(m)}/${y}`;
+  $('tatTabs').innerHTML=['all',...tatCfg.artists].map(a=>`<span class="chip${tatFilter===a?' on':''}" onclick="tatSetFilter('${esc(a)}')">${a==='all'?'전체 · ทั้งหมด':'🖋 '+esc(a)}</span>`).join('');
+  const list=tatList();
+  // 문신사별 요약 카드
+  const arts=tatFilter==='all'?tatCfg.artists:[tatFilter];
+  $('tatCards').innerHTML=arts.map(a=>{
+    const s=tatSum(list.filter(e=>e.tat.artist===a));
+    return `<div class="tat-card"><h4>🖋 ${esc(a)} <span style="font-size:11px;color:var(--muted);font-weight:600">${s.n}건</span></h4>
+      <div class="kv"><span>⏳ 가예약 · 🔒 확정</span><b>${s.pend} · ${s.conf}</b></div>
+      <div class="kv"><span>✅ 방문 · 🚫 노쇼</span><b>${s.vis} · ${s.ns}</b></div>
+      <div class="tat-owner">
+        <div class="kv"><span>💰 보유 예약금</span><b>${fmt(s.held)}</b></div>
+        <div class="kv"><span>매출 (총액)</span><b>${fmt(s.gross)}</b></div>
+        <div class="kv pay"><span>문신사 지급</span><b>${fmt(s.payout)}</b></div>
+        <div class="kv hana"><span>HANAHAYAN 몫</span><b>${fmt(s.hana)}</b></div>
+        <div class="kv pay"><span>💸 미정산</span><b>${fmt(s.unpaid)}</b></div>
+        ${s.unpaid?`<button class="btn copy" onclick="tatCopyStatement('${esc(a)}')">📋 정산서 복사 · คัดลอกสรุป</button>
+        <button class="btn copy" onclick="tatSettleAll('${esc(a)}')">💸 미정산 전부 정산완료</button>`:''}
+      </div></div>`;
+  }).join('');
+  // 단계별 목록
+  const groups=[['pending','⏳ 예약금 대기 · รอมัดจำ'],['confirmed','🔒 확정 (예약금 받음) · ยืนยันแล้ว'],['visited','✅ 방문 — 정산 전 · มาแล้ว'],['noshow','🚫 노쇼 · ไม่มา'],['settled','💸 정산 완료 · จ่ายช่างแล้ว'],['cancel','❌ 캔슬 · ยกเลิก']];
+  let html='';
+  groups.forEach(([k,lbl])=>{
+    const g=list.filter(e=>tatStage(e)===k);
+    if(!g.length)return;
+    html+=`<div class="tat-sec">${lbl} <span class="n">${g.length}</span></div>`+g.map(tatRowHtml).join('');
+  });
+  $('tatList').innerHTML=html||'<div class="tat-empty">이번 달 문신 예약이 없어요 · ยังไม่มีคิวสักเดือนนี้<br>아래 [+ 문신 예약 추가] 또는 예약 화면에서 🖋 문신 예약을 체크하세요.</div>';
+  renderTatCfg();
+}
+function tatRowHtml(e){
+  const t=e.tat, st=tatStage(e), c=tatCalc(e);
+  const[,mm,dd]=e.date.split('-');
+  const dows=(I18N.dow&&(I18N.dow[LANG]||I18N.dow.ko))||['일','월','화','수','목','금','토'];
+  const dw=dows[new Date(e.date+'T00:00').getDay()];
+  const meta=[`${Number(mm)}/${Number(dd)} (${dw}) ${e.time||''}`,esc(e.treat||e.bktreat||''),'🖋 '+esc(t.artist),esc(TAT_CH[t.ch]||t.ch||'')].filter(Boolean).join(' · ');
+  let money='';
+  if(st==='pending')money=`<span>시작가 <b>${fmt(t.price)}</b></span><span>예약금 받을 돈 <b style="color:#8a4a13">${fmt(t.dep)}</b></span>`;
+  else if(st==='confirmed')money=`<span>시작가 <b>${fmt(t.price)}</b></span><span>예약금 ✓ <b>${fmt(t.dep)}</b>${t.depAt?` <span style="color:var(--muted)">(${t.depAt.slice(5)})</span>`:''}</span>`;
+  else if(c.kind==='visit')money=`<span>총액 <b>${fmt(c.gross)}</b></span><span>예약금 <b>${fmt(c.dep)}</b></span><span>잔금 <b>${fmt(c.bal)}</b></span>`
+    +`<span class="tat-owner">문신사 지급 <b style="color:#8a4a13">${fmt(c.payout)}</b> <span style="color:var(--muted)">(${c.pct}%${c.fee?' · GoWabi 수수료 −'+fmt(c.fee):''}${c.vat?' · VAT −'+fmt(c.vat):''}${c.retain?' · 초기유보 −'+fmt(c.retain):''})</span></span>`
+    +`<span class="tat-owner">HANAHAYAN <b style="color:var(--wine)">${fmt(c.hana)}</b></span>`;
+  else if(c.kind==='noshow')money=`<span>예약금 <b>${fmt(c.dep)}</b> (환불 없음)</span><span class="tat-owner">문신사 ${t.came===false?'안 옴 → 지급 0':'왔음 → 지급'} <b style="color:#8a4a13">${fmt(c.payout)}</b></span><span class="tat-owner">HANAHAYAN <b>${fmt(c.hana)}</b></span>`;
+  let acts='';
+  if(st==='pending')acts=`<button class="btn dep" onclick="tatDepOk('${e.id}')">💰 예약금 받음 · ได้รับมัดจำ</button>`;
+  if(st==='confirmed'){
+    acts=`<button class="btn${t.rem?' on':''}" onclick="tatToggleRem('${e.id}')">${t.rem?'✅ 전날 알림 보냄':'🔔 전날 알림 보냄?'}</button>`
+      +`<button class="btn go" onclick="tatVisitOpen('${e.id}')">✅ 방문 · 최종 금액</button>`
+      +`<button class="btn" onclick="tatNoshow('${e.id}')">🚫 노쇼</button>`;
+  }
+  if((st==='visited'||st==='noshow')&&c.kind)acts=`<button class="btn tat-owner" onclick="tatSettle('${e.id}')">💸 문신사 정산완료 · จ่ายช่างแล้ว</button>`;
+  if(st==='settled')acts=`<span class="tat-owner" style="font-size:11px;color:var(--muted)">💸 ${t.settledAt||''} 정산 · <a href="#" onclick="tatUnsettle('${e.id}');return false">되돌리기</a></span>`;
+  let visit='';
+  if(_tatVisit===String(e.id)){
+    const pre=t.price||'';
+    visit=`<div class="tat-visit">
+      <div class="g2"><div><label class="lab">최종 금액 (총액, 예약금 포함) ฿</label><input id="tatv_amt" inputmode="numeric" value="${pre}" oninput="tatVisitBal('${e.id}')"></div>
+      <div><label class="lab">잔금 결제 · ชำระส่วนที่เหลือ</label><select id="tatv_pay"><option value="이체">이체 · โอน</option><option value="PromptPay">PromptPay</option><option value="현금">현금 · เงินสด</option><option value="카드">카드 · บัตร</option><option value="GoWabi">GoWabi</option></select></div></div>
+      <div class="bal" id="tatv_bal"></div>
+      <div class="tat-acts" style="margin-top:0"><button class="btn go" onclick="tatVisitSave('${e.id}')">💾 방문 저장 · บันทึก</button><button class="btn" onclick="_tatVisit=null;renderTat()">취소</button></div></div>`;
+  }
+  return `<div class="tat-row ${st}">
+    <div class="tat-top" onclick="tatOpen('${e.id}')"><div><div class="tat-nm">${dispName(e)}${e.phone?'':' 📵'}</div><div class="tat-meta">${meta}</div></div><span class="tat-st ${st}">${TAT_STAGE[st]}</span></div>
+    ${money?`<div class="tat-money">${money}</div>`:''}
+    ${acts?`<div class="tat-acts">${acts}</div>`:''}${visit}</div>`;
+}
+function tatGet(id){return data.find(x=>String(x.id)===String(id));}
+function tatDepOk(id){
+  const e=tatGet(id);if(!e)return;
+  let dep=Number(e.tat.dep||0);
+  const v=prompt(`💰 ${e.name||''} 예약금 받은 금액 ฿ · ยอดมัดจำที่ได้รับ`,dep||'');
+  if(v==null)return;
+  dep=tatNum(v);if(!dep){alert('금액을 입력해 주세요 · กรอกยอด');return;}
+  e.tat={...e.tat,dep,depOk:true,depAt:todayStr()};
+  e.depAmt=dep;e.depPay=e.depPay||'이체';e.depRefund=false;
+  save();renderTat();render();toast('🔒 확정 · ยืนยันแล้ว');
+}
+function tatToggleRem(id){const e=tatGet(id);if(!e)return;e.tat={...e.tat,rem:!e.tat.rem};save();renderTat();}
+function tatVisitOpen(id){_tatVisit=String(id);renderTat();setTimeout(()=>{tatVisitBal(id);const a=$('tatv_amt');if(a){a.focus();a.select();}},30);}
+function tatVisitBal(id){
+  const e=tatGet(id);if(!e)return;
+  const amt=tatNum($('tatv_amt').value), dep=e.tat.depOk?Number(e.tat.dep||0):0;
+  $('tatv_bal').textContent=amt?`→ 오늘 받을 잔금 · ยอดที่ต้องเก็บวันนี้: ${fmt(Math.max(0,amt-dep))}${dep?` (예약금 ${fmt(dep)} 차감)`:''}`:'';
+}
+function tatVisitSave(id){
+  const e=tatGet(id);if(!e)return;
+  const amt=tatNum($('tatv_amt').value);
+  if(!amt){alert('최종 금액을 입력해 주세요 · กรอกยอดรวม');return;}
+  const dep=e.tat.depOk?Number(e.tat.dep||0):0;
+  if(amt<dep&&!confirm('최종 금액이 예약금보다 적어요. 그대로 저장할까요?'))return;
+  if(!confirm(`💾 ${e.name||''} 방문 저장 · บันทึก\n총액 ${fmt(amt)}\n오늘 받은 잔금 ${fmt(Math.max(0,amt-dep))}`))return;
+  const treat=e.treat||e.bktreat||'문신';
+  e.status='방문';e.treat=treat;e.amount=amt;e.items=[{treat,amount:amt}];
+  e.subtotal=amt;e.discount=0;e.adjust=0;e.pay=$('tatv_pay').value;
+  if(!e.converted){e.converted=true;e.convertedAt=new Date().toISOString().slice(0,16).replace('T',' ');}
+  _tatVisit=null;save();renderTat();render();toast('✅ 방문 저장 · บันทึกแล้ว');
+}
+function tatNoshow(id){
+  const e=tatGet(id);if(!e)return;
+  if(!confirm(`🚫 ${e.name||''} 노쇼 처리할까요? · ไม่มาตามนัด?\n예약금 ${fmt(e.tat.depOk?e.tat.dep:0)}은 환불하지 않습니다.`))return;
+  const came=confirm('문신사는 매장에 왔었나요? · ช่างมาที่ร้านไหม?\n\n[확인] 왔음 · มา\n[취소] 안 왔음 · ไม่มา');
+  e.status='노쇼';e.tat={...e.tat,came};
+  save();renderTat();render();
+}
+function tatSettle(id){
+  const e=tatGet(id);if(!e)return;const c=tatCalc(e);
+  if(!confirm(`💸 ${e.tat.artist}에게 ${fmt(c.payout)} 지급 완료로 표시할까요?`))return;
+  e.tat={...e.tat,settled:true,settledAt:todayStr(),paid:c.payout};save();renderTat();
+}
+function tatUnsettle(id){const e=tatGet(id);if(!e)return;if(!confirm('정산완료를 취소할까요?'))return;e.tat={...e.tat,settled:false,settledAt:'',paid:0};save();renderTat();}
+function tatUnsettledOf(a){return tatList().filter(e=>e.tat.artist===a&&(e.status==='방문'||e.status==='노쇼')&&!e.tat.settled&&tatCalc(e).kind);}
+function tatSettleAll(a){
+  const g=tatUnsettledOf(a);if(!g.length)return;
+  const sum=g.reduce((s,e)=>s+tatCalc(e).payout,0);
+  if(!confirm(`💸 ${a} — ${g.length}건 ${fmt(sum)} 지급 완료로 표시할까요?`))return;
+  g.forEach(e=>{e.tat={...e.tat,settled:true,settledAt:todayStr(),paid:tatCalc(e).payout};});
+  save();renderTat();
+}
+function tatCopyStatement(a){
+  const g=tatUnsettledOf(a);if(!g.length)return;
+  const[y,m]=tatMonth.split('-');
+  let total=0;
+  const lines=g.map(e=>{const c=tatCalc(e);total+=c.payout;const[,mm,dd]=e.date.split('-');
+    const who=String(e.name||'').split(' ')[0];
+    return c.kind==='visit'?`• ${Number(dd)}/${Number(mm)} ${who} · ${e.treat||e.bktreat||''} · ยอด ${fmt(c.gross)} → ${fmt(c.payout)}`
+      :`• ${Number(dd)}/${Number(mm)} ${who} · ไม่มา (มัดจำ ${fmt(c.dep)}) → ${fmt(c.payout)}`;});
+  const txt=`สรุปค่าคอมงานสัก · ${a}\nเดือน ${Number(m)}/${y} · HANAHAYAN\n\n${lines.join('\n')}\n\nรวมโอน: ${fmt(total)}\n(หักภาษี/ค่าธรรมเนียมแล้ว) 🙏`;
+  if(typeof rmClip==='function')rmClip(txt,'📋 복사됨 · คัดลอกแล้ว');
+  else{try{navigator.clipboard.writeText(txt);toast('📋 복사됨');}catch(err){prompt('복사',txt);}}
+}
+function renderTatCfg(){
+  const c=tatCfg;
+  const box=$('tatCfgForm');if(!box)return;
+  const inp=(k,v,ph)=>`<input inputmode="decimal" data-k="${k}" value="${v==null?'':v}" placeholder="${ph||''}" onchange="tatCfgChange(this)">`;
+  box.innerHTML=`
+    <div class="g2"><div><label class="lab">예약금 % · มัดจำ</label>${inp('depPct',c.depPct)}</div>
+    <div><label class="lab">VAT % (총액에서 먼저 차감)</label>${inp('vat',c.vat)}</div></div>
+    <div class="g2"><div><label class="lab">문신사 % — HANAHAYAN 고객</label>${inp('pct.HANAHAYAN',c.pct.HANAHAYAN)}</div>
+    <div><label class="lab">문신사 % — GoWabi 고객</label>${inp('pct.GoWabi',c.pct.GoWabi)}</div></div>
+    <div class="g2"><div><label class="lab">문신사 % — 문신사 본인 고객 <span class="warn">*미정</span></label>${inp('pct.Artist',c.pct.Artist)}</div>
+    <div><label class="lab">노쇼 시 HANAHAYAN 보유 % (예약금)</label>${inp('nsKeep',c.nsKeep)}</div></div>
+    <div class="g2"><div><label class="lab">초기 유보 % <span class="warn">*미정</span></label>${inp('ret',c.ret)}</div>
+    <div><label class="lab">유보 기간 (개월)</label>${inp('retMonths',c.retMonths)}</div></div>
+    <div class="g2">${c.artists.map(a=>`<div><label class="lab">${esc(a)} 계약 시작일</label><input type="date" data-k="start.${esc(a)}" value="${c.start[a]||''}" onchange="tatCfgChange(this)"></div>`).join('')}</div>
+    <div class="g2"><div><label class="lab">문신사 이름 (쉼표로 구분)</label><input data-k="artists" value="${esc(c.artists.join(', '))}" onchange="tatCfgChange(this)"></div>
+    <div><label class="lab">GoWabi 수수료 %</label><input value="${Number(gowabiRate)||0}" disabled title="기존 GoWabi 설정값 사용"></div></div>
+    <div class="note">계산: 총액 − VAT − GoWabi 수수료 = 정산 기준액 → × 문신사 % = 문신사 몫 → 계약 후 ${c.retMonths}개월은 ${c.ret}% 유보 → <b>지급액</b>. 나머지는 HANAHAYAN.<br>
+    노쇼: 예약금 환불 없음. 문신사가 왔으면 예약금의 ${100-(Number(c.nsKeep)||0)}% 지급, 안 왔으면 0.<br>
+    <span class="warn">*미정 항목은 임시값입니다. 확정되면 여기서 바꾸면 모든 건에 바로 반영됩니다.</span></div>`;
+}
+function tatCfgChange(el){
+  const k=el.dataset.k, c=JSON.parse(JSON.stringify(tatCfg));
+  if(k==='artists'){c.artists=el.value.split(',').map(s=>s.trim()).filter(Boolean);}
+  else if(k.startsWith('start.')){c.start[k.slice(6)]=el.value;}
+  else if(k.startsWith('pct.')){c.pct[k.slice(4)]=Number(el.value)||0;}
+  else c[k]=Number(el.value)||0;
+  tatSetCfg(c);tatSaveCfg();
+  const open=$('tatCfgBox').open;renderTat();$('tatCfgBox').open=open;
+}
+</script>
+
 </body>
 </html>
